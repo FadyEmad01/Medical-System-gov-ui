@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 export default function WelcomeBanner() {
   return (
     <div className="group relative flex min-h-[220px] w-full items-end overflow-hidden rounded-xl bg-slate-900 shadow-md">
-
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -25,13 +24,15 @@ export default function WelcomeBanner() {
           </p>
 
           {/* Action Link / Button */}
-          <button className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-white transition-all hover:text-gray-300">
+          <button
+            type="button"
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-white transition-all hover:text-gray-300"
+          >
             Explore odds
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
           </button>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,0 +1,33 @@
+export const GENDER_OPTIONS = [
+  { value: "Male", label: "male" },
+  { value: "Female", label: "female" },
+] as const;
+
+export const GOVERNORATE_OPTIONS = [
+  { value: "Cairo", label: "governorate_cairo" },
+  { value: "Alexandria", label: "governorate_alexandria" },
+  { value: "Giza", label: "governorate_giza" },
+  { value: "Qalyubia", label: "governorate_qalyubia" },
+  { value: "Port Said", label: "governorate_port_said" },
+  { value: "Suez", label: "governorate_suez" },
+  { value: "Dakahlia", label: "governorate_dakahlia" },
+  { value: "Sharqia", label: "governorate_sharqia" },
+  { value: "Beheira", label: "governorate_beheira" },
+  { value: "Gharbia", label: "governorate_gharbia" },
+  { value: "Monufia", label: "governorate_monufia" },
+  { value: "Ismailia", label: "governorate_ismailia" },
+  { value: "Beni Suef", label: "governorate_beni_suef" },
+  { value: "Fayoum", label: "governorate_fayoum" },
+  { value: "Minya", label: "governorate_minya" },
+  { value: "Asyut", label: "governorate_asyut" },
+  { value: "Sohag", label: "governorate_sohag" },
+  { value: "Qena", label: "governorate_qena" },
+  { value: "Luxor", label: "governorate_luxor" },
+  { value: "Aswan", label: "governorate_aswan" },
+  { value: "Damietta", label: "governorate_damietta" },
+  { value: "South Sinai", label: "governorate_south_sinai" },
+  { value: "North Sinai", label: "governorate_north_sinai" },
+  { value: "Red Sea", label: "governorate_red_sea" },
+  { value: "Matrouh", label: "governorate_matrouh" },
+  { value: "New Valley", label: "governorate_new_valley" },
+] as const;

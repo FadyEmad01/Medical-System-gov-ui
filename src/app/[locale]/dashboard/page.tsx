@@ -11,5 +11,5 @@ export default function page() {
         <MakeCardBanner />
       </div>
     </div>
-  )
+  );
 }

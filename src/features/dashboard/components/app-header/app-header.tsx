@@ -31,7 +31,6 @@
 //         </div>
 //       </div>
 
-
 //       {/* user, notifications, lang */}
 //       <div className="flex items-center gap-2">
 //         <div className="relative">
@@ -58,26 +57,25 @@
 //   )
 // }
 
-import LanguageSwitcher from '@/components/language-switcher'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { SidebarTrigger } from '@/components/ui/sidebar'
-import { getInitials } from '@/lib/utils'
-import { Bell, SearchIcon } from 'lucide-react'
+import { Bell, SearchIcon } from "lucide-react";
+import LanguageSwitcher from "@/components/language-switcher";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { getInitials } from "@/lib/utils";
 
 export default function AppHeader() {
   return (
     <header className="relative flex justify-between border-b h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-14 px-4">
-      
       <div className="flex items-center gap-2 flex-1 lg:flex-none">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
           className="mr-2 data-[orientation=vertical]:h-4 my-auto"
         />
-        
+
         {/* Search */}
         <div className="relative flex-1 lg:absolute lg:left-1/2 lg:-translate-x-1/2  max-w-[230px]">
           <Input
@@ -113,5 +111,5 @@ export default function AppHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }
