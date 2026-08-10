@@ -45,9 +45,14 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ dir, ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar
+      collapsible="icon"
+      dir={dir}
+      side={dir === "rtl" ? "right" : "left"}
+      {...props}
+    >
       <SidebarHeader>
         <Logo />
       </SidebarHeader>

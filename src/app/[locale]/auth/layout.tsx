@@ -1,16 +1,13 @@
 import Image from "next/image";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import LanguageSwitcher from "@/components/language-switcher";
 import { Link } from "@/i18n/navigation";
 
 type Props = {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
 };
 
-export default async function AuthLayout({ children, params }: Props) {
-  const { locale } = await params;
-  setRequestLocale(locale);
+export default async function AuthLayout({ children }: Props) {
   const t = await getTranslations("auth");
 
   return (
