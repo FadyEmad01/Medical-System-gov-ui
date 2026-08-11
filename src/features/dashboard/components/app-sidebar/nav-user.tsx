@@ -3,8 +3,8 @@
 import {
   BadgeCheck,
   Bell,
-  ChevronsUpDown,
   CreditCard,
+  Ellipsis,
   LogOut,
   Sparkles,
 } from "lucide-react";
@@ -68,7 +68,7 @@ export function NavUser({ user, avatar }: NavUserProps) {
               <Badge variant="secondary" className="ml-auto shrink-0">
                 {user.role}
               </Badge>
-              <ChevronsUpDown className="ml-1 size-4" />
+              <Ellipsis className="ml-1 size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -79,11 +79,11 @@ export function NavUser({ user, avatar }: NavUserProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="h-8 w-8 ">
                   {avatar ? (
                     <AvatarImage src={avatar} alt={user.fullName} />
                   ) : null}
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className="">
                     {getInitials(user.fullName)}
                   </AvatarFallback>
                 </Avatar>

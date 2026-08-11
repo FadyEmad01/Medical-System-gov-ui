@@ -59,14 +59,14 @@
 
 import { Bell, SearchIcon } from "lucide-react";
 import LanguageSwitcher from "@/components/language-switcher";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { getInitials } from "@/lib/utils";
+import UserAvatar from "./user-avatar";
 
 export default function AppHeader() {
+
   return (
     <header className="relative flex justify-between border-b h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-14 px-4">
       <div className="flex items-center gap-2 flex-1 lg:flex-none">
@@ -102,12 +102,7 @@ export default function AppHeader() {
         </div>
         <LanguageSwitcher className="bg-transparent" size="default" />
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-          <Avatar className="size-8 rounded-lg">
-            <AvatarImage src={"https://i.pravatar.cc/300"} alt={"Fady emad"} />
-            <AvatarFallback className="rounded-lg">
-              {getInitials("Fady emad")}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar />
         </div>
       </div>
     </header>

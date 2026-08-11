@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/features/auth/hooks/use-me";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { Spinner } from "./ui/spinner";
 
 type Props = {
   children: React.ReactNode;
@@ -34,11 +35,15 @@ export function AuthGuard({ children }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-svh flex-col gap-4 p-6" aria-busy="true">
+      // <div className="flex min-h-svh flex-col gap-4 p-6" aria-busy="true">
+      //   <span className="sr-only">{t("loadingSession")}</span>
+      //   <Skeleton className="h-8 w-40" />
+      //   <Skeleton className="h-4 w-full max-w-sm" />
+      //   <Skeleton className="h-4 w-full max-w-sm" />
+      // </div>
+      <div className="flex min-h-svh items-center justify-center" aria-busy="true">
         <span className="sr-only">{t("loadingSession")}</span>
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-4 w-full max-w-sm" />
-        <Skeleton className="h-4 w-full max-w-sm" />
+        <Spinner className="text-primary" />
       </div>
     );
   }

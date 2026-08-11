@@ -44,4 +44,5 @@ export interface MeResponse {
   username: string;
   fullName: string;
   role: UserRole;
+  avatar?: string;
 }
