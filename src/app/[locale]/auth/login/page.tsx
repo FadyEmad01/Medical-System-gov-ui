@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { LoginForm } from "@/features/auth/components/login/login-form";
 
-export default async function LoginPage() {
-  return <LoginForm />;
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
 }

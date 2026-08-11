@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,22 +13,47 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { useLogin } from "../../hooks/use-auth";
+import { applyActionError } from "../../lib/apply-action-error";
 import {
   type LoginFormData,
   loginFormSchema,
 } from "../../validation/login-form";
+import { FormError, useErrorText } from "../form-error";
+
+/**
+ * Validates and normalizes the `?from=` redirect target the proxy sets when
+ * bouncing unauthenticated users. Only same-origin relative paths are
+ * accepted; anything else (protocol-relative `//evil.com`, absolute URLs)
+ * falls back to the dashboard.
+ */
+function resolveFromParam(from: string | null): string | null {
+  if (!from) return null;
+  let path = from.split(/[?#]/)[0];
+  for (const locale of routing.locales) {
+    const prefix = `/${locale}`;
+    if (path === prefix || path.startsWith(`${prefix}/`)) {
+      path = path.slice(prefix.length) || "/";
+      break;
+    }
+  }
+  if (!path.startsWith("/") || path.startsWith("//")) return null;
+  return path;
+}
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const t = useTranslations("auth");
-  const errorText = useCallback(
-    (msg?: string) => (msg && t.has(msg) ? t(msg) : (msg ?? "")),
-    [t],
-  );
+  const router = useRouter();
+  const login = useLogin();
+  const errorText = useErrorText();
+  const searchParams = useSearchParams();
+  const from = resolveFromParam(searchParams.get("from"));
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -44,13 +69,21 @@ export function LoginForm({
     formState: { errors },
   } = form;
 
-  const handleSubmit = (data: LoginFormData) => {
-    console.log(data);
-  };
+  const handleSubmit = form.handleSubmit(async (data) => {
+    try {
+      await login.mutateAsync({
+        nationalId: data.nationalId,
+        password: data.password,
+      });
+      router.replace(from ?? { pathname: "/dashboard" });
+    } catch (raw) {
+      applyActionError(raw, form);
+    }
+  });
 
   return (
     <form
-      onSubmit={form.handleSubmit(handleSubmit)}
+      onSubmit={handleSubmit}
       className={cn("flex flex-col gap-6", className)}
       {...props}
     >
@@ -61,12 +94,15 @@ export function LoginForm({
             {t("loginDescription")}
           </p>
         </div>
+        {errors.root?.message && <FormError message={errors.root.message} />}
         <Field>
           <FieldLabel htmlFor="nationalId">{t("nationalId")}</FieldLabel>
           <Input
             id="nationalId"
             inputMode="numeric"
             placeholder="XXXXXXXXXXXXXX"
+            autoComplete="username"
+            disabled={login.isPending}
             {...register("nationalId")}
             aria-invalid={!!errors.nationalId || undefined}
           />
@@ -87,6 +123,8 @@ export function LoginForm({
           <Input
             id="password"
             type="password"
+            autoComplete="current-password"
+            disabled={login.isPending}
             {...register("password")}
             aria-invalid={!!errors.password || undefined}
           />
@@ -95,7 +133,9 @@ export function LoginForm({
           )}
         </Field>
         <Field>
-          <Button type="submit">{t("login")}</Button>
+          <Button type="submit" disabled={login.isPending}>
+            {login.isPending ? t("signingIn") : t("login")}
+          </Button>
         </Field>
         <Field>
           <FieldDescription className="text-center">
