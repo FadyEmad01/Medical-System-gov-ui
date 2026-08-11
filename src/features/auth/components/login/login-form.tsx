@@ -101,7 +101,6 @@ export function LoginForm({
             id="nationalId"
             inputMode="numeric"
             placeholder="XXXXXXXXXXXXXX"
-            autoComplete="username"
             disabled={login.isPending}
             {...register("nationalId")}
             aria-invalid={!!errors.nationalId || undefined}
