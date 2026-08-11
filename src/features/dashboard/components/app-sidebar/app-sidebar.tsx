@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Bot, CircleUser, Hospital, House, IdCard, Settings2, SquareTerminal } from "lucide-react";
+import { CircleUser, Hospital, House, IdCard } from "lucide-react";
 import type * as React from "react";
 import {
   Sidebar,
@@ -9,43 +9,44 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useMe } from "@/features/auth/hooks/use-me";
 import { Logo } from "./logo";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 
-// This is sample data.
-const data = {
-  user: {
-    name: "fady emad",
-    email: "m@example.com",
-    avatar: "https://i.pravatar.cc/300",
+const navMain = [
+  {
+    title: "Home",
+    url: "/dashboard",
+    icon: House,
+    isActive: true,
   },
-  navMain: [
-    {
-      title: "Home",
-      url: "/dashboard",
-      icon: House,
-      isActive: true,
-    },
-    {
-      title: "Hospitals",
-      url: "#",
-      icon: Hospital,
-    },
-    {
-      title: "My insurance card",
-      url: "/dashboard/insurance-card",
-      icon: IdCard,
-    },
-    {
-      title: "Profile",
-      url: "#",
-      icon: CircleUser,
-    },
-  ],
-};
+  {
+    title: "Hospitals",
+    url: "#",
+    icon: Hospital,
+  },
+  {
+    title: "My insurance card",
+    url: "/dashboard/insurance-card",
+    icon: IdCard,
+  },
+  {
+    title: "Profile",
+    url: "#",
+    icon: CircleUser,
+  },
+];
 
-export function AppSidebar({ dir, ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  dir,
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const { data: user } = useMe();
+
+  // The dashboard layout is wrapped in <AuthGuard>, which guarantees `user` is
+  // non-null by the time this renders. While the query is hydrating on first
+  // paint, we simply omit the footer to avoid a flash of empty initials.
   return (
     <Sidebar
       collapsible="icon"
@@ -57,11 +58,13 @@ export function AppSidebar({ dir, ...props }: React.ComponentProps<typeof Sideba
         <Logo />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      {user ? (
+        <SidebarFooter>
+          <NavUser user={user} />
+        </SidebarFooter>
+      ) : null}
       <SidebarRail />
     </Sidebar>
   );
