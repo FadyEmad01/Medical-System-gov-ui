@@ -1,7 +1,6 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -9,6 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link, usePathname } from "@/i18n/navigation";
 
 export function NavMain({
   items,
@@ -20,15 +20,23 @@ export function NavMain({
     isActive?: boolean;
   }[];
 }) {
+  const pathname = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton tooltip={item.title} isActive={item.isActive}>
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
+            <SidebarMenuButton
+              asChild
+              tooltip={item.title}
+              isActive={pathname === item.url}
+            >
+              <Link href={item.url}>
+                {item.icon && <item.icon />}
+                <span>{item.title}</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Bot, Settings2, SquareTerminal } from "lucide-react";
+import { CircleUser, Hospital, House, IdCard } from "lucide-react";
 import type * as React from "react";
 import {
   Sidebar,
@@ -16,25 +16,25 @@ import { NavUser } from "./nav-user";
 
 const navMain = [
   {
-    title: "Playground",
-    url: "#",
-    icon: SquareTerminal,
+    title: "Home",
+    url: "/dashboard",
+    icon: House,
     isActive: true,
   },
   {
-    title: "Models",
+    title: "Hospitals",
     url: "#",
-    icon: Bot,
+    icon: Hospital,
   },
   {
-    title: "Documentation",
-    url: "#",
-    icon: BookOpen,
+    title: "My insurance card",
+    url: "/dashboard/insurance-card",
+    icon: IdCard,
   },
   {
-    title: "Settings",
+    title: "Profile",
     url: "#",
-    icon: Settings2,
+    icon: CircleUser,
   },
 ];
 
