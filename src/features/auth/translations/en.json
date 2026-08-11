@@ -80,8 +80,22 @@
     "passwordRequired": "Password is required",
     "confirmPasswordRequired": "Please confirm your password",
     "passwordMismatch": "Passwords do not match",
-    "loginFailed": "Login failed. Please try again."
+    "loginFailed": "Login failed. Please try again.",
+    "requestFailed": "Request failed. Please try again.",
+    "invalidCredentials": "National ID or password is incorrect.",
+    "validationFailed": "Please review the highlighted fields.",
+    "serverUnreachable": "Couldn't reach the server. Check your connection."
   },
+  "sessionError": "Couldn't verify your session. Please retry.",
+  "serverUnavailable": "The server is temporarily unavailable.",
+  "account": "Account",
+  "billing": "Billing",
+  "notifications": "Notifications",
+  "upgradeToPro": "Upgrade to Pro",
+  "portalBadge": "Official Health Insurance Portal",
+  "portalTitle": "Health Insurance Portal",
+  "portalDescription": "Manage your health insurance coverage, track your benefits, and access the services available to you — all in one place.",
+  "portalNote": "A secure government service. Your data is protected.",
   "next": "Next",
   "back": "Back",
   "step1": "Step 1: Personal Information",
@@ -93,5 +107,9 @@
   "reviewTitle": "Review Your Information",
   "registerSuccess": "Account created successfully!",
   "registerError": "Registration failed. Please try again.",
-  "loginSuccess": "Logged in successfully!"
+  "loginSuccess": "Logged in successfully!",
+  "signingIn": "Signing in…",
+  "submitting": "Submitting…",
+  "retry": "Retry",
+  "loadingSession": "Checking your session…"
 }
