@@ -3,13 +3,15 @@
 import {
   BadgeCheck,
   Bell,
+  ChevronsUpDown,
   CreditCard,
-  Ellipsis,
   LogOut,
   Sparkles,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,18 +27,20 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useLogout } from "@/features/auth/hooks/use-auth";
+import type { MeResponse } from "@/features/auth/types";
 import { getInitials } from "@/lib/utils";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+type NavUserProps = {
+  user: MeResponse;
+  /** Optional avatar URL. Falls back to initials when omitted. */
+  avatar?: string;
+};
+
+export function NavUser({ user, avatar }: NavUserProps) {
+  const t = useTranslations("auth");
   const { isMobile } = useSidebar();
+  const logout = useLogout();
 
   return (
     <SidebarMenu>
@@ -48,16 +52,23 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                {avatar ? (
+                  <AvatarImage src={avatar} alt={user.fullName} />
+                ) : null}
                 <AvatarFallback className="rounded-lg">
-                  {getInitials(user.name)}
+                  {getInitials(user.fullName)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-medium">{user.fullName}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {user.username}
+                </span>
               </div>
-              <Ellipsis className="ml-auto size-4" />
+              <Badge variant="secondary" className="ml-auto shrink-0">
+                {user.role}
+              </Badge>
+              <ChevronsUpDown className="ml-1 size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -69,14 +80,18 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  {avatar ? (
+                    <AvatarImage src={avatar} alt={user.fullName} />
+                  ) : null}
                   <AvatarFallback className="rounded-lg">
-                    {getInitials(user.name)}
+                    {getInitials(user.fullName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-medium">{user.fullName}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.nationalId}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -84,28 +99,35 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
-                Upgrade to Pro
+                {t("upgradeToPro")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
-                Account
+                {t("account")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />
-                Billing
+                {t("billing")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
-                Notifications
+                {t("notifications")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={(e) => {
+                e.preventDefault();
+                logout.mutate();
+              }}
+              disabled={logout.isPending}
+            >
               <LogOut />
-              Log out
+              {logout.isPending ? "…" : t("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
