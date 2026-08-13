@@ -1,0 +1,84 @@
+"use client";
+
+import { ShieldX } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type * as React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
+import { useMe } from "@/features/auth/hooks/use-me";
+import { Link } from "@/i18n/navigation";
+
+type RoleGuardProps = {
+  children: React.ReactNode;
+};
+
+type GuardedRole = "Admin" | "Patient";
+
+/**
+ * Role gate for client pages.
+ *
+ * UI-only: the backend remains the source of truth for authorization; this
+ * guard merely hides content the current role cannot access and points those
+ * users back to the dashboard. The dashboard layout's <AuthGuard> already
+ * redirects logged-out users, so `user === null` renders nothing here.
+ */
+export function AdminGuard({ children }: RoleGuardProps) {
+  return <RoleGuard allowedRole="Admin">{children}</RoleGuard>;
+}
+
+export function PatientGuard({ children }: RoleGuardProps) {
+  return <RoleGuard allowedRole="Patient">{children}</RoleGuard>;
+}
+
+function RoleGuard({
+  children,
+  allowedRole,
+}: RoleGuardProps & { allowedRole: GuardedRole }) {
+  const { data: user } = useMe();
+
+  // `useMe` contract: `data === undefined` is still loading, `null` is logged out.
+  if (user === undefined) {
+    return (
+      <div className="flex flex-1 items-center justify-center" aria-busy="true">
+        <Spinner className="text-primary" />
+      </div>
+    );
+  }
+
+  if (user === null) return null;
+
+  if (user.role !== allowedRole) {
+    return <AccessDenied />;
+  }
+
+  return <>{children}</>;
+}
+
+function AccessDenied() {
+  const t = useTranslations("common");
+
+  return (
+    <Empty>
+      <EmptyMedia variant="icon">
+        <ShieldX />
+      </EmptyMedia>
+      <EmptyHeader>
+        <EmptyTitle>{t("accessDenied.title")}</EmptyTitle>
+        <EmptyDescription>{t("accessDenied.description")}</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button asChild variant="outline">
+          <Link href="/dashboard">{t("nav.home")}</Link>
+        </Button>
+      </EmptyContent>
+    </Empty>
+  );
+}

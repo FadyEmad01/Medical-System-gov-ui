@@ -1,7 +1,7 @@
 import "server-only";
 
-import type { ProblemDetails } from "./problem-details";
 import { env } from "./env";
+import type { ProblemDetails } from "./problem-details";
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 
@@ -57,6 +57,14 @@ class ApiClient {
     options?: RequestOptions,
   ): Promise<T> {
     return this.request<T>("POST", path, body, options);
+  }
+
+  async put<T>(
+    path: string,
+    body: unknown,
+    options?: RequestOptions,
+  ): Promise<T> {
+    return this.request<T>("PUT", path, body, options);
   }
 
   private async request<T>(

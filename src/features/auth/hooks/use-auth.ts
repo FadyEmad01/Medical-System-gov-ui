@@ -2,12 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/navigation";
-import {
-  type AuthActionError,
-  loginAction,
-  logoutAction,
-  registerAction,
-} from "../actions";
+import { loginAction, logoutAction, registerAction } from "../actions";
+import type { AuthActionError } from "../lib/action-error";
 import { toMeResponse } from "../lib/to-me-response";
 import type { LoginRequest, RegisterRequest } from "../types";
 import { ME_QUERY_KEY } from "./use-me";
@@ -67,6 +63,8 @@ export function useLogout() {
     },
     onSuccess: () => {
       qc.removeQueries({ queryKey: ME_QUERY_KEY });
+      // Insurance data is patient PII; never let it survive a session switch.
+      qc.removeQueries({ queryKey: ["insurance"] });
       router.replace("/auth/login");
     },
   });

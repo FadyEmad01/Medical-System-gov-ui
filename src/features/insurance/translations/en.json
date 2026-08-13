@@ -1,0 +1,116 @@
+{
+  "profile": {
+    "title": "My Profile",
+    "description": "Your personal and insurance details",
+    "saved": "Profile updated",
+    "saving": "Saving...",
+    "save": "Save",
+    "loadFailed": "Couldn't load your profile",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "completeness": {
+      "title": "Profile completeness",
+      "additionalData": "Additional data you need to complete",
+      "filled": "{filled} of {total} fields completed",
+      "complete": "Your profile is complete. You can now apply for your insurance card.",
+      "fields": {
+        "occupation": "Occupation",
+        "maritalStatus": "Marital status",
+        "nationality": "Nationality",
+        "emergencyContactName": "Emergency contact name",
+        "emergencyContactPhone": "Emergency contact phone"
+      }
+    },
+    "field": {
+      "occupation": "Occupation",
+      "maritalStatus": "Marital status",
+      "maritalStatusRequired": "Please select a marital status",
+      "nationality": "Nationality",
+      "preferredLanguage": "Preferred language",
+      "emergencyContactName": "Emergency contact name",
+      "emergencyContactPhone": "Emergency contact phone"
+    },
+    "maritalStatus": {
+      "Single": "Single",
+      "Married": "Married",
+      "Divorced": "Divorced",
+      "Widowed": "Widowed"
+    },
+    "levels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "identity": {
+      "fullName": "Full name",
+      "nationalId": "National ID",
+      "email": "Email",
+      "occupation": "Occupation",
+      "nationality": "Nationality",
+      "preferredLanguage": "Preferred language",
+      "emergencyContactName": "Emergency contact name",
+      "emergencyContactPhone": "Emergency contact phone",
+      "createdAt": "Member since"
+    }
+  },
+  "card": {
+    "title": "My insurance card",
+    "steps": {
+      "1": {
+        "title": "Upload needed documents",
+        "description": "Upload the required documents so the admin can review your application."
+      },
+      "2": {
+        "title": "Admin/Doctor approval",
+        "description": "An admin or doctor reviews your documents and approves your application."
+      },
+      "3": {
+        "title": "Card ready",
+        "description": "Your insurance card is ready to download."
+      }
+    },
+    "status": {
+      "Active": "Active",
+      "Suspended": "Suspended",
+      "Revoked": "Revoked",
+      "Superseded": "Superseded"
+    },
+    "download": {
+      "comingSoon": "Card download coming soon",
+      "tooltip": "PDF download is not available yet. Check back soon."
+    },
+    "empty": {
+      "title": "You don't have an insurance card yet"
+    },
+    "attention": {
+      "title": "Your card needs attention",
+      "description": "Your card is currently marked as {status}. Contact support for more information."
+    },
+    "qrPlaceholder": "QR code area",
+    "retry": "Try again",
+    "error": {
+      "title": "Something went wrong"
+    },
+    "cta": {
+      "upload": "Upload documents",
+      "track": "Track application"
+    },
+    "view": {
+      "holderName": "Holder name",
+      "issued": "Issued",
+      "expires": "Expires",
+      "insuranceClass": "Insurance class",
+      "familyNumber": "Family number",
+      "version": "Version",
+      "versionPrefix": "v{version}",
+      "tokenVersion": "Token version",
+      "readyNote": "Your digital insurance card."
+    }
+  },
+  "errors": {
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "generic": "Something went wrong. Please try again.",
+    "forbidden": "You don't have permission to perform this action.",
+    "notFound": "The requested information could not be found."
+  }
+}

@@ -1,16 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-import InsuranceStepper from "@/features/insurance-card/components/insurance-stepper-to-get-card";
+import InsuranceCardPage from "@/features/insurance/card/components/card-page";
 
-export default function page() {
-  return (
-    <div>
-      <Card>
-        <CardContent>
-          <InsuranceStepper />
-        </CardContent>
-
-      </Card>
-
-    </div>
-  )
-}
+export default InsuranceCardPage;

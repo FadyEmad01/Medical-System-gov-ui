@@ -1,6 +1,6 @@
 import type { UseFormReturn } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
-import type { AuthActionError } from "../actions";
+import type { AuthActionError } from "./action-error";
 import { applyActionError } from "./apply-action-error";
 
 type FormData = { nationalId: string; password: string };

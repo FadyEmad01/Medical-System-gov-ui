@@ -8,14 +8,20 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ? requested
     : routing.defaultLocale;
 
-  const [auth] = await Promise.all([
+  const [auth, insurance, common] = await Promise.all([
     import(`../features/auth/translations/${locale}.json`).then(
+      (m) => m.default,
+    ),
+    import(`../features/insurance/translations/${locale}.json`).then(
+      (m) => m.default,
+    ),
+    import(`../features/common/translations/${locale}.json`).then(
       (m) => m.default,
     ),
   ]);
 
   return {
     locale,
-    messages: { auth },
+    messages: { auth, insurance, common },
   };
 });

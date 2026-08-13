@@ -1,6 +1,7 @@
 "use client";
 
-import { CircleUser, Hospital, House, IdCard } from "lucide-react";
+import { CalendarDays, CircleUser, House, IdCard, Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type * as React from "react";
 import {
   Sidebar,
@@ -11,38 +12,56 @@ import {
 } from "@/components/ui/sidebar";
 import { useMe } from "@/features/auth/hooks/use-me";
 import { Logo } from "./logo";
-import { NavMain } from "./nav-main";
+import { type NavGroup, NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-
-const navMain = [
-  {
-    title: "Home",
-    url: "/dashboard",
-    icon: House,
-    isActive: true,
-  },
-  {
-    title: "Hospitals",
-    url: "#",
-    icon: Hospital,
-  },
-  {
-    title: "My insurance card",
-    url: "/dashboard/insurance-card",
-    icon: IdCard,
-  },
-  {
-    title: "Profile",
-    url: "#",
-    icon: CircleUser,
-  },
-];
 
 export function AppSidebar({
   dir,
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const { data: user } = useMe();
+  const t = useTranslations("common");
+
+  const groups: NavGroup[] = [
+    {
+      label: t("nav.groups.platform"),
+      items: [{ title: t("nav.home"), url: "/dashboard", icon: House }],
+    },
+    {
+      label: t("nav.groups.insurance"),
+      items: [
+        {
+          title: t("nav.profile"),
+          url: "/dashboard/profile",
+          icon: CircleUser,
+        },
+        {
+          title: t("nav.insuranceCard"),
+          url: "/dashboard/insurance-card",
+          icon: IdCard,
+        },
+      ],
+    },
+    {
+      label: t("nav.groups.appointments"),
+      items: [
+        {
+          title: t("nav.appointments"),
+          url: "/dashboard/appointments",
+          icon: CalendarDays,
+        },
+      ],
+    },
+  ];
+
+  // The admin area is gated by <AdminGuard> on the page; keep it out of the
+  // sidebar entirely for everyone else.
+  if (user?.role === "Admin") {
+    groups.push({
+      label: t("nav.groups.admin"),
+      items: [{ title: t("nav.admin"), url: "/dashboard/admin", icon: Shield }],
+    });
+  }
 
   // The dashboard layout is wrapped in <AuthGuard>, which guarantees `user` is
   // non-null by the time this renders. While the query is hydrating on first
@@ -58,7 +77,7 @@ export function AppSidebar({
         <Logo />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        <NavMain groups={groups} />
       </SidebarContent>
       {user ? (
         <SidebarFooter>

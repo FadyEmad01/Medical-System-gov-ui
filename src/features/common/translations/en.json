@@ -1,0 +1,29 @@
+{
+  "comingSoon": {
+    "title": "Coming soon",
+    "description": "This section is under construction. Check back later."
+  },
+  "accessDenied": {
+    "title": "Access denied",
+    "description": "You don't have permission to view this page."
+  },
+  "admin": {
+    "title": "Admin"
+  },
+  "appointments": {
+    "description": "Manage your medical appointments."
+  },
+  "nav": {
+    "home": "Home",
+    "profile": "Profile",
+    "insuranceCard": "Insurance card",
+    "appointments": "Appointments",
+    "admin": "Admin",
+    "groups": {
+      "platform": "Platform",
+      "insurance": "Insurance",
+      "appointments": "Appointments",
+      "admin": "Admin"
+    }
+  }
+}

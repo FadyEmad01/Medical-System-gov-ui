@@ -1,5 +1,5 @@
 import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
-import type { AuthActionError } from "../actions";
+import type { AuthActionError } from "./action-error";
 
 /**
  * Map a Server Action error onto React Hook Form fields.

@@ -1,5 +1,6 @@
 import { AuthGuard } from "@/components/auth-guard";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import AppHeader from "@/features/dashboard/components/app-header/app-header";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar/app-sidebar";
 
@@ -19,6 +20,7 @@ export default async function DashboardLayout({ children, params }: Props) {
         <SidebarInset>
           <AppHeader />
           <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+          <Toaster theme="system" dir={dir} />
         </SidebarInset>
       </SidebarProvider>
     </AuthGuard>

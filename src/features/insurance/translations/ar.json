@@ -1,0 +1,116 @@
+{
+  "profile": {
+    "title": "ملفي الشخصي",
+    "description": "بياناتك الشخصية وبيانات التأمين",
+    "saved": "تم تحديث الملف الشخصي",
+    "saving": "جارٍ الحفظ...",
+    "save": "حفظ",
+    "loadFailed": "تعذّر تحميل ملفك الشخصي",
+    "edit": "تعديل",
+    "cancel": "إلغاء",
+    "completeness": {
+      "title": "اكتمال الملف الشخصي",
+      "additionalData": "بيانات إضافية تحتاج إلى استكمالها",
+      "filled": "{filled} من {total} حقول مكتملة",
+      "complete": "ملفك الشخصي مكتمل. يمكنك الآن التقدم بطلب للحصول على بطاقة التأمين.",
+      "fields": {
+        "occupation": "المهنة",
+        "maritalStatus": "الحالة الاجتماعية",
+        "nationality": "الجنسية",
+        "emergencyContactName": "اسم جهة الاتصال للطوارئ",
+        "emergencyContactPhone": "هاتف جهة الاتصال للطوارئ"
+      }
+    },
+    "field": {
+      "occupation": "المهنة",
+      "maritalStatus": "الحالة الاجتماعية",
+      "maritalStatusRequired": "يرجى اختيار الحالة الاجتماعية",
+      "nationality": "الجنسية",
+      "preferredLanguage": "اللغة المفضلة",
+      "emergencyContactName": "اسم جهة الاتصال للطوارئ",
+      "emergencyContactPhone": "هاتف جهة الاتصال للطوارئ"
+    },
+    "maritalStatus": {
+      "Single": "أعزب",
+      "Married": "متزوج",
+      "Divorced": "مطلق",
+      "Widowed": "أرمل"
+    },
+    "levels": {
+      "low": "منخفض",
+      "medium": "متوسط",
+      "high": "مرتفع"
+    },
+    "identity": {
+      "fullName": "الاسم الكامل",
+      "nationalId": "الرقم القومي",
+      "email": "البريد الإلكتروني",
+      "occupation": "المهنة",
+      "nationality": "الجنسية",
+      "preferredLanguage": "اللغة المفضلة",
+      "emergencyContactName": "اسم جهة الاتصال للطوارئ",
+      "emergencyContactPhone": "هاتف جهة الاتصال للطوارئ",
+      "createdAt": "عضو منذ"
+    }
+  },
+  "card": {
+    "title": "بطاقة التأمين الخاصة بي",
+    "steps": {
+      "1": {
+        "title": "رفع المستندات المطلوبة",
+        "description": "قم برفع المستندات المطلوبة حتى يتمكن المسؤول من مراجعة طلبك."
+      },
+      "2": {
+        "title": "موافقة المسؤول أو الطبيب",
+        "description": "يقوم مسؤول أو طبيب بمراجعة مستنداتك والموافقة على طلبك."
+      },
+      "3": {
+        "title": "البطاقة جاهزة",
+        "description": "بطاقة التأمين الخاصة بك جاهزة للتحميل."
+      }
+    },
+    "status": {
+      "Active": "نشطة",
+      "Suspended": "موقوفة",
+      "Revoked": "ملغاة",
+      "Superseded": "مستبدلة"
+    },
+    "download": {
+      "comingSoon": "تحميل البطاقة قريباً",
+      "tooltip": "تحميل ملف PDF غير متاح بعد. عد لاحقاً."
+    },
+    "empty": {
+      "title": "لا توجد بطاقة تأمين لديك بعد"
+    },
+    "attention": {
+      "title": "بطاقتك تحتاج إلى انتباه",
+      "description": "بطاقتك حالياً بحالة: {status}. تواصل مع الدعم لمزيد من المعلومات."
+    },
+    "qrPlaceholder": "منطقة رمز الاستجابة السريعة",
+    "retry": "إعادة المحاولة",
+    "error": {
+      "title": "حدث خطأ ما"
+    },
+    "cta": {
+      "upload": "رفع المستندات",
+      "track": "متابعة الطلب"
+    },
+    "view": {
+      "holderName": "اسم الحامل",
+      "issued": "تاريخ الإصدار",
+      "expires": "تاريخ الانتهاء",
+      "insuranceClass": "فئة التأمين",
+      "familyNumber": "رقم الأسرة",
+      "version": "الإصدار",
+      "versionPrefix": "{version}",
+      "tokenVersion": "إصدار الرمز",
+      "readyNote": "بطاقتك الرقمية جاهزة."
+    }
+  },
+  "errors": {
+    "sessionExpired": "انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.",
+    "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "forbidden": "ليس لديك صلاحية للقيام بهذا الإجراء.",
+    "notFound": "تعذّر العثور على المعلومات المطلوبة."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "comingSoon": {
+    "title": "قريباً",
+    "description": "هذا القسم قيد الإنشاء. عد لاحقاً."
+  },
+  "accessDenied": {
+    "title": "تم رفض الوصول",
+    "description": "ليس لديك صلاحية لعرض هذه الصفحة."
+  },
+  "admin": {
+    "title": "الإدارة"
+  },
+  "appointments": {
+    "description": "إدارة مواعيدك الطبية."
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "profile": "الملف الشخصي",
+    "insuranceCard": "بطاقة التأمين",
+    "appointments": "المواعيد",
+    "admin": "الإدارة",
+    "groups": {
+      "platform": "المنصة",
+      "insurance": "التأمين",
+      "appointments": "المواعيد",
+      "admin": "الإدارة"
+    }
+  }
+}
