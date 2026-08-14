@@ -27,8 +27,8 @@ function makeStatus(
 }
 
 describe("deriveCardState", () => {
-  it("returns not-started / step 1 for null status and no cards", () => {
-    expect(deriveCardState(null, [])).toEqual({
+  it("returns not-started / step 1 for null status and no card", () => {
+    expect(deriveCardState(null, null)).toEqual({
       kind: "not-started",
       step: 1,
       card: null,
@@ -36,7 +36,7 @@ describe("deriveCardState", () => {
   });
 
   it("returns not-started / step 1 when the status has no documents", () => {
-    expect(deriveCardState(makeStatus(), [])).toEqual({
+    expect(deriveCardState(makeStatus(), null)).toEqual({
       kind: "not-started",
       step: 1,
       card: null,
@@ -44,7 +44,7 @@ describe("deriveCardState", () => {
   });
 
   it("returns in-progress / step 2 when documents were uploaded", () => {
-    const result = deriveCardState(makeStatus({ documentCount: 2 }), []);
+    const result = deriveCardState(makeStatus({ documentCount: 2 }), null);
 
     expect(result).toEqual({
       kind: "in-progress",
@@ -53,10 +53,10 @@ describe("deriveCardState", () => {
     });
   });
 
-  it("returns awaiting-issuance / step 2 when the application is approved", () => {
+  it("returns awaiting-issuance / step 2 when the application is approved but no card exists", () => {
     const result = deriveCardState(
       makeStatus({ currentApplicationStatus: "Approved" }),
-      [],
+      null,
     );
 
     expect(result).toEqual({
@@ -66,11 +66,11 @@ describe("deriveCardState", () => {
     });
   });
 
-  it("returns ready / step 3 with the latest card when it is active and valid", () => {
+  it("returns ready / step 3 with the current card when it is active and valid", () => {
     const card = makeCard();
     const result = deriveCardState(
       makeStatus({ currentApplicationStatus: "Approved" }),
-      [card],
+      card,
     );
 
     expect(result).toEqual({ kind: "ready", step: 3, card });
@@ -80,7 +80,7 @@ describe("deriveCardState", () => {
     const card = makeCard();
     const result = deriveCardState(
       makeStatus({ currentApplicationStatus: "Approved", documentCount: 3 }),
-      [card],
+      card,
     );
 
     expect(result.kind).toBe("ready");
@@ -88,11 +88,18 @@ describe("deriveCardState", () => {
     expect(result.card).toBe(card);
   });
 
+  it("returns attention / step 2 when the current card is active but expired", () => {
+    const card = makeCard({ isCurrentlyValid: false });
+    const result = deriveCardState(null, card);
+
+    expect(result).toEqual({ kind: "attention", step: 2, card });
+  });
+
   it("returns attention / step 2 for a suspended card, even when approved", () => {
     const card = makeCard({ status: "Suspended", isCurrentlyValid: false });
     const result = deriveCardState(
       makeStatus({ currentApplicationStatus: "Approved" }),
-      [card],
+      card,
     );
 
     expect(result).toEqual({ kind: "attention", step: 2, card });
@@ -100,45 +107,22 @@ describe("deriveCardState", () => {
 
   it("returns attention / step 2 for a revoked card", () => {
     const card = makeCard({ status: "Revoked", isCurrentlyValid: false });
-    const result = deriveCardState(null, [card]);
+    const result = deriveCardState(null, card);
 
     expect(result).toEqual({ kind: "attention", step: 2, card });
   });
 
   it("returns attention / step 2 for a superseded card", () => {
     const card = makeCard({ status: "Superseded", isCurrentlyValid: false });
-    const result = deriveCardState(null, [card]);
+    const result = deriveCardState(null, card);
 
     expect(result).toEqual({ kind: "attention", step: 2, card });
   });
 
-  it("falls through to not-started when the only card is active but invalid", () => {
-    const card = makeCard({ isCurrentlyValid: false });
-    const result = deriveCardState(null, [card]);
-
-    expect(result).toEqual({ kind: "not-started", step: 1, card: null });
-  });
-
   it("treats an empty cardNumber as a real card", () => {
     const card = makeCard({ cardNumber: "" });
-    const result = deriveCardState(null, [card]);
+    const result = deriveCardState(null, card);
 
     expect(result).toEqual({ kind: "ready", step: 3, card });
-  });
-
-  it("uses the first card (newest) even when an older card is valid", () => {
-    const latest = makeCard({
-      id: "card-latest",
-      status: "Suspended",
-      isCurrentlyValid: false,
-    });
-    const older = makeCard({
-      id: "card-older",
-      status: "Active",
-      isCurrentlyValid: true,
-    });
-    const result = deriveCardState(null, [latest, older]);
-
-    expect(result).toEqual({ kind: "attention", step: 2, card: latest });
   });
 });

@@ -66,7 +66,7 @@
       },
       "3": {
         "title": "Card ready",
-        "description": "Your insurance card is ready to download."
+        "description": "Your insurance card is ready."
       }
     },
     "status": {
@@ -75,10 +75,6 @@
       "Revoked": "Revoked",
       "Superseded": "Superseded"
     },
-    "download": {
-      "comingSoon": "Card download coming soon",
-      "tooltip": "PDF download is not available yet. Check back soon."
-    },
     "empty": {
       "title": "You don't have an insurance card yet"
     },
@@ -86,13 +82,12 @@
       "title": "Your card needs attention",
       "description": "Your card is currently marked as {status}. Contact support for more information."
     },
-    "qrPlaceholder": "QR code area",
     "retry": "Try again",
     "error": {
       "title": "Something went wrong"
     },
     "cta": {
-      "upload": "Upload documents",
+      "apply": "Apply for insurance",
       "track": "Track application"
     },
     "view": {
@@ -107,10 +102,201 @@
       "readyNote": "Your digital insurance card."
     }
   },
+  "documents": {
+    "types": {
+      "nationalId": "National ID",
+      "birthCertificate": "Birth certificate",
+      "marriageCertificate": "Marriage certificate",
+      "employmentLetter": "Employment letter",
+      "disabilityCertificate": "Disability certificate",
+      "deathCertificate": "Death certificate",
+      "guardianAuthorization": "Guardian authorization",
+      "familyRegistration": "Family registration"
+    },
+    "description": "Upload the required documents so the admin can review your application.",
+    "empty": "No documents uploaded yet.",
+    "uploaded": "Uploaded",
+    "current": "Current",
+    "mandatory": "Required",
+    "optional": "Optional",
+    "missing": "Missing documents",
+    "replace": "Replace file",
+    "remove": "Remove file",
+    "removedHint": "Hidden from this view only. Contact support to remove an uploaded document.",
+    "retry": "Upload failed — try again",
+    "additionalInfo": "Additional information",
+    "additionalInfoHint": "Optional details the reviewer may need.",
+    "documentNumber": "Document number",
+    "expiresAt": "Expiry date",
+    "errors": {
+      "tooLarge": "File is larger than 10 MB.",
+      "invalidType": "Only PDF, JPG, JPEG or PNG files are allowed.",
+      "storageUnavailable": "File storage is temporarily unavailable. Please try again."
+    }
+  },
+  "categories": {
+    "title": "Apply for insurance",
+    "description": "Choose the insurance category that fits you",
+    "empty": "No insurance categories are available right now.",
+    "documentsRequired": "{count, plural, one {# required document} other {# required documents}}",
+    "ageRange": "{min}–{max}",
+    "ageMinOnly": "{min}+",
+    "ageMaxOnly": "Up to {max}",
+    "maritalEligible": "Eligible for",
+    "dependentsNotAllowed": "This category does not cover dependents.",
+    "guardianRequired": "A guardian is required for this category.",
+    "errors": {
+      "selectCategory": "Please select an insurance category."
+    }
+  },
+  "enrollment": {
+    "started": "Enrollment started",
+    "title": "Apply for insurance",
+    "back": "Back",
+    "next": "Next",
+    "retry": "Try again",
+    "applicationNumber": "Application {number}",
+    "steps": {
+      "eligibility": "Eligibility",
+      "profile": "Profile",
+      "documents": "Documents",
+      "dependents": "Dependents",
+      "review": "Review"
+    },
+    "status": {
+      "Draft": "Draft",
+      "Submitted": "Submitted",
+      "UnderReview": "Under review",
+      "WaitingForDocuments": "Waiting for documents",
+      "Approved": "Approved",
+      "Rejected": "Rejected",
+      "Cancelled": "Cancelled"
+    },
+    "eligibility": {
+      "eligible": "You're eligible for this category.",
+      "notEligibleHint": "You're not eligible for this category",
+      "browseCategories": "Browse other categories"
+    },
+    "profile": {
+      "completenessHint": "Complete the highlighted fields in your profile to continue."
+    },
+    "submitFailed": "We couldn't submit your application",
+    "errors": {
+      "alreadyExists": "You already have an active enrollment."
+    }
+  },
+  "dependents": {
+    "description": "Add the people covered under your policy.",
+    "add": "Add dependent",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "end": "Remove dependent",
+    "empty": "No dependents added yet.",
+    "added": "Dependent added",
+    "ended": "Dependent removed",
+    "fields": {
+      "firstName": "First name",
+      "secondName": "Second name",
+      "thirdName": "Third name",
+      "fourthName": "Fourth name",
+      "dateOfBirth": "Date of birth",
+      "gender": "Gender",
+      "relationshipType": "Relationship",
+      "nationalId": "National ID"
+    },
+    "gender": {
+      "Male": "Male",
+      "Female": "Female"
+    },
+    "relationship": {
+      "Spouse": "Spouse",
+      "Child": "Child",
+      "Parent": "Parent",
+      "Guardian": "Guardian"
+    },
+    "endDialog": {
+      "title": "Remove dependent?",
+      "description": "This will end {name}'s coverage under your policy.",
+      "cancel": "Cancel",
+      "confirm": "Remove"
+    },
+    "errors": {
+      "invalidName": "Name must be between 1 and 50 characters.",
+      "dateOfBirthRequired": "Please choose a date of birth.",
+      "genderRequired": "Please select a gender.",
+      "relationshipRequired": "Please select a relationship.",
+      "nationalId": "National ID must be exactly 14 digits.",
+      "alreadyExists": "This dependent is already added.",
+      "alreadyEnded": "This dependent's coverage has already ended.",
+      "notFound": "The dependent could not be found."
+    }
+  },
+  "review": {
+    "title": "Review and submit",
+    "description": "Confirm your details before submitting",
+    "applicationNumber": "Application number",
+    "applicationStatus": "Status",
+    "category": "Category",
+    "createdAt": "Created",
+    "profile": "Profile",
+    "eligibility": "Eligibility",
+    "eligibilityOk": "Eligible",
+    "eligibilityNo": "Not eligible",
+    "documents": "Documents",
+    "dependents": "Dependents",
+    "dependentsEmpty": "None",
+    "warnings": "Note",
+    "submitDisabledHint": "Complete the required information above before submitting.",
+    "submit": "Submit application",
+    "submitting": "Submitting..."
+  },
+  "applications": {
+    "cancelled": "Application cancelled",
+    "errors": {
+      "terminal": "This application can no longer be cancelled."
+    }
+  },
+  "tracking": {
+    "title": "Application tracking",
+    "noApplication": "You don't have an application yet.",
+    "notSubmitted": "Your application hasn't been submitted yet. You can continue where you left off.",
+    "resume": "Resume application",
+    "cancel": "Cancel application",
+    "cancelling": "Cancelling...",
+    "cancelDialog": {
+      "title": "Cancel application?",
+      "description": "Your application will be cancelled and you'll need to start over to apply again.",
+      "cancel": "Keep application",
+      "confirm": "Cancel application"
+    },
+    "waitingDocuments": "We're waiting for more documents before we can review your application.",
+    "approved": "Your application has been approved.",
+    "viewCard": "View my card",
+    "rejected": "Your application was rejected.",
+    "rejectedReason": "Reason",
+    "cancelled": "Your application has been cancelled.",
+    "startNew": "Start a new application",
+    "timeline": "Progress",
+    "details": "Application details",
+    "submissionChannel": "Submitted via",
+    "submissionChannels": {
+      "WebPortal": "Web portal",
+      "MobileApp": "Mobile app",
+      "AdminPortal": "Admin portal",
+      "Kiosk": "Kiosk",
+      "GovernmentImport": "Government import"
+    },
+    "submittedAt": "Submitted",
+    "documentCount": "Documents",
+    "dependentCount": "Dependents",
+    "documentsSection": "Upload the missing documents"
+  },
   "errors": {
     "sessionExpired": "Your session has expired. Please sign in again.",
     "generic": "Something went wrong. Please try again.",
     "forbidden": "You don't have permission to perform this action.",
-    "notFound": "The requested information could not be found."
+    "notFound": "The requested information could not be found.",
+    "storageUnavailable": "File storage is temporarily unavailable. Please try again.",
+    "validationFailed": "Some fields need your attention."
   }
 }

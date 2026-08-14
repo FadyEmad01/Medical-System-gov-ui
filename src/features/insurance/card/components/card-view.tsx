@@ -2,16 +2,9 @@
 
 import { format } from "date-fns";
 import { arSA, enUS } from "date-fns/locale";
-import { Download, QrCode } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { CardResponseDto, CardStatus } from "../../types";
 
 /** Status → badge tone classes built from the semantic status tokens. */
@@ -35,9 +28,8 @@ function Detail({ label, value }: { label: string; value: string }) {
  * The ready-state insurance card.
  *
  * Clean and neutral on purpose — the production card artwork arrives later.
- * The QR area is a placeholder because the backend never serializes the token,
- * only its version. Download is intentionally disabled: there is no PDF
- * endpoint in the API.
+ * View-only: the backend exposes no QR payload and no PDF/download endpoint
+ * (§10), so the card shows identity + validity details only.
  */
 export function CardView({ card }: { card: CardResponseDto }) {
   const t = useTranslations("insurance");
@@ -84,12 +76,6 @@ export function CardView({ card }: { card: CardResponseDto }) {
         </dl>
 
         <div className="flex items-center gap-4">
-          <div className="flex size-36 shrink-0 items-center justify-center rounded-lg border border-dashed border-muted-foreground/40">
-            <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
-              <QrCode className="size-8" />
-              <span className="text-xs">{t("card.qrPlaceholder")}</span>
-            </div>
-          </div>
           <p className="text-sm text-muted-foreground">
             {t("card.view.tokenVersion")}: {card.tokenVersion}
           </p>
@@ -100,17 +86,6 @@ export function CardView({ card }: { card: CardResponseDto }) {
         <p className="text-sm text-muted-foreground">
           {t("card.view.readyNote")}
         </p>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex">
-              <Button type="button" variant="outline" disabled>
-                <Download data-icon="inline-start" />
-                {t("card.download.comingSoon")}
-              </Button>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{t("card.download.tooltip")}</TooltipContent>
-        </Tooltip>
       </CardFooter>
     </Card>
   );

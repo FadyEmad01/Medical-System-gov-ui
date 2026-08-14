@@ -2,7 +2,7 @@
  * Backend DTOs for the Insurance feature.
  *
  * Shapes mirror the contracts verified against the live Swagger spec
- * (stg-api.runasp.net/swagger/v1/swagger.json): snake_case JSON property names,
+ * (stg-api.runasp.net/swagger/v1/swagger.json): camelCase JSON property names,
  * additionalProperties:false (no extra fields are sent or accepted).
  */
 

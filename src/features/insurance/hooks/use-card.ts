@@ -13,7 +13,7 @@ import {
 export const CARD_STATE_QUERY_KEY = ["insurance", "card-state"] as const;
 
 /**
- * Application status + card history for the insurance card stepper.
+ * Application status + current card for the insurance card dashboard.
  *
  * Same normalize-to-throw pattern as `useProfile`; components derive the
  * stepper step from the result via `deriveCardState`.

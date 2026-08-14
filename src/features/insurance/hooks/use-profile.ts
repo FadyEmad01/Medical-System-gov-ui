@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import type { AuthActionError } from "@/features/auth/lib/action-error";
 import { getProfileAction, updateProfileAction } from "../actions";
+import { READINESS_QUERY_KEY } from "../enrollment/hooks/use-enrollment";
 import type { ProfileResponseDto, UpdateProfileRequestDto } from "../types";
 import {
   handleSessionExpiry,
@@ -72,6 +73,9 @@ export function useUpdateProfile() {
     onSuccess: () => {
       toast.success(t("profile.saved"));
       queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY });
+      // Profile completion gates the enrollment wizard, so the readiness
+      // snapshot must refresh after every save.
+      queryClient.invalidateQueries({ queryKey: READINESS_QUERY_KEY });
     },
     onError: (error) => {
       // Field errors are already mapped into the form via `setError`; a

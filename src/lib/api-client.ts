@@ -67,6 +67,14 @@ class ApiClient {
     return this.request<T>("PUT", path, body, options);
   }
 
+  async patch<T>(
+    path: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<T> {
+    return this.request<T>("PATCH", path, body, options);
+  }
+
   private async request<T>(
     method: string,
     path: string,
@@ -80,13 +88,19 @@ class ApiClient {
       options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     );
 
+    const isFormData = this.isFormData(body);
+
     let response: Response;
     try {
       response = await fetch(url, {
         method,
         signal: controller.signal,
-        headers: this.buildHeaders(options),
-        body: body === undefined ? undefined : JSON.stringify(body),
+        headers: this.buildHeaders(options, isFormData),
+        body: isFormData
+          ? body
+          : body === undefined
+            ? undefined
+            : JSON.stringify(body),
         cache: "no-store",
         redirect: "manual",
       });
@@ -117,16 +131,25 @@ class ApiClient {
     return `${this.baseUrl}${cleanPath}`;
   }
 
-  private buildHeaders(options: RequestOptions): Record<string, string> {
+  private buildHeaders(
+    options: RequestOptions,
+    isFormData: boolean,
+  ): Record<string, string> {
     const headers: Record<string, string> = {
       Accept: "application/json",
-      "Content-Type": "application/json",
+      // FormData must be sent without a Content-Type so fetch can set the
+      // multipart boundary itself.
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(options.headers ?? {}),
     };
     if (options.token) {
       headers.Authorization = `Bearer ${options.token}`;
     }
     return headers;
+  }
+
+  private isFormData(body: unknown): body is FormData {
+    return typeof FormData !== "undefined" && body instanceof FormData;
   }
 
   private async parseBody(response: Response): Promise<unknown> {

@@ -66,7 +66,7 @@
       },
       "3": {
         "title": "البطاقة جاهزة",
-        "description": "بطاقة التأمين الخاصة بك جاهزة للتحميل."
+        "description": "بطاقة التأمين الخاصة بك جاهزة."
       }
     },
     "status": {
@@ -75,10 +75,6 @@
       "Revoked": "ملغاة",
       "Superseded": "مستبدلة"
     },
-    "download": {
-      "comingSoon": "تحميل البطاقة قريباً",
-      "tooltip": "تحميل ملف PDF غير متاح بعد. عد لاحقاً."
-    },
     "empty": {
       "title": "لا توجد بطاقة تأمين لديك بعد"
     },
@@ -86,13 +82,12 @@
       "title": "بطاقتك تحتاج إلى انتباه",
       "description": "بطاقتك حالياً بحالة: {status}. تواصل مع الدعم لمزيد من المعلومات."
     },
-    "qrPlaceholder": "منطقة رمز الاستجابة السريعة",
     "retry": "إعادة المحاولة",
     "error": {
       "title": "حدث خطأ ما"
     },
     "cta": {
-      "upload": "رفع المستندات",
+      "apply": "التقديم على التأمين",
       "track": "متابعة الطلب"
     },
     "view": {
@@ -107,10 +102,201 @@
       "readyNote": "بطاقتك الرقمية جاهزة."
     }
   },
+  "documents": {
+    "types": {
+      "nationalId": "الرقم القومي",
+      "birthCertificate": "شهادة الميلاد",
+      "marriageCertificate": "شهادة الزواج",
+      "employmentLetter": "خطاب العمل",
+      "disabilityCertificate": "شهادة الإعاقة",
+      "deathCertificate": "شهادة الوفاة",
+      "guardianAuthorization": "تفويض الوصي",
+      "familyRegistration": "قيد العائلة"
+    },
+    "description": "قم برفع المستندات المطلوبة حتى يتمكن المسؤول من مراجعة طلبك.",
+    "empty": "لم يتم رفع أي مستندات بعد.",
+    "uploaded": "تم الرفع",
+    "current": "الحالية",
+    "mandatory": "مطلوب",
+    "optional": "اختياري",
+    "missing": "مستندات ناقصة",
+    "replace": "استبدال الملف",
+    "remove": "إزالة الملف",
+    "removedHint": "هذا الإخفاء مؤقت ويظهر في هذه الشاشة فقط. يرجى التواصل مع الدعم لإزالة المستند المرفوع.",
+    "retry": "فشل الرفع — حاول مرة أخرى",
+    "additionalInfo": "معلومات إضافية",
+    "additionalInfoHint": "تفاصيل اختيارية قد يحتاجها المراجع.",
+    "documentNumber": "رقم المستند",
+    "expiresAt": "تاريخ الانتهاء",
+    "errors": {
+      "tooLarge": "حجم الملف أكبر من 10 ميغابايت.",
+      "invalidType": "يُسمح فقط بملفات PDF أو JPG أو JPEG أو PNG.",
+      "storageUnavailable": "التخزين غير متاح مؤقتاً. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "categories": {
+    "title": "التقديم على التأمين",
+    "description": "اختر فئة التأمين المناسبة لك",
+    "empty": "لا تتوفر فئات تأمين حالياً.",
+    "documentsRequired": "{count, plural, zero {لا مستندات مطلوبة} one {مستند واحد مطلوب} two {مستندان مطلوبان} few {# مستندات مطلوبة} many {# مستنداً مطلوباً} other {# مستنداً مطلوباً}}",
+    "ageRange": "{min}–{max}",
+    "ageMinOnly": "{min}+",
+    "ageMaxOnly": "حتى {max}",
+    "maritalEligible": "متاح للحالات",
+    "dependentsNotAllowed": "لا تسمح هذه الفئة بإضافة معالين.",
+    "guardianRequired": "تتطلب هذه الفئة وجود ولي أمر.",
+    "errors": {
+      "selectCategory": "يرجى اختيار فئة التأمين."
+    }
+  },
+  "enrollment": {
+    "started": "تم بدء التقديم",
+    "title": "التقديم على التأمين",
+    "back": "رجوع",
+    "next": "التالي",
+    "retry": "إعادة المحاولة",
+    "applicationNumber": "الطلب رقم {number}",
+    "steps": {
+      "eligibility": "الأهلية",
+      "profile": "الملف الشخصي",
+      "documents": "المستندات",
+      "dependents": "المعالون",
+      "review": "المراجعة"
+    },
+    "status": {
+      "Draft": "مسودة",
+      "Submitted": "تم التقديم",
+      "UnderReview": "قيد المراجعة",
+      "WaitingForDocuments": "في انتظار المستندات",
+      "Approved": "مقبول",
+      "Rejected": "مرفوض",
+      "Cancelled": "ملغي"
+    },
+    "eligibility": {
+      "eligible": "أنت مؤهل لهذه الفئة.",
+      "notEligibleHint": "أنت غير مؤهل لهذه الفئة",
+      "browseCategories": "تصفح الفئات الأخرى"
+    },
+    "profile": {
+      "completenessHint": "أكمل الحقول المحددة في ملفك الشخصي للمتابعة."
+    },
+    "submitFailed": "تعذّر تقديم طلبك",
+    "errors": {
+      "alreadyExists": "لديك بالفعل طلب تقديم نشط."
+    }
+  },
+  "dependents": {
+    "description": "أضف الأشخاص المشمولين ببوليصة التأمين الخاصة بك.",
+    "add": "إضافة معال",
+    "saving": "جارٍ الحفظ...",
+    "cancel": "إلغاء",
+    "end": "إزالة المعال",
+    "empty": "لم تتم إضافة أي معالين بعد.",
+    "added": "تمت إضافة المعال",
+    "ended": "تمت إزالة المعال",
+    "fields": {
+      "firstName": "الاسم الأول",
+      "secondName": "الاسم الثاني",
+      "thirdName": "الاسم الثالث",
+      "fourthName": "الاسم الرابع",
+      "dateOfBirth": "تاريخ الميلاد",
+      "gender": "الجنس",
+      "relationshipType": "صلة القرابة",
+      "nationalId": "الرقم القومي"
+    },
+    "gender": {
+      "Male": "ذكر",
+      "Female": "أنثى"
+    },
+    "relationship": {
+      "Spouse": "زوج/زوجة",
+      "Child": "ابن/ابنة",
+      "Parent": "والد/والدة",
+      "Guardian": "ولي أمر"
+    },
+    "endDialog": {
+      "title": "إزالة المعال؟",
+      "description": "سيؤدي هذا إلى إنهاء تغطية {name} بموجب بوليصة التأمين الخاصة بك.",
+      "cancel": "إلغاء",
+      "confirm": "إزالة"
+    },
+    "errors": {
+      "invalidName": "يجب أن يتراوح الاسم بين حرف واحد و50 حرفاً.",
+      "dateOfBirthRequired": "يرجى اختيار تاريخ الميلاد.",
+      "genderRequired": "يرجى اختيار الجنس.",
+      "relationshipRequired": "يرجى اختيار صلة القرابة.",
+      "nationalId": "يجب أن يتكون الرقم القومي من 14 رقماً بالضبط.",
+      "alreadyExists": "هذا المعال مضاف بالفعل.",
+      "alreadyEnded": "انتهت تغطية هذا المعال بالفعل.",
+      "notFound": "تعذّر العثور على المعال."
+    }
+  },
+  "review": {
+    "title": "المراجعة والتقديم",
+    "description": "تأكد من بياناتك قبل التقديم",
+    "applicationNumber": "رقم الطلب",
+    "applicationStatus": "الحالة",
+    "category": "الفئة",
+    "createdAt": "تاريخ الإنشاء",
+    "profile": "الملف الشخصي",
+    "eligibility": "الأهلية",
+    "eligibilityOk": "مؤهل",
+    "eligibilityNo": "غير مؤهل",
+    "documents": "المستندات",
+    "dependents": "المعالون",
+    "dependentsEmpty": "لا يوجد",
+    "warnings": "ملاحظة",
+    "submitDisabledHint": "أكمل المعلومات المطلوبة أعلاه قبل التقديم.",
+    "submit": "تقديم الطلب",
+    "submitting": "جارٍ التقديم..."
+  },
+  "applications": {
+    "cancelled": "تم إلغاء الطلب",
+    "errors": {
+      "terminal": "لا يمكن إلغاء هذا الطلب بعد الآن."
+    }
+  },
+  "tracking": {
+    "title": "متابعة الطلب",
+    "noApplication": "لا يوجد لديك طلب تقديم بعد.",
+    "notSubmitted": "لم يتم تقديم طلبك بعد. يمكنك المتابعة من حيث توقفت.",
+    "resume": "متابعة التقديم",
+    "cancel": "إلغاء الطلب",
+    "cancelling": "جارٍ الإلغاء...",
+    "cancelDialog": {
+      "title": "إلغاء الطلب؟",
+      "description": "سيتم إلغاء طلبك وستحتاج إلى البدء من جديد للتقدم مرة أخرى.",
+      "cancel": "الاحتفاظ بالطلب",
+      "confirm": "إلغاء الطلب"
+    },
+    "waitingDocuments": "نحن بانتظار مستندات إضافية قبل مراجعة طلبك.",
+    "approved": "تمت الموافقة على طلبك.",
+    "viewCard": "عرض بطاقتي",
+    "rejected": "تم رفض طلبك.",
+    "rejectedReason": "السبب",
+    "cancelled": "تم إلغاء طلبك.",
+    "startNew": "بدء طلب جديد",
+    "timeline": "سير الطلب",
+    "details": "تفاصيل الطلب",
+    "submissionChannel": "قدّم عبر",
+    "submissionChannels": {
+      "WebPortal": "البوابة الإلكترونية",
+      "MobileApp": "تطبيق الجوال",
+      "AdminPortal": "البوابة الإدارية",
+      "Kiosk": "كشك الخدمة الذاتية",
+      "GovernmentImport": "الاستيراد الحكومي"
+    },
+    "submittedAt": "تاريخ التقديم",
+    "documentCount": "المستندات",
+    "dependentCount": "المعالون",
+    "documentsSection": "رفع المستندات الناقصة"
+  },
   "errors": {
     "sessionExpired": "انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.",
     "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "forbidden": "ليس لديك صلاحية للقيام بهذا الإجراء.",
-    "notFound": "تعذّر العثور على المعلومات المطلوبة."
+    "notFound": "تعذّر العثور على المعلومات المطلوبة.",
+    "storageUnavailable": "التخزين غير متاح مؤقتاً. يرجى المحاولة مرة أخرى.",
+    "validationFailed": "بعض الحقول تحتاج إلى مراجعة."
   }
 }

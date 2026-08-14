@@ -57,7 +57,7 @@ export default function InsuranceCardPage() {
     );
   }
 
-  const state = deriveCardState(data.status, data.cards);
+  const state = deriveCardState(data.status, data.currentCard);
 
   return (
     <div className="flex flex-col gap-4">

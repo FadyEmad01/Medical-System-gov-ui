@@ -1,6 +1,13 @@
 "use client";
 
-import { CalendarDays, CircleUser, House, IdCard, Shield } from "lucide-react";
+import {
+  CalendarDays,
+  CircleUser,
+  FilePlus2,
+  House,
+  IdCard,
+  Shield,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
 import {
@@ -39,6 +46,11 @@ export function AppSidebar({
           title: t("nav.insuranceCard"),
           url: "/dashboard/insurance-card",
           icon: IdCard,
+        },
+        {
+          title: t("nav.apply"),
+          url: "/dashboard/insurance",
+          icon: FilePlus2,
         },
       ],
     },

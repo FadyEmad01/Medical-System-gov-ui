@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  CircleX,
-  FileSearch,
-  FileUp,
-  IdCard,
-  type LucideIcon,
-  ShieldAlert,
-} from "lucide-react";
+import { CircleX, FileSearch, FileUp, IdCard, ShieldAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +14,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Link } from "@/i18n/navigation";
 import { isAuthActionError } from "../../hooks/session-guard";
 import type { CardState, CardStateKind } from "../../lib/card-status";
 import type { CardResponseDto, CardStatus } from "../../types";
@@ -45,8 +34,9 @@ const EMPTY_DESCRIPTION: Record<PendingKind, string> = {
 
 /** Status → Alert border tone. Only unhealthy cards reach the attention state. */
 const ATTENTION_BORDER_TONE: Record<CardStatus, string> = {
-  // Active is unreachable via deriveCardState; kept for Record exhaustiveness.
-  Active: "",
+  // An expired-but-Active card lands in attention (Active && !isCurrentlyValid),
+  // so it gets the same validity-warning tone as Suspended.
+  Active: "border-warning/60",
   Suspended: "border-warning/60",
   Revoked: "border-destructive/60",
   Superseded: "border-info/60",
@@ -65,34 +55,8 @@ export function errorMessageKey(error: unknown): string {
   return "errors.generic";
 }
 
-/** Disabled CTA with a tooltip — no documents/applications pages exist yet. */
-function ComingSoonButton({
-  icon: Icon,
-  label,
-  tooltip,
-}: {
-  icon: LucideIcon;
-  label: string;
-  tooltip: string;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex">
-          <Button type="button" variant="outline" disabled>
-            <Icon data-icon="inline-start" />
-            {label}
-          </Button>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
-    </Tooltip>
-  );
-}
-
 function EmptyState({ kind }: { kind: PendingKind }) {
   const t = useTranslations("insurance");
-  const tCommon = useTranslations("common");
 
   return (
     <Empty>
@@ -105,16 +69,18 @@ function EmptyState({ kind }: { kind: PendingKind }) {
       </EmptyHeader>
       <EmptyContent>
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <ComingSoonButton
-            icon={FileUp}
-            label={t("card.cta.upload")}
-            tooltip={tCommon("comingSoon.title")}
-          />
-          <ComingSoonButton
-            icon={FileSearch}
-            label={t("card.cta.track")}
-            tooltip={tCommon("comingSoon.title")}
-          />
+          <Button asChild variant="outline">
+            <Link href="/dashboard/insurance">
+              <FileUp data-icon="inline-start" />
+              {t("card.cta.apply")}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/dashboard/insurance/track">
+              <FileSearch data-icon="inline-start" />
+              {t("card.cta.track")}
+            </Link>
+          </Button>
         </div>
       </EmptyContent>
     </Empty>

@@ -1,18 +1,18 @@
 "use server";
 
-import {
-  type ActionResult,
-  type AuthActionError,
-  toActionError,
+import type {
+  ActionResult,
+  AuthActionError,
 } from "@/features/auth/lib/action-error";
-import {
-  clearSessionCookie,
-  getSessionToken,
-} from "@/features/auth/lib/session-cookie";
+import { getSessionToken } from "@/features/auth/lib/session-cookie";
 import { ApiError } from "@/lib/api-client";
-import { getCardHistory } from "./api/card-client";
+import { getCurrentCard } from "./api/card-client";
 import { getProfile, updateProfile } from "./api/profile-client";
 import { getInsuranceStatus } from "./api/status-client";
+import {
+  SESSION_EXPIRED_ERROR,
+  toSessionAwareError,
+} from "./lib/session-aware-error";
 import type {
   CardResponseDto,
   InsuranceStatusResponseDto,
@@ -20,12 +20,6 @@ import type {
   ProfileResponseDto,
   UpdateProfileRequestDto,
 } from "./types";
-
-const SESSION_EXPIRED_ERROR: AuthActionError = {
-  kind: "unauthorized",
-  formError: "errors.sessionExpired",
-  fieldErrors: {},
-};
 
 /**
  * GET /profile for the authenticated patient.
@@ -84,15 +78,17 @@ export async function updateProfileAction(
 
 interface CardStateData {
   status: InsuranceStatusResponseDto | null;
-  cards: CardResponseDto[];
+  currentCard: CardResponseDto | null;
 }
 
 /**
- * Snapshot for the insurance card stepper: application status + card history.
+ * Snapshot for the insurance card stepper: application status + current card.
  *
  * The patientId comes from the citizen profile (`ProfileResponseDto`), never
  * from the JWT identity. A missing insurance application surfaces as
- * `status: null` rather than an error — the stepper just has nothing to show.
+ * `status: null` AND `currentCard: null` rather than an error — the stepper
+ * just has nothing to show. A 404 from the current-card endpoint is normal
+ * (card not issued yet, even after approval).
  */
 export async function getCardStateAction(): Promise<
   ActionResult<CardStateData>
@@ -102,11 +98,11 @@ export async function getCardStateAction(): Promise<
 
   try {
     const profile = await getProfile(token);
-    const [status, cards] = await Promise.all([
+    const [status, currentCard] = await Promise.all([
       getStatusOrNull(profile.patientId, token),
-      getCardsOrEmpty(profile.patientId, token),
+      getCurrentCardOrNull(profile.patientId, token),
     ]);
-    return { ok: true, data: { status, cards } };
+    return { ok: true, data: { status, currentCard } };
   } catch (err) {
     return { ok: false, error: await toSessionAwareError(err) };
   }
@@ -158,33 +154,6 @@ function normalizeNullableString(
   return trimmed === "" ? null : trimmed;
 }
 
-/**
- * 401 (unauthorized) means the session is dead — the cookie is cleared so the
- * client can redirect to login. 403 (forbidden) means the user is
- * authenticated but lacks permission (e.g. a Doctor hitting a patient-only
- * endpoint); the session stays valid, so we report the localized forbidden
- * error without touching the cookie. Any other kind falls through to the
- * generic mapping.
- */
-async function toSessionAwareError(err: unknown): Promise<AuthActionError> {
-  if (err instanceof ApiError && err.kind === "unauthorized") {
-    await clearSessionCookie();
-    return {
-      kind: "unauthorized",
-      formError: "errors.sessionExpired",
-      fieldErrors: {},
-    };
-  }
-  if (err instanceof ApiError && err.kind === "forbidden") {
-    return {
-      kind: "forbidden",
-      formError: "errors.forbidden",
-      fieldErrors: {},
-    };
-  }
-  return toActionError(err);
-}
-
 /** A patient without an insurance application yet has no status — not an error. */
 async function getStatusOrNull(
   patientId: number,
@@ -198,15 +167,15 @@ async function getStatusOrNull(
   }
 }
 
-/** Likewise an empty card history is a valid state. */
-async function getCardsOrEmpty(
+/** Likewise a patient with no active card yet has no current card — not an error. */
+async function getCurrentCardOrNull(
   patientId: number,
   token: string,
-): Promise<CardResponseDto[]> {
+): Promise<CardResponseDto | null> {
   try {
-    return await getCardHistory(patientId, token);
+    return await getCurrentCard(patientId, token);
   } catch (err) {
-    if (err instanceof ApiError && err.kind === "notFound") return [];
+    if (err instanceof ApiError && err.kind === "notFound") return null;
     throw err;
   }
 }

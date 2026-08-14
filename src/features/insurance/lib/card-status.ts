@@ -14,31 +14,26 @@ export interface CardState {
 }
 
 /**
- * Derives the insurance card stepper state from the application status and
- * card history. The API returns cards newest-first, so `cards[0]` is the
- * latest card. Priority: a valid active card → an unhealthy card → an approved
- * application → documents under review → not started.
+ * Derives the insurance card stepper state from the application status and the
+ * patient's current card. The API returns a single current card (404 = none
+ * issued yet — even an approved application does not guarantee a card).
+ *
+ * Priority: an active, currently-valid card → a non-usable current card
+ * (suspended/revoked/superseded/expired) → an approved application → documents
+ * under review → not started.
  *
  * An empty `cardNumber` still counts as a card — only `status` and
  * `isCurrentlyValid` decide whether the card is usable.
  */
 export function deriveCardState(
   status: InsuranceStatusResponseDto | null,
-  cards: CardResponseDto[],
+  currentCard: CardResponseDto | null,
 ): CardState {
-  const latest = cards[0] ?? null;
-
-  if (latest && latest.status === "Active" && latest.isCurrentlyValid) {
-    return { kind: "ready", step: 3, card: latest };
-  }
-
-  if (
-    latest &&
-    (latest.status === "Suspended" ||
-      latest.status === "Revoked" ||
-      latest.status === "Superseded")
-  ) {
-    return { kind: "attention", step: 2, card: latest };
+  if (currentCard) {
+    if (currentCard.status === "Active" && currentCard.isCurrentlyValid) {
+      return { kind: "ready", step: 3, card: currentCard };
+    }
+    return { kind: "attention", step: 2, card: currentCard };
   }
 
   if (status?.currentApplicationStatus === "Approved") {
