@@ -1,7 +1,9 @@
 "use client";
 
+import { format } from "date-fns";
+import { arSA, enUS } from "date-fns/locale";
 import { CircleX, FileSearch, FileUp, IdCard, ShieldAlert } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,13 +19,25 @@ import {
 import { Link } from "@/i18n/navigation";
 import { isAuthActionError } from "../../hooks/session-guard";
 import type { CardState, CardStateKind } from "../../lib/card-status";
-import type { CardResponseDto, CardStatus } from "../../types";
-import { CARD_STATUS_TONE, CardView } from "./card-view";
+import type {
+  CardResponseDto,
+  CardStatus,
+  ProfileResponseDto,
+} from "../../types";
+import { EgyptianInsuranceCard } from "./egyptian-card";
 
 export type PendingKind = Extract<
   CardStateKind,
   "not-started" | "in-progress" | "awaiting-issuance"
 >;
+
+/** Status → badge tone classes built from the semantic status tokens. */
+export const CARD_STATUS_TONE: Record<CardStatus, string> = {
+  Active: "bg-success/10 text-success",
+  Suspended: "bg-warning/10 text-warning",
+  Revoked: "bg-revoked/10 text-revoked",
+  Superseded: "bg-superseded/10 text-superseded",
+};
 
 /** Contextual empty text per kind, reusing the matching stepper description. */
 const EMPTY_DESCRIPTION: Record<PendingKind, string> = {
@@ -125,9 +139,73 @@ function AttentionState({ card }: { card: CardResponseDto }) {
   );
 }
 
-export function CardStateContent({ state }: { state: CardState }) {
+function ReadyState({
+  card,
+  profile,
+  beneficiaryType,
+}: {
+  card: CardResponseDto;
+  profile: ProfileResponseDto | null;
+  beneficiaryType?: string | null;
+}) {
+  const t = useTranslations("insurance");
+  const locale = useLocale();
+
+  const formatDate = (iso: string) => {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return "—";
+    return format(date, "PPP", { locale: locale === "ar" ? arSA : enUS });
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <EgyptianInsuranceCard
+        card={card}
+        profile={profile}
+        beneficiaryType={beneficiaryType}
+      />
+
+      {/* Compact localized status/details row under the card. */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 py-3">
+          <Badge className={CARD_STATUS_TONE[card.status]}>
+            {t(`card.status.${card.status}`)}
+          </Badge>
+          <span className="text-sm text-muted-foreground">
+            {t("card.view.expires")}:{" "}
+            <span className="font-medium text-foreground">
+              {formatDate(card.expiresAt)}
+            </span>
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {t("card.view.version")}:{" "}
+            <span className="font-medium text-foreground">
+              {t("card.view.versionPrefix", { version: card.version })}
+            </span>
+          </span>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export function CardStateContent({
+  state,
+  profile,
+  beneficiaryType,
+}: {
+  state: CardState;
+  profile: ProfileResponseDto | null;
+  beneficiaryType?: string | null;
+}) {
   if (state.kind === "ready") {
-    return state.card ? <CardView card={state.card} /> : null;
+    return state.card ? (
+      <ReadyState
+        card={state.card}
+        profile={profile}
+        beneficiaryType={beneficiaryType}
+      />
+    ) : null;
   }
   if (state.kind === "attention") {
     return state.card ? <AttentionState card={state.card} /> : null;

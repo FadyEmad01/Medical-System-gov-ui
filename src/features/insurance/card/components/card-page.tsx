@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { useDependents } from "../../enrollment/hooks/use-enrollment";
 import { useCardState } from "../../hooks/use-card";
+import { useProfile } from "../../hooks/use-profile";
 import { deriveCardState } from "../../lib/card-status";
+import { resolveBeneficiaryType } from "../lib/beneficiary-type";
 import { CardStateContent, errorMessageKey } from "./card-state-content";
 import InsuranceCardStepper from "./insurance-stepper";
 
@@ -16,6 +19,8 @@ export default function InsuranceCardPage() {
   const t = useTranslations("insurance");
   const { data, isPending, isError, error, refetch, isRefetching } =
     useCardState();
+  const { data: profile } = useProfile();
+  const { data: dependents } = useDependents(profile?.patientId ?? null);
 
   if (isPending) {
     return (
@@ -59,6 +64,13 @@ export default function InsuranceCardPage() {
 
   const state = deriveCardState(data.status, data.currentCard);
 
+  // Silent "—" fallback is deliberate: getDependentsAction has no 404→[]
+  // mapping (api-client maps 404→notFound, useInsuranceActionQuery throws on
+  // !res.ok), so on query error `dependents` is undefined and a dependent
+  // card's badge degrades to "—" — accepted behavior for a decorative badge
+  // (401 is still handled by the session guard effect).
+  const beneficiaryType = resolveBeneficiaryType(state.card, dependents);
+
   return (
     <div className="flex flex-col gap-4">
       <CardTitle>{t("card.title")}</CardTitle>
@@ -69,7 +81,11 @@ export default function InsuranceCardPage() {
         </CardContent>
       </Card>
 
-      <CardStateContent state={state} />
+      <CardStateContent
+        state={state}
+        profile={profile ?? null}
+        beneficiaryType={beneficiaryType}
+      />
     </div>
   );
 }

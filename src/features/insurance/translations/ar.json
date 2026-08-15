@@ -91,15 +91,9 @@
       "track": "متابعة الطلب"
     },
     "view": {
-      "holderName": "اسم الحامل",
-      "issued": "تاريخ الإصدار",
       "expires": "تاريخ الانتهاء",
-      "insuranceClass": "فئة التأمين",
-      "familyNumber": "رقم الأسرة",
       "version": "الإصدار",
-      "versionPrefix": "{version}",
-      "tokenVersion": "إصدار الرمز",
-      "readyNote": "بطاقتك الرقمية جاهزة."
+      "versionPrefix": "{version}"
     }
   },
   "documents": {

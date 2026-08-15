@@ -91,15 +91,9 @@
       "track": "Track application"
     },
     "view": {
-      "holderName": "Holder name",
-      "issued": "Issued",
       "expires": "Expires",
-      "insuranceClass": "Insurance class",
-      "familyNumber": "Family number",
       "version": "Version",
-      "versionPrefix": "v{version}",
-      "tokenVersion": "Token version",
-      "readyNote": "Your digital insurance card."
+      "versionPrefix": "v{version}"
     }
   },
   "documents": {
