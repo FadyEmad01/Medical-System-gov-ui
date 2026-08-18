@@ -12,6 +12,7 @@ import { useCardState } from "../../hooks/use-card";
 import { useProfile } from "../../hooks/use-profile";
 import { deriveCardState } from "../../lib/card-status";
 import { resolveBeneficiaryType } from "../lib/beneficiary-type";
+import { CardHistorySection } from "./card-history";
 import { CardStateContent, errorMessageKey } from "./card-state-content";
 import InsuranceCardStepper from "./insurance-stepper";
 
@@ -86,6 +87,8 @@ export default function InsuranceCardPage() {
         profile={profile ?? null}
         beneficiaryType={beneficiaryType}
       />
+
+      <CardHistorySection history={data.cardHistory} />
     </div>
   );
 }

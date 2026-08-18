@@ -15,12 +15,13 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useMe } from "@/features/auth/hooks/use-me";
 import { Link } from "@/i18n/navigation";
+import type { UserRole } from "@/types/enums";
 
 type RoleGuardProps = {
   children: React.ReactNode;
 };
 
-type GuardedRole = "Admin" | "Patient";
+type GuardedRole = UserRole;
 
 /**
  * Role gate for client pages.
@@ -31,17 +32,22 @@ type GuardedRole = "Admin" | "Patient";
  * redirects logged-out users, so `user === null` renders nothing here.
  */
 export function AdminGuard({ children }: RoleGuardProps) {
-  return <RoleGuard allowedRole="Admin">{children}</RoleGuard>;
+  return <RoleGuard allowedRoles={["Admin"]}>{children}</RoleGuard>;
 }
 
 export function PatientGuard({ children }: RoleGuardProps) {
-  return <RoleGuard allowedRole="Patient">{children}</RoleGuard>;
+  return <RoleGuard allowedRoles={["Patient"]}>{children}</RoleGuard>;
+}
+
+/** Admin or Doctor — point-of-care verify + record verification. */
+export function StaffGuard({ children }: RoleGuardProps) {
+  return <RoleGuard allowedRoles={["Admin", "Doctor"]}>{children}</RoleGuard>;
 }
 
 function RoleGuard({
   children,
-  allowedRole,
-}: RoleGuardProps & { allowedRole: GuardedRole }) {
+  allowedRoles,
+}: RoleGuardProps & { allowedRoles: GuardedRole[] }) {
   const { data: user } = useMe();
 
   // `useMe` contract: `data === undefined` is still loading, `null` is logged out.
@@ -55,7 +61,7 @@ function RoleGuard({
 
   if (user === null) return null;
 
-  if (user.role !== allowedRole) {
+  if (!allowedRoles.includes(user.role)) {
     return <AccessDenied />;
   }
 

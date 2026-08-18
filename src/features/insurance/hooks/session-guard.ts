@@ -59,5 +59,8 @@ export function handleSessionExpiry(
   if (!isSessionExpiry(error)) return false;
   queryClient.removeQueries({ queryKey: ME_QUERY_KEY });
   queryClient.removeQueries({ queryKey: ["insurance"] });
+  // Admin bundles carry full applicant PII (nationalId, address, mobile) —
+  // they must never survive a session switch on a shared machine.
+  queryClient.removeQueries({ queryKey: ["admin"] });
   return true;
 }

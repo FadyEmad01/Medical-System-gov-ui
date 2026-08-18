@@ -25,6 +25,10 @@
       "insurance": "التأمين",
       "appointments": "المواعيد",
       "admin": "الإدارة"
-    }
+    },
+    "adminApplications": "مراجعة الطلبات",
+    "adminCategories": "الفئات",
+    "adminCards": "دورة حياة البطاقة",
+    "adminVerification": "التحقق"
   }
 }
