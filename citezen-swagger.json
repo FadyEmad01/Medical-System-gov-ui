@@ -1,0 +1,4517 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Citizen API",
+    "description": "Self-service APIs for the citizen-facing Insurance portal: registration, login, profile, dependents, documents, the enrollment wizard, application tracking, and the digital insurance card. Endpoints are grouped below in the order a real citizen workflow follows - start with **Authentication**.",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Registers a new patient account and immediately logs them in.",
+        "description": "Call this once, from the citizen-facing registration screen, before any other Domain 1 endpoint.\r\nAnyone (unauthenticated) may call it. Creates a patient with role \"Patient\" - NationalId must be\r\nexactly 14 digits and unique; Username must be unique. The password is hashed with BCrypt before\r\nbeing stored - it is never saved or returned in plain text. On success, a JWT is returned\r\nimmediately so the caller is logged in right after registering; store it and send it as\r\n`Authorization: Bearer <token>` on every subsequent call.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequestDto"
+              },
+              "example": {
+                "nationalId": "29801011234567",
+                "firstName": "Ahmed",
+                "secondName": "Mohamed",
+                "thirdName": "Ali",
+                "fourthName": "Hassan",
+                "dateOfBirth": "1998-01-01",
+                "gender": "Male",
+                "mobileNumber": "01012345678",
+                "governorate": "Cairo",
+                "district": "Nasr City",
+                "email": "ahmed.hassan@example.com",
+                "address": "12 El Nasr Street, Nasr City, Cairo",
+                "username": "ahmed.hassan",
+                "password": "SecurePass@123"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created. Returns a JWT and the new user's basic info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "expiresAtUtc": "2026-08-11T07:59:10Z",
+                  "userId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "role": "Patient"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed - a required field is missing, or NationalId/MobileNumber/\r\n            Password doesn't match its required format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "NationalId or Username is already registered to another account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logs in with NationalId and password.",
+        "description": "Call this from the login screen every time a returning user signs in. Works for any role -\r\nPatient, Doctor, or Admin - since all three are checked by NationalId. Anyone (unauthenticated)\r\nmay call it. Returns the same generic error for an unknown NationalId or a wrong password, so\r\ncallers cannot use this endpoint to enumerate which national IDs are registered.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              },
+              "example": {
+                "nationalId": "29801011234567",
+                "password": "SecurePass@123"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credentials valid. Returns a JWT and the user's basic info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "expiresAtUtc": "2026-08-11T07:59:10Z",
+                  "userId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "role": "Patient"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "NationalId or password is incorrect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/test-token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Issues a JWT for an existing account without checking a password. Development environment only.",
+        "description": "Not for frontend use - QA/tooling only, to skip typing a password while exploring the API in\r\nSwagger. Returns 404 outside the Development environment, so it can never be reached in\r\nproduction. Pass any seeded or registered NationalId and get back a valid token instantly.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestTokenRequestDto"
+              },
+              "example": {
+                "nationalId": "12345678901234"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestTokenRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestTokenRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account found. Returns a JWT and the user's basic info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "expiresAtUtc": "2026-08-11T07:59:10Z",
+                  "userId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "role": "Patient"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No account with this NationalId, or the API is not running in Development.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Returns the identity of the currently authenticated user, as read from their JWT.",
+        "description": "Useful for a frontend to confirm a stored token is still valid and see who it belongs to (e.g.\r\non app startup, before showing a logged-in UI). Requires a valid Bearer token from\r\n/register, /login, or /test-token - any authenticated role may call it.",
+        "responses": {
+          "200": {
+            "description": "Returns the caller's identity as read from the JWT claims.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                },
+                "example": {
+                  "userId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "role": "Patient"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/profile": {
+      "get": {
+        "tags": [
+          "Citizen Profile"
+        ],
+        "summary": "Gets the authenticated patient's profile.",
+        "description": "Call this to populate a profile screen, or before showing the enrollment wizard's Step 2 (a\r\ncomplete profile is required before an application can be submitted). Patient only - always\r\nreturns the caller's own record, there is no patientId parameter.",
+        "responses": {
+          "200": {
+            "description": "Returns the profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponseDto"
+                },
+                "example": {
+                  "patientId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "dateOfBirth": "1998-01-01",
+                  "gender": "Male",
+                  "mobileNumber": "01012345678",
+                  "governorate": "Cairo",
+                  "district": "Nasr City",
+                  "email": "ahmed.hassan@example.com",
+                  "address": "12 El Nasr Street, Nasr City, Cairo",
+                  "occupation": "Software Engineer",
+                  "maritalStatus": "Married",
+                  "nationality": "Egyptian",
+                  "preferredLanguage": "Arabic",
+                  "emergencyContactName": "Mona Ali Hassan",
+                  "emergencyContactPhone": "01098765432",
+                  "createdAt": "2026-07-31T10:59:45Z",
+                  "updatedAt": "2026-08-04T08:01:45Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No CitizenProfile found for this patient (should not happen - one is created automatically at registration).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Citizen Profile"
+        ],
+        "summary": "Replaces the authenticated patient's editable profile fields.",
+        "description": "Call this from the profile-edit screen, or from Step 2 of the enrollment wizard. Covers only\r\nCitizenProfile-owned fields (Occupation, MaritalStatus, Nationality, PreferredLanguage,\r\nEmergencyContactName, EmergencyContactPhone) - Patient identity fields are not part of this\r\nrequest. This is a full replace: send every field you want kept, since an omitted/null field\r\nclears it. Patient only - always updates the caller's own record.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequestDto"
+              },
+              "example": {
+                "occupation": "Software Engineer",
+                "maritalStatus": "Married",
+                "nationality": "Egyptian",
+                "preferredLanguage": "Arabic",
+                "emergencyContactName": "Mona Ali Hassan",
+                "emergencyContactPhone": "01098765432"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated. Returns the full profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponseDto"
+                },
+                "example": {
+                  "patientId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "dateOfBirth": "1998-01-01",
+                  "gender": "Male",
+                  "mobileNumber": "01012345678",
+                  "governorate": "Cairo",
+                  "district": "Nasr City",
+                  "email": "ahmed.hassan@example.com",
+                  "address": "12 El Nasr Street, Nasr City, Cairo",
+                  "occupation": "Software Engineer",
+                  "maritalStatus": "Married",
+                  "nationality": "Egyptian",
+                  "preferredLanguage": "Arabic",
+                  "emergencyContactName": "Mona Ali Hassan",
+                  "emergencyContactPhone": "01098765432",
+                  "createdAt": "2026-07-31T10:59:45Z",
+                  "updatedAt": "2026-08-04T08:01:45Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A field fails validation (e.g. EmergencyContactPhone isn't a valid phone number, or a field exceeds its max length).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No CitizenProfile found for this patient (should not happen).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/dependents": {
+      "post": {
+        "tags": [
+          "Dependents"
+        ],
+        "summary": "Registers a dependent (family member) for the caller's own account.",
+        "description": "Call this from Step 3 of the enrollment wizard, or any time a citizen wants to add a family\r\nmember to their account. Restricted to Patient, always for the caller's own account - the\r\nsponsor is derived from the caller's own claim, never a request parameter. Creates both the\r\ndependent's identity and the sponsor relationship together, in one transaction.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDependentRequestDto"
+              },
+              "example": {
+                "firstName": "Youssef",
+                "secondName": "Ahmed",
+                "thirdName": "Mohamed",
+                "fourthName": "Hassan",
+                "dateOfBirth": "2015-03-20",
+                "gender": "Male",
+                "nationalId": null,
+                "relationshipType": "Child"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDependentRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDependentRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registered. Returns the new dependent and relationship.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependentResponseDto"
+                },
+                "example": {
+                  "dependentPersonId": "3a1b2c3d-4e5f-6789-abcd-ef0123456789",
+                  "fullName": "Youssef Ahmed Mohamed Hassan",
+                  "dateOfBirth": "2015-03-20",
+                  "gender": "Male",
+                  "nationalId": null,
+                  "status": "Active",
+                  "relationshipId": "7f8e9d0c-1b2a-3c4d-5e6f-7a8b9c0d1e2f",
+                  "relationshipType": "Child",
+                  "isPrimarySponsor": true,
+                  "startedAt": "2026-08-04T08:05:00Z",
+                  "endedAt": null,
+                  "isActive": true,
+                  "correlationId": "9c8b7a6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A required field is missing, or NationalId (if provided) isn't exactly 14 digits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/dependents/{patientId}": {
+      "get": {
+        "tags": [
+          "Dependents"
+        ],
+        "summary": "Gets a patient's registered dependents and each relationship's status.",
+        "description": "Call this to list a citizen's family members, e.g. on Step 3 of the enrollment wizard. Restricted\r\nto the Patient themselves (own patientId only) - Doctors have no access to this endpoint at all,\r\nand Admin no longer does either: use GET /api/insurance/applications/{applicationId}/review\r\ninstead, which shows exactly which dependents were captured in a given application's submission\r\nsnapshot.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the dependent list (empty if none).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DependentResponseDto"
+                  }
+                },
+                "example": [
+                  {
+                    "dependentPersonId": "3a1b2c3d-4e5f-6789-abcd-ef0123456789",
+                    "fullName": "Youssef Ahmed Mohamed Hassan",
+                    "dateOfBirth": "2015-03-20",
+                    "gender": "Male",
+                    "nationalId": null,
+                    "status": "Active",
+                    "relationshipId": "7f8e9d0c-1b2a-3c4d-5e6f-7a8b9c0d1e2f",
+                    "relationshipType": "Child",
+                    "isPrimarySponsor": true,
+                    "startedAt": "2026-08-04T08:05:00Z",
+                    "endedAt": null,
+                    "isActive": true,
+                    "correlationId": "9c8b7a6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, or the caller has no access to this patientId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/dependents/{relationshipId}/end": {
+      "patch": {
+        "tags": [
+          "Dependents"
+        ],
+        "summary": "Ends a family relationship (e.g. divorce, revoked guardianship).",
+        "description": "Call this when a citizen removes a dependent from their account. Restricted to Patient, and only\r\nthe sponsor who owns this relationship. Sets EndedAt - never deletes the relationship or the\r\nunderlying dependent record, so the history remains visible.",
+        "parameters": [
+          {
+            "name": "relationshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ended. Returns the updated relationship.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependentResponseDto"
+                },
+                "example": {
+                  "dependentPersonId": "3a1b2c3d-4e5f-6789-abcd-ef0123456789",
+                  "fullName": "Youssef Ahmed Mohamed Hassan",
+                  "dateOfBirth": "2015-03-20",
+                  "gender": "Male",
+                  "nationalId": null,
+                  "status": "Active",
+                  "relationshipId": "7f8e9d0c-1b2a-3c4d-5e6f-7a8b9c0d1e2f",
+                  "relationshipType": "Child",
+                  "isPrimarySponsor": true,
+                  "startedAt": "2026-08-04T08:05:00Z",
+                  "endedAt": null,
+                  "isActive": true,
+                  "correlationId": "9c8b7a6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such relationship, or the caller is not its sponsor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The relationship has already ended.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/cards/current/{patientId}": {
+      "get": {
+        "tags": [
+          "Digital Insurance Card"
+        ],
+        "summary": "Gets the patient's own currently active card.",
+        "description": "Call this to show a citizen their own current, usable card (e.g. a \"My Card\" screen with\r\n            a QR code) - this is the only card-read endpoint a Patient token can call; GetCards/GetDetail\r\n            above are Admin-only. Access is Admin (any patientId) or the Patient themselves (own patientId\r\n            only). Returns only a card that is Status == Active and not yet past ExpiresAt, scoped to the\r\n            patient's own card (not a dependent's).",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the current card.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardResponseDto"
+                },
+                "example": {
+                  "cardNumber": "INS-2026-00000015",
+                  "id": "7a6b5c4d-3e2f-1a0b-9c8d-7e6f5a4b3c2d",
+                  "patientId": 1,
+                  "dependentPersonId": null,
+                  "holderFullName": "Ahmed Mohamed Ali Hassan",
+                  "status": "Active",
+                  "isCurrentlyValid": true,
+                  "issueReason": "Initial",
+                  "version": 1,
+                  "cardTemplate": null,
+                  "tokenVersion": 1,
+                  "replacementReason": null,
+                  "reasonNote": null,
+                  "predecessorCardId": null,
+                  "successorCardId": null,
+                  "isLatestCard": true,
+                  "issuedAt": "2026-08-10T00:00:00Z",
+                  "expiresAt": "2027-08-10T00:00:00Z",
+                  "applicationId": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "createdAt": "2026-08-10T00:00:00Z",
+                  "correlationId": "3c2d1a0b-9c8d-7e6f-5a4b-3c2d1a0b9c8d"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, the caller has no access, or no currently active card exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/documents/upload": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Uploads (or replaces) an insurance-application document.",
+        "description": "Call this from Step 4 of the enrollment wizard, once per required document. Restricted to\r\nPatient, always for the caller's own account - PatientId is derived from the caller's own claim,\r\nnever a form field. Only PDF, JPG, JPEG, or PNG files up to 10 MB are accepted. Uploading a\r\ndocument of a DocumentType that already has one does not overwrite it - the previous document\r\nremains permanently visible in history, and the new upload becomes \"current\" (the one that\r\ncounts toward enrollment readiness).",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "documentType": {
+                    "$ref": "#/components/schemas/DocumentType"
+                  },
+                  "file": {
+                    "type": "string",
+                    "description": "Required. The file itself (PDF/JPG/JPEG/PNG, max 10 MB).",
+                    "format": "binary"
+                  },
+                  "documentNumber": {
+                    "type": "string",
+                    "description": "Optional. The number printed on the physical document (e.g. a National ID number)."
+                  },
+                  "expiresAt": {
+                    "type": "string",
+                    "description": "Optional. The document's own printed expiry date, if it has one.",
+                    "format": "date-time"
+                  },
+                  "dependentPersonId": {
+                    "type": "string",
+                    "description": "Optional. Set this to upload a document about a specific dependent instead of the citizen themselves - must be one of the caller's own, currently-active dependents.",
+                    "format": "uuid"
+                  }
+                }
+              },
+              "encoding": {
+                "documentType": {
+                  "style": "form"
+                },
+                "file": {
+                  "style": "form"
+                },
+                "documentNumber": {
+                  "style": "form"
+                },
+                "expiresAt": {
+                  "style": "form"
+                },
+                "dependentPersonId": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Uploaded. Returns the new document's metadata and secure URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenDocumentResponseDto"
+                },
+                "example": {
+                  "id": "5f4e3d2c-1b0a-4988-8f77-6e5d4c3b2a1f",
+                  "patientId": 1,
+                  "dependentPersonId": null,
+                  "documentType": "NationalId",
+                  "documentNumber": "29801011234567",
+                  "fileName": "national_id_front.pdf",
+                  "fileUrl": "https://res.cloudinary.com/medical-system/raw/upload/v1/documents/national_id_front.pdf",
+                  "fileType": "application/pdf",
+                  "fileSize": 245760,
+                  "uploadedAt": "2026-08-04T08:15:00Z",
+                  "expiresAt": "2031-08-04T00:00:00Z",
+                  "reviewStatus": "Pending",
+                  "reviewedBy": null,
+                  "reviewedAt": null,
+                  "rejectionReason": null,
+                  "isCurrent": true,
+                  "correlationId": "8a7b6c5d-4e3f-2a1b-0c9d-8e7f6a5b4c3d"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing file, disallowed file type, over the 10 MB limit, or an invalid dependentPersonId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Cloudinary (file storage) is unreachable or rejected the upload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/documents/{patientId}": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Gets a patient's full document history (their own documents and any about their dependents), newest first.",
+        "description": "Call this to show upload history, or which documents are already on file. Restricted to the\r\nPatient themselves (own patientId only) - Doctors have no access to this endpoint at all, and\r\nAdmin no longer does either: use GET /api/insurance/applications/{applicationId}/review instead,\r\nwhich shows exactly what was captured in a given application's submission snapshot.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the document history (empty list if none).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CitizenDocumentResponseDto"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "5f4e3d2c-1b0a-4988-8f77-6e5d4c3b2a1f",
+                    "patientId": 1,
+                    "dependentPersonId": null,
+                    "documentType": "NationalId",
+                    "documentNumber": "29801011234567",
+                    "fileName": "national_id_front.pdf",
+                    "fileUrl": "https://res.cloudinary.com/medical-system/raw/upload/v1/documents/national_id_front.pdf",
+                    "fileType": "application/pdf",
+                    "fileSize": 245760,
+                    "uploadedAt": "2026-08-04T08:15:00Z",
+                    "expiresAt": "2031-08-04T00:00:00Z",
+                    "reviewStatus": "Pending",
+                    "reviewedBy": null,
+                    "reviewedAt": null,
+                    "rejectionReason": null,
+                    "isCurrent": true,
+                    "correlationId": "8a7b6c5d-4e3f-2a1b-0c9d-8e7f6a5b4c3d"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, or the caller has no access to this patientId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/documents/document/{documentId}": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Gets a single document's metadata and secure download URL.",
+        "description": "Call this to view or download one specific document. Ownership is checked against the\r\ndocument's own PatientId before the URL is ever returned - restricted to the Patient themselves,\r\nsame as the history endpoint. Admin: use\r\nGET /api/insurance/applications/{applicationId}/review instead.",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the document.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitizenDocumentResponseDto"
+                },
+                "example": {
+                  "id": "5f4e3d2c-1b0a-4988-8f77-6e5d4c3b2a1f",
+                  "patientId": 1,
+                  "dependentPersonId": null,
+                  "documentType": "NationalId",
+                  "documentNumber": "29801011234567",
+                  "fileName": "national_id_front.pdf",
+                  "fileUrl": "https://res.cloudinary.com/medical-system/raw/upload/v1/documents/national_id_front.pdf",
+                  "fileType": "application/pdf",
+                  "fileSize": 245760,
+                  "uploadedAt": "2026-08-04T08:15:00Z",
+                  "expiresAt": "2031-08-04T00:00:00Z",
+                  "reviewStatus": "Pending",
+                  "reviewedBy": null,
+                  "reviewedAt": null,
+                  "rejectionReason": null,
+                  "isCurrent": true,
+                  "correlationId": "8a7b6c5d-4e3f-2a1b-0c9d-8e7f6a5b4c3d"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such document, or the caller has no access to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/applications": {
+      "post": {
+        "tags": [
+          "Insurance Applications"
+        ],
+        "summary": "Creates a new Draft application for the caller.",
+        "description": "Prefer POST /api/insurance/enrollment/start instead, which does this same step as part of the\r\nguided wizard. Call this directly only if building outside the wizard. Restricted to Patient,\r\nalways for the caller's own account. Rejects with 409 if the patient already has a non-terminal\r\napplication.",
+        "responses": {
+          "200": {
+            "description": "Created. Returns the new Draft application.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponseDto"
+                },
+                "example": {
+                  "applicationNumber": "APP-2026-00000015",
+                  "id": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "patientId": 1,
+                  "status": "UnderReview",
+                  "submissionChannel": "WebPortal",
+                  "submittedAt": "2026-08-04T09:00:00Z",
+                  "reviewedBy": null,
+                  "reviewedAt": null,
+                  "decisionReason": null,
+                  "eligibilityStatusSnapshot": null,
+                  "verificationStatusSnapshot": null,
+                  "documentCount": 2,
+                  "dependentCount": 0,
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The patient already has a non-terminal application.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/applications/{applicationId}/submit": {
+      "patch": {
+        "tags": [
+          "Insurance Applications"
+        ],
+        "summary": "Submits a Draft application for review, gated on enrollment readiness.",
+        "description": "Prefer PATCH /api/insurance/enrollment/submit instead, which returns a structured\r\n\"missingRequirements\" array on failure - this endpoint returns the same information as a plain\r\ntext message in the 400 body. Restricted to Patient, and only the application's own owner.\r\nValidates readiness (required documents, profile completeness, dependents validity, category\r\neligibility rules where a category was selected) before completing - the same rules the wizard's\r\ngated endpoint enforces, since both call the same readiness check internally. Snapshots every\r\ncurrently-current CitizenDocument and every active dependent into the application's permanent\r\nrecord - this snapshot is never re-taken later, even if the application is later sent back to\r\nWaitingForDocuments and forward again.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Submitted. Returns the updated application.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponseDto"
+                },
+                "example": {
+                  "applicationNumber": "APP-2026-00000015",
+                  "id": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "patientId": 1,
+                  "status": "UnderReview",
+                  "submissionChannel": "WebPortal",
+                  "submittedAt": "2026-08-04T09:00:00Z",
+                  "reviewedBy": null,
+                  "reviewedAt": null,
+                  "decisionReason": null,
+                  "eligibilityStatusSnapshot": null,
+                  "verificationStatusSnapshot": null,
+                  "documentCount": 2,
+                  "dependentCount": 0,
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not ready for submission - the response Detail text lists what's missing/invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such application, or the caller does not own it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The application is not currently in Draft.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/applications/{applicationId}/cancel": {
+      "patch": {
+        "tags": [
+          "Insurance Applications"
+        ],
+        "summary": "Cancels an application.",
+        "description": "Call this when a citizen abandons an in-progress application (e.g. to start over with a\r\ndifferent category). Restricted to Patient, and only the application's own owner. Any\r\nnon-terminal status can be cancelled.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancelled. Returns the updated application.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponseDto"
+                },
+                "example": {
+                  "applicationNumber": "APP-2026-00000015",
+                  "id": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "patientId": 1,
+                  "status": "UnderReview",
+                  "submissionChannel": "WebPortal",
+                  "submittedAt": "2026-08-04T09:00:00Z",
+                  "reviewedBy": null,
+                  "reviewedAt": null,
+                  "decisionReason": null,
+                  "eligibilityStatusSnapshot": null,
+                  "verificationStatusSnapshot": null,
+                  "documentCount": 2,
+                  "dependentCount": 0,
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such application, or the caller does not own it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The application is already in a terminal status (Approved/Rejected/Cancelled).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/applications/{patientId}": {
+      "get": {
+        "tags": [
+          "Insurance Applications"
+        ],
+        "summary": "Gets a patient's applications, newest first.",
+        "description": "Call this to show a citizen's application history. Access is Admin (any patientId) or\r\n            the Patient themselves (own patientId only) - no Doctor access.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the application list (empty if none).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationResponseDto"
+                  }
+                },
+                "example": [
+                  {
+                    "applicationNumber": "APP-2026-00000015",
+                    "id": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                    "patientId": 1,
+                    "status": "UnderReview",
+                    "submissionChannel": "WebPortal",
+                    "submittedAt": "2026-08-04T09:00:00Z",
+                    "reviewedBy": null,
+                    "reviewedAt": null,
+                    "decisionReason": null,
+                    "eligibilityStatusSnapshot": null,
+                    "verificationStatusSnapshot": null,
+                    "documentCount": 2,
+                    "dependentCount": 0,
+                    "createdAt": "2026-08-04T08:00:50Z",
+                    "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, or the caller has no access to this patientId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/applications/detail/{applicationId}": {
+      "get": {
+        "tags": [
+          "Insurance Applications"
+        ],
+        "summary": "Gets full application detail, including its review history.",
+        "description": "Call this for an application detail/case screen. Same access rule as the list endpoint.\r\n            InternalNotes on each review entry is populated only when the caller is Admin.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the application detail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailResponseDto"
+                },
+                "example": {
+                  "applicationNumber": "APP-2026-00000015",
+                  "id": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "patientId": 1,
+                  "status": "UnderReview",
+                  "submissionChannel": "WebPortal",
+                  "submittedAt": "2026-08-04T09:00:00Z",
+                  "reviewedBy": null,
+                  "reviewedAt": null,
+                  "decisionReason": null,
+                  "eligibilityStatusSnapshot": null,
+                  "verificationStatusSnapshot": null,
+                  "documentCount": 2,
+                  "dependentCount": 0,
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807",
+                  "reviewHistory": [
+                    {
+                      "previousStatus": "Submitted",
+                      "newStatus": "UnderReview",
+                      "reviewOutcome": null,
+                      "reviewedBy": 1,
+                      "reviewedAt": "2026-08-04T09:05:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such application, or the caller has no access to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/applications/by-number/{applicationNumber}": {
+      "get": {
+        "tags": [
+          "Insurance Applications"
+        ],
+        "summary": "Gets full application detail by its human-readable reference number.",
+        "description": "Same access rule and detail shape as the Guid-based detail endpoint - for citizens/staff\r\n            who only have the printed/spoken reference number (e.g. \"APP-2026-00000015\"), such as a support\r\n            call or a printed confirmation.",
+        "parameters": [
+          {
+            "name": "applicationNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the application detail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDetailResponseDto"
+                },
+                "example": {
+                  "applicationNumber": "APP-2026-00000015",
+                  "id": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "patientId": 1,
+                  "status": "UnderReview",
+                  "submissionChannel": "WebPortal",
+                  "submittedAt": "2026-08-04T09:00:00Z",
+                  "reviewedBy": null,
+                  "reviewedAt": null,
+                  "decisionReason": null,
+                  "eligibilityStatusSnapshot": null,
+                  "verificationStatusSnapshot": null,
+                  "documentCount": 2,
+                  "dependentCount": 0,
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807",
+                  "reviewHistory": [
+                    {
+                      "previousStatus": "Submitted",
+                      "newStatus": "UnderReview",
+                      "reviewOutcome": null,
+                      "reviewedBy": 1,
+                      "reviewedAt": "2026-08-04T09:05:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such application, or the caller has no access to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/categories": {
+      "get": {
+        "tags": [
+          "Insurance Categories"
+        ],
+        "summary": "Gets the active insurance categories, in display order.",
+        "description": "Call this to populate Step 1 of the enrollment wizard (category selection) - it shows the\r\ncitizen each category's required documents and eligibility rules up front. Any authenticated\r\ncaller may call it.",
+        "responses": {
+          "200": {
+            "description": "Returns the active category list (empty if none are configured yet).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InsuranceCategoryResponseDto"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "ab358e29-e9b3-4677-a762-e556d9fe0301",
+                    "code": "GOVERNMENT_EMPLOYEE",
+                    "name": "Government Employee",
+                    "description": "Citizens employed by a government ministry or public authority.",
+                    "isActive": true,
+                    "displayOrder": 1,
+                    "requiredDocumentTypes": [
+                      "NationalId",
+                      "EmploymentLetter"
+                    ],
+                    "documentRequirements": [
+                      {
+                        "id": "6f1a2b3c-4d5e-6f70-8192-a3b4c5d6e7f8",
+                        "documentType": "EmploymentLetter",
+                        "displayName": "Employment Letter",
+                        "helpText": "A signed letter from your employer, dated within the last 3 months.",
+                        "sampleDocumentUrl": null,
+                        "displayOrder": 2,
+                        "isActive": true,
+                        "isMandatory": true
+                      }
+                    ],
+                    "minimumAge": 18,
+                    "maximumAge": null,
+                    "allowedMaritalStatuses": [ ],
+                    "guardianRequired": false,
+                    "dependentsAllowed": true,
+                    "createdAt": "2026-08-04T07:58:07Z",
+                    "updatedAt": null
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/categories/{id}": {
+      "get": {
+        "tags": [
+          "Insurance Categories"
+        ],
+        "summary": "Gets a single insurance category's detail.",
+        "description": "Any authenticated caller may call it - e.g. to show full detail after the citizen taps a\r\n            category in the wizard.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the category.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCategoryResponseDto"
+                },
+                "example": {
+                  "id": "ab358e29-e9b3-4677-a762-e556d9fe0301",
+                  "code": "GOVERNMENT_EMPLOYEE",
+                  "name": "Government Employee",
+                  "description": "Citizens employed by a government ministry or public authority.",
+                  "isActive": true,
+                  "displayOrder": 1,
+                  "requiredDocumentTypes": [
+                    "NationalId",
+                    "EmploymentLetter"
+                  ],
+                  "documentRequirements": [
+                    {
+                      "id": "6f1a2b3c-4d5e-6f70-8192-a3b4c5d6e7f8",
+                      "documentType": "EmploymentLetter",
+                      "displayName": "Employment Letter",
+                      "helpText": "A signed letter from your employer, dated within the last 3 months.",
+                      "sampleDocumentUrl": null,
+                      "displayOrder": 2,
+                      "isActive": true,
+                      "isMandatory": true
+                    }
+                  ],
+                  "minimumAge": 18,
+                  "maximumAge": null,
+                  "allowedMaritalStatuses": [ ],
+                  "guardianRequired": false,
+                  "dependentsAllowed": true,
+                  "createdAt": "2026-08-04T07:58:07Z",
+                  "updatedAt": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such category.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/eligibility/{patientId}": {
+      "get": {
+        "tags": [
+          "Insurance Eligibility"
+        ],
+        "summary": "Gets a patient's current insurance eligibility.",
+        "description": "Call this to display a citizen's eligibility state, e.g. on a case-review or status screen.\r\nRestricted to Doctor and Patient: a Doctor only a patient they have an existing visit with or are\r\nexplicitly assigned to; a Patient only their own record. Admin no longer has direct access here -\r\nuse GET /api/insurance/applications/{applicationId}/review, which includes the applicant's\r\ncurrent eligibility alongside everything else needed to review an application. An inaccessible\r\npatient returns the same 404 as a patient that doesn't exist at all. A patient who exists but has\r\nnever been checked also returns 404 - that's a normal, expected state, not an error.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the patient's current eligibility.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceEligibilityResponseDto"
+                },
+                "example": {
+                  "id": "4b3a2c1d-0e9f-8a7b-6c5d-4e3f2a1b0c9d",
+                  "patientId": 1,
+                  "patientFullName": "Ahmed Mohamed Ali Hassan",
+                  "patientNationalId": "29801011234567",
+                  "status": "Eligible",
+                  "reason": "Verified against Ministry of Health enrollment records.",
+                  "checkedAt": "2026-08-04T09:30:00Z",
+                  "checkedBy": 1,
+                  "remarks": null,
+                  "createdAt": "2026-08-04T09:30:00Z",
+                  "updatedAt": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, the caller has no access, or no eligibility record exists yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/enrollment/start": {
+      "post": {
+        "tags": [
+          "Insurance Enrollment Wizard"
+        ],
+        "summary": "Starts a new enrollment: Step 1 of the wizard, right after the citizen picks a category.",
+        "description": "Call this once the citizen has chosen a category from GET /api/insurance/categories. Creates a\r\nDraft InsuranceApplication and links it to a new InsuranceEnrollment row. Patient only. Rejects\r\nwith 409 if the patient already has a non-terminal application/enrollment - call GET /current\r\nfirst to check for one before showing the \"start\" screen.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartEnrollmentRequestDto"
+              },
+              "example": {
+                "insuranceCategoryId": "ab358e29-e9b3-4677-a762-e556d9fe0301"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartEnrollmentRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartEnrollmentRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Started. Returns the new enrollment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentResponseDto"
+                },
+                "example": {
+                  "id": "b6d64354-c4f2-4088-8ff7-aceaae471567",
+                  "patientId": 1,
+                  "insuranceCategory": {
+                    "code": "GOVERNMENT_EMPLOYEE",
+                    "name": "Government Employee"
+                  },
+                  "applicationId": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "applicationNumber": "APP-2026-00000008",
+                  "applicationStatus": "Draft",
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The category exists but is not currently active.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No insurance category with this id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The patient already has a non-terminal application - finish or cancel it first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/enrollment/current": {
+      "get": {
+        "tags": [
+          "Insurance Enrollment Wizard"
+        ],
+        "summary": "Gets the caller's current (non-terminal) enrollment, if any.",
+        "description": "Call this when the wizard screen loads, before deciding whether to show \"Apply for Health\r\nInsurance\" (404 = no active enrollment, start fresh) or resume an in-progress one (200 = resume\r\nat whichever step makes sense given the returned ApplicationStatus). Patient only.",
+        "responses": {
+          "200": {
+            "description": "Returns the current enrollment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentResponseDto"
+                },
+                "example": {
+                  "id": "b6d64354-c4f2-4088-8ff7-aceaae471567",
+                  "patientId": 1,
+                  "insuranceCategory": {
+                    "code": "GOVERNMENT_EMPLOYEE",
+                    "name": "Government Employee"
+                  },
+                  "applicationId": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "applicationNumber": "APP-2026-00000008",
+                  "applicationStatus": "Draft",
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No active enrollment - the citizen hasn't started one, or their last one is Approved/Rejected/Cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/enrollment/readiness": {
+      "get": {
+        "tags": [
+          "Insurance Enrollment Wizard"
+        ],
+        "summary": "Gets the readiness checklist for the caller's current enrollment: Step 4 of the wizard, to show\r\nupload progress.",
+        "description": "Call this after each document upload to refresh the checklist UI (e.g. checkmarks next to\r\nrequired documents). A 200 response with \"isReady\": false is the normal, expected state while\r\nthe citizen is still uploading - it is not an error. Patient only.",
+        "responses": {
+          "200": {
+            "description": "Returns the readiness result (isReady may be false - this is not an error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentReadinessResponseDto"
+                },
+                "example": {
+                  "isReady": false,
+                  "missingRequirements": [
+                    "Employment Letter is required."
+                  ],
+                  "missingDocumentTypes": [
+                    "EmploymentLetter"
+                  ],
+                  "isEligibleForCategory": true,
+                  "eligibilityViolations": [ ],
+                  "profileComplete": true,
+                  "dependentsValid": true,
+                  "documentsComplete": false,
+                  "applicationExists": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No active enrollment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/enrollment/summary": {
+      "get": {
+        "tags": [
+          "Insurance Enrollment Wizard"
+        ],
+        "summary": "Gets everything the Review step needs for the caller's current enrollment: Step 5 of the wizard.",
+        "description": "Call this once, right before showing the final Review screen, instead of calling\r\nProfile/Dependents/Documents/Readiness separately - it aggregates all of them in one response.\r\nPatient only.",
+        "responses": {
+          "200": {
+            "description": "Returns the enrollment summary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentSummaryResponseDto"
+                },
+                "example": {
+                  "enrollmentId": "b6d64354-c4f2-4088-8ff7-aceaae471567",
+                  "insuranceCategory": {
+                    "code": "GOVERNMENT_EMPLOYEE",
+                    "name": "Government Employee"
+                  },
+                  "profile": {
+                    "fullName": "Ahmed Mohamed Ali Hassan",
+                    "occupation": "Software Engineer"
+                  },
+                  "dependents": [ ],
+                  "documents": [
+                    {
+                      "documentType": "NationalId",
+                      "isCurrent": true
+                    }
+                  ],
+                  "missingDocumentTypes": [
+                    "EmploymentLetter"
+                  ],
+                  "applicationId": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "applicationNumber": "APP-2026-00000008",
+                  "applicationStatus": "Draft",
+                  "readiness": {
+                    "isReady": false,
+                    "missingRequirements": [
+                      "Employment Letter is required."
+                    ]
+                  },
+                  "warnings": [ ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No active enrollment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/enrollment/submit": {
+      "patch": {
+        "tags": [
+          "Insurance Enrollment Wizard"
+        ],
+        "summary": "Submits the caller's current enrollment for review, gated on readiness. The final action of the wizard.",
+        "description": "Call this from the Review screen's \"Submit\" button. Checks readiness first; if not ready, returns\r\n400 with a structured \"missingRequirements\" array describing exactly what's missing/invalid, e.g.\r\n`{\"missingRequirements\":[\"National ID is required.\",\"Minimum age for Student is 18 (you are 16).\"]}`\r\n- render these directly to the citizen. Only when ready does it actually submit. Patient only.\r\nPrefer this endpoint over calling PATCH /api/insurance/applications/{id}/submit directly - both\r\nnow enforce the same readiness rules, but only this one returns the structured breakdown.",
+        "responses": {
+          "200": {
+            "description": "Submitted. Returns the updated enrollment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentResponseDto"
+                },
+                "example": {
+                  "id": "b6d64354-c4f2-4088-8ff7-aceaae471567",
+                  "patientId": 1,
+                  "insuranceCategory": {
+                    "code": "GOVERNMENT_EMPLOYEE",
+                    "name": "Government Employee"
+                  },
+                  "applicationId": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "applicationNumber": "APP-2026-00000008",
+                  "applicationStatus": "Draft",
+                  "createdAt": "2026-08-04T08:00:50Z",
+                  "correlationId": "1cbb4b4c-575a-458b-bbbb-c6c4b0ae3807"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not ready for submission - see \"missingRequirements\" in the response body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not a Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No active enrollment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The application is not currently in Draft (e.g. already submitted).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/status/{patientId}": {
+      "get": {
+        "tags": [
+          "Insurance Status Tracking"
+        ],
+        "summary": "Gets a patient's aggregated insurance status timeline in one call.",
+        "description": "Call this once to populate a citizen's insurance status dashboard, instead of calling Insurance\r\nApplications, Insurance Eligibility, Insurance Verification, and Documents separately. Access is\r\nAdmin (any patientId) or the Patient themselves (own patientId only) - no Doctor access.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the status timeline.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceStatusResponseDto"
+                },
+                "example": {
+                  "patientId": 1,
+                  "currentApplicationNumber": "APP-2026-00000015",
+                  "currentApplicationId": "d7d50a04-df4a-4826-9b5f-5c737a51d32a",
+                  "currentApplicationStatus": "UnderReview",
+                  "timeline": [
+                    {
+                      "stageName": "Submitted",
+                      "isComplete": true,
+                      "timestamp": "2026-08-04T09:00:00Z"
+                    },
+                    {
+                      "stageName": "UnderReview",
+                      "isComplete": true,
+                      "timestamp": "2026-08-04T09:05:00Z"
+                    },
+                    {
+                      "stageName": "Decision",
+                      "isComplete": false,
+                      "timestamp": null
+                    }
+                  ],
+                  "eligibilityStatus": "Eligible",
+                  "verificationStatus": "Verified",
+                  "documentCount": 2
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, or the caller has no access to this patientId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/verification/{patientId}/latest": {
+      "get": {
+        "tags": [
+          "Insurance Verification"
+        ],
+        "summary": "Gets a patient's most recent insurance verification, regardless of whether it's still valid.",
+        "description": "Restricted to Doctor and Patient: a Doctor only a patient they have an existing visit with or are\r\nexplicitly assigned to; a Patient only their own record. Admin no longer has direct access here -\r\nuse GET /api/insurance/applications/{applicationId}/review, which includes the applicant's most\r\nrecent verification alongside everything else needed to review an application.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the most recent verification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceVerificationResponseDto"
+                },
+                "example": {
+                  "id": "6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a",
+                  "patientId": 1,
+                  "patientFullName": "Ahmed Mohamed Ali Hassan",
+                  "patientNationalId": "29801011234567",
+                  "status": "Verified",
+                  "context": "CheckIn",
+                  "source": "Manual",
+                  "reason": "Confirmed active coverage via national insurance portal.",
+                  "remarks": null,
+                  "verifiedAt": "2026-08-04T10:00:00Z",
+                  "expiresAt": "2026-08-05T10:00:00Z",
+                  "verifiedBy": 1,
+                  "correlationId": "5c4b3a2f-1e0d-9c8b-7a6f-5e4d3c2b1a0f",
+                  "isCurrentlyValid": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, the caller has no access, or no verification exists yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/verification/current/{patientId}": {
+      "get": {
+        "tags": [
+          "Insurance Verification"
+        ],
+        "summary": "Gets a patient's currently valid insurance verification, if one exists.",
+        "description": "Call this to gate an action on \"is this patient's insurance usable right now\" - unlike \"latest\",\r\nthis does not simply return the most recent row, it applies the same validity rule\r\n(Status = Verified and not yet expired) everywhere else in this API. If the most recent\r\nverification is stale, not verified, or pending, this returns 404 even though \"latest\" would\r\nstill return that row.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the currently valid verification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceVerificationResponseDto"
+                },
+                "example": {
+                  "id": "6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a",
+                  "patientId": 1,
+                  "patientFullName": "Ahmed Mohamed Ali Hassan",
+                  "patientNationalId": "29801011234567",
+                  "status": "Verified",
+                  "context": "CheckIn",
+                  "source": "Manual",
+                  "reason": "Confirmed active coverage via national insurance portal.",
+                  "remarks": null,
+                  "verifiedAt": "2026-08-04T10:00:00Z",
+                  "expiresAt": "2026-08-05T10:00:00Z",
+                  "verifiedBy": 1,
+                  "correlationId": "5c4b3a2f-1e0d-9c8b-7a6f-5e4d3c2b1a0f",
+                  "isCurrentlyValid": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, the caller has no access, or no currently valid verification exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/verification/{patientId}/history": {
+      "get": {
+        "tags": [
+          "Insurance Verification"
+        ],
+        "summary": "Gets a patient's full insurance verification history, newest first.",
+        "description": "Same access policy as the other read endpoints in this controller.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the verification history (empty list if none).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InsuranceVerificationResponseDto"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a",
+                    "patientId": 1,
+                    "patientFullName": "Ahmed Mohamed Ali Hassan",
+                    "patientNationalId": "29801011234567",
+                    "status": "Verified",
+                    "context": "CheckIn",
+                    "source": "Manual",
+                    "reason": "Confirmed active coverage via national insurance portal.",
+                    "remarks": null,
+                    "verifiedAt": "2026-08-04T10:00:00Z",
+                    "expiresAt": "2026-08-05T10:00:00Z",
+                    "verifiedBy": 1,
+                    "correlationId": "5c4b3a2f-1e0d-9c8b-7a6f-5e4d3c2b1a0f",
+                    "isCurrentlyValid": true
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, or the caller has no access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddDependentRequestDto": {
+        "required": [
+          "dateOfBirth",
+          "firstName",
+          "fourthName",
+          "gender",
+          "relationshipType",
+          "secondName",
+          "thirdName"
+        ],
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Required, max 50 characters.",
+            "example": "Youssef"
+          },
+          "secondName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Required, max 50 characters.",
+            "example": "Ahmed"
+          },
+          "thirdName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Required, max 50 characters.",
+            "example": "Mohamed"
+          },
+          "fourthName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Required, max 50 characters.",
+            "example": "Hassan"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "Required.",
+            "format": "date",
+            "example": "2015-03-20"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "nationalId": {
+            "pattern": "^\\d{14}$",
+            "type": "string",
+            "description": "Optional - a dependent (especially a young child) may not have a National ID yet. If\r\n            provided, must be exactly 14 digits.",
+            "nullable": true
+          },
+          "relationshipType": {
+            "$ref": "#/components/schemas/RelationshipType"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for registering a dependent. Creates a DependentPerson and its FamilyRelationship to\r\nthe caller together, in one call - a dependent never exists without a sponsor."
+      },
+      "ApplicationDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "applicationNumber": {
+            "type": "string",
+            "nullable": true,
+            "example": "APP-2026-00000015"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "submissionChannel": {
+            "$ref": "#/components/schemas/SubmissionChannel"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reviewedBy": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "eligibilityStatusSnapshot": {
+            "$ref": "#/components/schemas/EligibilityStatus"
+          },
+          "verificationStatusSnapshot": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "documentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dependentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationReviewResponseDto"
+            },
+            "description": "Newest first. InternalNotes on each entry is populated only for an Admin caller - a\r\n            Patient caller sees null there.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Full application detail, including its review history."
+      },
+      "ApplicationResponseDto": {
+        "type": "object",
+        "properties": {
+          "applicationNumber": {
+            "type": "string",
+            "description": "Human-readable reference, e.g. \"APP-2026-00000015\" - the primary reference to show\r\n            users. Id (below) remains the internal identifier used by every other endpoint in this\r\n            controller (submit/cancel/review/detail).",
+            "nullable": true,
+            "example": "APP-2026-00000015"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "submissionChannel": {
+            "$ref": "#/components/schemas/SubmissionChannel"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "Null while still Draft.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reviewedBy": {
+            "type": "integer",
+            "description": "AdminId of whoever most recently reviewed this. Null until the first review.",
+            "format": "int32",
+            "nullable": true
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionReason": {
+            "type": "string",
+            "description": "Citizen-visible reason for the final decision - set only once Status becomes Approved or\r\n            Rejected.",
+            "nullable": true
+          },
+          "eligibilityStatusSnapshot": {
+            "$ref": "#/components/schemas/EligibilityStatus"
+          },
+          "verificationStatusSnapshot": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "documentCount": {
+            "type": "integer",
+            "description": "Number of documents captured in this application's snapshot at submission time.",
+            "format": "int32",
+            "example": 2
+          },
+          "dependentCount": {
+            "type": "integer",
+            "description": "Number of dependents captured in this application's snapshot at submission time.",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false,
+        "description": "An insurance application's current state."
+      },
+      "ApplicationReviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "previousStatus": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "newStatus": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "reviewOutcome": {
+            "$ref": "#/components/schemas/ReviewOutcome"
+          },
+          "reviewedBy": {
+            "type": "integer",
+            "description": "AdminId of whoever performed this review.",
+            "format": "int32",
+            "example": 1
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "citizenVisibleReason": {
+            "type": "string",
+            "description": "Shown to the citizen. Required at the service level when NewStatus is Rejected.",
+            "nullable": true,
+            "example": "All required documents verified."
+          },
+          "internalNotes": {
+            "type": "string",
+            "description": "Set only when the caller is Admin - null for a Patient caller, enforced in the\r\n            service.",
+            "nullable": true,
+            "example": "Employment letter confirmed with HR department."
+          }
+        },
+        "additionalProperties": false,
+        "description": "A single review action taken on an application."
+      },
+      "ApplicationStatus": {
+        "enum": [
+          "Draft",
+          "Submitted",
+          "UnderReview",
+          "WaitingForDocuments",
+          "Approved",
+          "Rejected",
+          "Cancelled"
+        ],
+        "type": "string",
+        "description": "Lifecycle state of an insurance application. Values: Draft, Submitted, UnderReview,\r\nWaitingForDocuments, Approved, Rejected, Cancelled. Valid transitions (see\r\nInsuranceApplicationService.AllowedTransitions): Draft -> Submitted -> UnderReview ->\r\nWaitingForDocuments -> UnderReview -> Approved/Rejected, and Draft/Submitted/UnderReview/\r\nWaitingForDocuments -> Cancelled. Approved, Rejected, and Cancelled are terminal - no outgoing\r\ntransitions."
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The JWT bearer token. Pass it in Swagger's Authorize dialog, or in an\r\n            \"Authorization: Bearer <token>\" header on every other call.",
+            "nullable": true,
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "expiresAtUtc": {
+            "type": "string",
+            "description": "UTC expiry of the token - the frontend should re-authenticate (log in again) once past\r\n            this time.",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "Internal numeric id of the account (Patient, Doctor, or Admin row).",
+            "format": "int32",
+            "example": 1
+          },
+          "nationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "example": "ahmed.hassan"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Response returned after a successful register, login, or test-token request."
+      },
+      "CardResponseDto": {
+        "type": "object",
+        "properties": {
+          "cardNumber": {
+            "type": "string",
+            "description": "Human-readable reference, e.g. \"INS-2026-00000015\" - the primary reference to show\r\n            users. Id (below) remains the internal identifier used by every other endpoint in this\r\n            controller.",
+            "nullable": true,
+            "example": "INS-2026-00000015"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "description": "The sponsor/owning account - always set, even when the card belongs to a\r\n            dependent.",
+            "format": "int32",
+            "example": 1
+          },
+          "dependentPersonId": {
+            "type": "string",
+            "description": "Null = this card belongs to the Patient themself. Set = belongs to that specific\r\n            dependent.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "holderFullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CardStatus"
+          },
+          "isCurrentlyValid": {
+            "type": "boolean",
+            "description": "Computed at read time: Status == Active && DateTime.UtcNow <= ExpiresAt."
+          },
+          "issueReason": {
+            "$ref": "#/components/schemas/IssueReason"
+          },
+          "version": {
+            "type": "integer",
+            "description": "Layout/schema version of this card row. Always 1 today - reserved for future card-layout\r\n            changes.",
+            "format": "int32",
+            "example": 1
+          },
+          "cardTemplate": {
+            "type": "string",
+            "description": "Reserved for future card layouts. Always null today.",
+            "nullable": true
+          },
+          "tokenVersion": {
+            "type": "integer",
+            "description": "Confirms a rotation succeeded without exposing the token itself - VerificationToken\r\n            remains permanently excluded from every response.",
+            "format": "int32",
+            "example": 1
+          },
+          "replacementReason": {
+            "$ref": "#/components/schemas/ReplacementReason"
+          },
+          "reasonNote": {
+            "type": "string",
+            "description": "Optional free-text note accompanying ReplacementReason.",
+            "nullable": true
+          },
+          "predecessorCardId": {
+            "type": "string",
+            "description": "The card this one superseded via Renew/Replace - null for a card issued via Issue.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "successorCardId": {
+            "type": "string",
+            "description": "The card that superseded this one, if any - resolved at read time, not stored.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "isLatestCard": {
+            "type": "boolean",
+            "description": "True when SuccessorCardId is null - avoids requiring every client to check for null\r\n            themselves."
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "IssuedAt plus the configured DefaultValidityMonths (12 months by default), computed once\r\n            at issuance and never recomputed.",
+            "format": "date-time"
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "The Approved application that authorized this issuance.",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A digital insurance card's current state. VerificationToken is deliberately never\r\n            included here - it is the opaque secret embedded in the card's QR/NFC payload."
+      },
+      "CardStatus": {
+        "enum": [
+          "Active",
+          "Suspended",
+          "Revoked",
+          "Superseded"
+        ],
+        "type": "string",
+        "description": "Closed set of Digital Insurance Card states. Values: Active, Suspended, Revoked, Superseded.\r\nDeliberately no \"Expired\" value - expiry is derived at read/verify time from ExpiresAt, never a\r\nstored status flip. Superseded is system-set only, when a replacement/renewal card is issued - never\r\na client-requested transition."
+      },
+      "CategoryDocumentRequirementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "6f1a2b3c-4d5e-6f70-8192-a3b4c5d6e7f8"
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Resolved label: the Admin-configured DisplayName, or a static fallback derived from\r\n            DocumentType when none was set.",
+            "nullable": true,
+            "example": "Employment Letter"
+          },
+          "helpText": {
+            "type": "string",
+            "description": "Short inline guidance shown next to the upload field in the enrollment wizard. Null if\r\n            not configured.",
+            "nullable": true,
+            "example": "A signed letter from your employer, dated within the last 3 months."
+          },
+          "sampleDocumentUrl": {
+            "type": "string",
+            "description": "Optional link to an example/template document. Null if not configured.",
+            "nullable": true,
+            "example": "https://example.gov.eg/samples/employment-letter.png"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "description": "Sort order among the category's requirements, ascending.",
+            "format": "int32",
+            "example": 2
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False = soft-disabled - excluded from RequiredDocumentTypes and readiness checks."
+          },
+          "isMandatory": {
+            "type": "boolean",
+            "description": "False = Optional - shown to the citizen but never blocks readiness/submission."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Full detail of a single required document row on an insurance category - the Admin\r\n            management view (unlike InsuranceCategoryResponseDto.RequiredDocumentTypes, which is the plain,\r\n            citizen-facing, active+mandatory-only list)."
+      },
+      "CitizenDocumentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dependentPersonId": {
+            "type": "string",
+            "description": "Set when this document is about a specific dependent rather than the uploading citizen\r\n            themselves (e.g. a dependent's own birth certificate). Null = the citizen's own document.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "documentNumber": {
+            "type": "string",
+            "description": "The number printed on the physical document. Optional, no format validation.",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true,
+            "example": "national_id_front.pdf"
+          },
+          "fileUrl": {
+            "type": "string",
+            "description": "Secure (HTTPS) Cloudinary URL - the download link.",
+            "nullable": true,
+            "example": "https://res.cloudinary.com/medical-system/raw/upload/v1/documents/national_id_front.pdf"
+          },
+          "fileType": {
+            "type": "string",
+            "description": "MIME type of the uploaded file - one of application/pdf, image/jpeg, image/png.",
+            "nullable": true,
+            "example": "application/pdf"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "Size in bytes. Max 10 MB (10,485,760 bytes) at upload time.",
+            "format": "int64",
+            "example": 245760
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Optional, citizen-supplied - e.g. a National ID's printed expiry date.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reviewStatus": {
+            "$ref": "#/components/schemas/DocumentReviewStatus"
+          },
+          "reviewedBy": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rejectionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCurrent": {
+            "type": "boolean",
+            "description": "True if this is the most recent upload of its DocumentType for its\r\n            (PatientId, DependentPersonId) - computed by the service, never the client. An earlier upload of\r\n            the same type is still visible in history (false) but no longer counts toward enrollment\r\n            readiness."
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A single insurance-application document."
+      },
+      "DependentResponseDto": {
+        "type": "object",
+        "properties": {
+          "dependentPersonId": {
+            "type": "string",
+            "description": "The dependent's own identity id - distinct from RelationshipId below.",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Youssef Ahmed Mohamed Hassan"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "Null if the dependent doesn't have one registered yet.",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/DependentStatus"
+          },
+          "relationshipId": {
+            "type": "string",
+            "description": "Id of the sponsor-to-dependent relationship row - use this (not DependentPersonId) with\r\n            the End Relationship endpoint.",
+            "format": "uuid"
+          },
+          "relationshipType": {
+            "$ref": "#/components/schemas/RelationshipType"
+          },
+          "isPrimarySponsor": {
+            "type": "boolean",
+            "description": "True if this sponsor was the first to register this dependent."
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedAt": {
+            "type": "string",
+            "description": "Null while the relationship is active. Set once ended - the relationship row is never\r\n            deleted, only ended.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Computed: true when EndedAt is null."
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A dependent, joined with the sponsor's relationship to them."
+      },
+      "DependentStatus": {
+        "enum": [
+          "Active",
+          "Inactive",
+          "Deceased"
+        ],
+        "type": "string",
+        "description": "A dependent's own life/record status. Values: Active, Inactive, Deceased. No business rules\r\n            are enforced around this yet - the field exists for future workflows to build on; new dependents\r\n            always start as Active."
+      },
+      "DocumentReviewStatus": {
+        "enum": [
+          "Pending",
+          "Approved",
+          "Rejected"
+        ],
+        "type": "string",
+        "description": "A document's review outcome. Values: Pending, Approved, Rejected. Exists to prepare CitizenDocument's\r\nschema for a future document-review capability - no endpoint today sets anything other than the\r\ndefault (Pending), so a frontend should not expect to see Approved/Rejected yet."
+      },
+      "DocumentType": {
+        "enum": [
+          "NationalId",
+          "BirthCertificate",
+          "MarriageCertificate",
+          "EmploymentLetter",
+          "DisabilityCertificate",
+          "DeathCertificate",
+          "GuardianAuthorization",
+          "FamilyRegistration"
+        ],
+        "type": "string",
+        "description": "Closed set of insurance-application document types. Values: NationalId, BirthCertificate,\r\nMarriageCertificate, EmploymentLetter, DisabilityCertificate, DeathCertificate,\r\nGuardianAuthorization, FamilyRegistration. Deliberately no generic \"Other\" value - a new\r\ndocument type gets its own enum value later, matching the approach already taken for VerificationContext."
+      },
+      "EligibilityStatus": {
+        "enum": [
+          "Eligible",
+          "NotEligible",
+          "PendingReview",
+          "Suspended",
+          "Expired"
+        ],
+        "type": "string",
+        "description": "A citizen's national health insurance eligibility outcome. Values: Eligible, NotEligible,\r\n            PendingReview, Suspended, Expired."
+      },
+      "EnrollmentReadinessResponseDto": {
+        "type": "object",
+        "properties": {
+          "isReady": {
+            "type": "boolean",
+            "description": "True only when every check below passes. This is the single flag that gates\r\n            Submit."
+          },
+          "missingRequirements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Human-readable, combines missing documents and eligibility violations - render this list\r\n            directly to the citizen (e.g. as a bullet list of what's still needed).",
+            "nullable": true,
+            "example": [
+              "Employment Letter is required."
+            ]
+          },
+          "missingDocumentTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentType"
+            },
+            "description": "Machine-readable subset of MissingRequirements - the specific DocumentTypes still not\r\n            uploaded.",
+            "nullable": true
+          },
+          "isEligibleForCategory": {
+            "type": "boolean",
+            "description": "False if the citizen's age or marital status doesn't meet the category's eligibility\r\n            rule, or the category disallows dependents and the citizen has one."
+          },
+          "eligibilityViolations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The eligibility-specific subset of MissingRequirements (e.g. age/marital-status\r\n            violations).",
+            "nullable": true
+          },
+          "profileComplete": {
+            "type": "boolean",
+            "description": "False if required CitizenProfile fields (occupation, marital status, nationality,\r\n            emergency contact) are missing."
+          },
+          "dependentsValid": {
+            "type": "boolean",
+            "description": "False only if a structural data-integrity problem exists among the citizen's active\r\n            dependents - effectively always true in normal use."
+          },
+          "documentsComplete": {
+            "type": "boolean",
+            "description": "False if any of the category's required document types hasn't been uploaded yet."
+          },
+          "applicationExists": {
+            "type": "boolean",
+            "description": "False if there is no active enrollment/application to check at all."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Structured result of an enrollment readiness check - never thrown as an exception, always a\r\npopulated result (see EnrollmentReadinessService). MissingRequirements combines missing documents\r\nand eligibility violations into one human-readable list; MissingDocumentTypes/EligibilityViolations\r\nbreak that same information out for a frontend that wants to render the two kinds of issue separately."
+      },
+      "EnrollmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "b6d64354-c4f2-4088-8ff7-aceaae471567"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "insuranceCategory": {
+            "$ref": "#/components/schemas/InsuranceCategoryResponseDto"
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "The Draft InsuranceApplication created alongside this enrollment - use this Id with the\r\n            Insurance Applications endpoints if you ever need to bypass the wizard.",
+            "format": "uuid"
+          },
+          "applicationNumber": {
+            "type": "string",
+            "description": "Human-readable reference, e.g. \"APP-2026-00000015\".",
+            "nullable": true,
+            "example": "APP-2026-00000008"
+          },
+          "applicationStatus": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Cross-domain tracing id, useful when correlating with audit logs.",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false,
+        "description": "An insurance enrollment - the category chosen for the citizen's current application attempt."
+      },
+      "EnrollmentSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "enrollmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "insuranceCategory": {
+            "$ref": "#/components/schemas/InsuranceCategoryResponseDto"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ProfileResponseDto"
+          },
+          "dependents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DependentResponseDto"
+            },
+            "description": "The citizen's registered dependents - same shape as GET /api/insurance/dependents/{patientId}.",
+            "nullable": true
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CitizenDocumentResponseDto"
+            },
+            "description": "The citizen's uploaded documents - same shape as GET /api/insurance/documents/{patientId}.",
+            "nullable": true
+          },
+          "missingDocumentTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentType"
+            },
+            "description": "Document types still required but not yet uploaded - same list as\r\n            EnrollmentReadinessResponseDto.MissingDocumentTypes.",
+            "nullable": true
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationNumber": {
+            "type": "string",
+            "nullable": true,
+            "example": "APP-2026-00000008"
+          },
+          "applicationStatus": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "readiness": {
+            "$ref": "#/components/schemas/EnrollmentReadinessResponseDto"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Non-blocking notices - e.g. a category with no configured requirements, or a\r\n            GuardianRequired category awaiting manual Admin review. Safe to show as informational banners;\r\n            they never prevent Submit.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Everything the frontend needs for the enrollment wizard's Review step, in one call. Purely an\r\naggregation of existing modules (Profile/Dependents/Documents, reused as-is) plus the enrollment's own\r\ncategory and readiness - duplicates no data."
+      },
+      "Gender": {
+        "enum": [
+          "Male",
+          "Female"
+        ],
+        "type": "string",
+        "description": "Biological gender of a patient."
+      },
+      "InsuranceCategoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "ab358e29-e9b3-4677-a762-e556d9fe0301"
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable machine key, unique across all categories - not shown directly to\r\n            citizens.",
+            "nullable": true,
+            "example": "GOVERNMENT_EMPLOYEE"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name shown to citizens in the wizard.",
+            "nullable": true,
+            "example": "Government Employee"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Citizens employed by a government ministry or public authority."
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False = the category is soft-disabled and no longer selectable for new enrollments (it\r\n            still appears on any enrollment that already used it)."
+          },
+          "displayOrder": {
+            "type": "integer",
+            "description": "Sort order for displaying categories in a list, ascending.",
+            "format": "int32",
+            "example": 1
+          },
+          "requiredDocumentTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentType"
+            },
+            "description": "Every DocumentType the citizen must upload to be ready to submit under this category -\r\n            active and mandatory requirements only.",
+            "nullable": true
+          },
+          "documentRequirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryDocumentRequirementDto"
+            },
+            "description": "Full detail for every requirement, including inactive/optional ones - the Admin\r\n            management and Preview view. RequiredDocumentTypes above is the filtered subset of this list.",
+            "nullable": true
+          },
+          "minimumAge": {
+            "type": "integer",
+            "description": "Null = no minimum age.",
+            "format": "int32",
+            "nullable": true,
+            "example": 18
+          },
+          "maximumAge": {
+            "type": "integer",
+            "description": "Null = no maximum age.",
+            "format": "int32",
+            "nullable": true
+          },
+          "allowedMaritalStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaritalStatus"
+            },
+            "description": "Empty = no marital-status restriction. Non-empty means the citizen's profile\r\n            MaritalStatus must be one of these values.",
+            "nullable": true
+          },
+          "guardianRequired": {
+            "type": "boolean",
+            "description": "Informational only - not automatically enforced (there's no automated way to verify a\r\n            guardian relationship). Shown as a manual-review note during Admin review instead."
+          },
+          "dependentsAllowed": {
+            "type": "boolean",
+            "description": "False means an applicant with any active dependent cannot use this category."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "An insurance enrollment category and the criteria configured for it."
+      },
+      "InsuranceEligibilityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "patientFullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "patientNationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EligibilityStatus"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "example": "Verified against Ministry of Health enrollment records."
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedBy": {
+            "type": "integer",
+            "description": "AdminId of whoever recorded this decision.",
+            "format": "int32",
+            "example": 1
+          },
+          "remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Null if this is the first decision ever recorded for this patient.",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "A patient's current national health insurance eligibility state."
+      },
+      "InsuranceStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "patientId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "currentApplicationNumber": {
+            "type": "string",
+            "description": "Human-readable reference of the patient's most recent application. Null if they've\r\n            never applied.",
+            "nullable": true,
+            "example": "APP-2026-00000015"
+          },
+          "currentApplicationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "currentApplicationStatus": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineStageDto"
+            },
+            "description": "Ordered stages of the application's progress, for rendering a visual progress\r\n            tracker.",
+            "nullable": true
+          },
+          "eligibilityStatus": {
+            "$ref": "#/components/schemas/EligibilityStatus"
+          },
+          "verificationStatus": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "documentCount": {
+            "type": "integer",
+            "description": "Total number of documents the patient has on file.",
+            "format": "int32",
+            "example": 2
+          }
+        },
+        "additionalProperties": false,
+        "description": "Citizen-facing insurance status timeline - a read-only aggregation over the patient's most recent\r\nInsuranceApplication, InsuranceEligibility, InsuranceVerification, and CitizenDocuments. Never\r\nincludes ApplicationReview.InternalNotes - see InsuranceStatusService."
+      },
+      "InsuranceVerificationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "patientFullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "patientNationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "status": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "context": {
+            "$ref": "#/components/schemas/VerificationContext"
+          },
+          "source": {
+            "$ref": "#/components/schemas/VerificationSource"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "example": "Confirmed active coverage via national insurance portal."
+          },
+          "remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Set only when Status is Verified - computed from\r\n            Insurance:Verification:DefaultValidityHours (24 hours by default) at the moment of\r\n            verification.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "verifiedBy": {
+            "type": "integer",
+            "description": "DoctorId or AdminId of whoever performed this verification.",
+            "format": "int32",
+            "example": 1
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isCurrentlyValid": {
+            "type": "boolean",
+            "description": "Computed by the service, never the client: true when Status is Verified and ExpiresAt\r\n            (if set) has not yet passed."
+          }
+        },
+        "additionalProperties": false,
+        "description": "A single insurance verification event."
+      },
+      "IssueReason": {
+        "enum": [
+          "Initial",
+          "Renewal",
+          "Replacement",
+          "Dependent",
+          "Migration"
+        ],
+        "type": "string",
+        "description": "Why a specific card row was issued. Values: Initial (first card for the primary applicant),\r\nRenewal (via POST .../renew), Replacement (via POST .../replace), Dependent (first card for a\r\ndependent), Migration (reserved for future bulk data-migration scenarios)."
+      },
+      "LoginRequestDto": {
+        "required": [
+          "nationalId",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "minLength": 1,
+            "pattern": "^\\d{14}$",
+            "type": "string",
+            "description": "Egyptian National ID of the account to log in as. Required, exactly 14\r\n            digits.",
+            "example": "29801011234567"
+          },
+          "password": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Account password, in plain text over HTTPS. Required.",
+            "example": "SecurePass@123"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for logging in. Works for any role (Patient, Doctor, Admin)."
+      },
+      "MaritalStatus": {
+        "enum": [
+          "Single",
+          "Married",
+          "Divorced",
+          "Widowed"
+        ],
+        "type": "string",
+        "description": "Marital status, part of a Patient's CitizenProfile. Values: Single, Married, Divorced,\r\n            Widowed. Also used by Insurance Categories to restrict which marital statuses may enroll under a\r\n            given category (e.g. the \"Widow\" category requires Widowed)."
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "nationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "example": "ahmed.hassan"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "role": {
+            "type": "string",
+            "description": "\"Patient\", \"Doctor\", or \"Admin\", read directly from the JWT's role claim.",
+            "nullable": true,
+            "example": "Patient"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Response for GET /api/auth/me, reflecting the claims present in the caller's JWT."
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "ProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "patientId": {
+            "type": "integer",
+            "description": "Read-only. Internal numeric id of the Patient account.",
+            "format": "int32",
+            "example": 1
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "Read-only. Set at registration, never editable here.",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "username": {
+            "type": "string",
+            "description": "Read-only. Set at registration, never editable here.",
+            "nullable": true,
+            "example": "ahmed.hassan"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Read-only. Computed from the four Patient name parts.",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "Read-only.",
+            "format": "date"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "mobileNumber": {
+            "type": "string",
+            "description": "Read-only.",
+            "nullable": true,
+            "example": "01012345678"
+          },
+          "governorate": {
+            "type": "string",
+            "description": "Read-only.",
+            "nullable": true,
+            "example": "Cairo"
+          },
+          "district": {
+            "type": "string",
+            "description": "Read-only.",
+            "nullable": true,
+            "example": "Nasr City"
+          },
+          "email": {
+            "type": "string",
+            "description": "Read-only. May be null - registration does not require an email.",
+            "nullable": true,
+            "example": "ahmed.hassan@example.com"
+          },
+          "address": {
+            "type": "string",
+            "description": "Read-only.",
+            "nullable": true,
+            "example": "12 El Nasr Street, Nasr City, Cairo"
+          },
+          "occupation": {
+            "type": "string",
+            "description": "Editable. Null if never set.",
+            "nullable": true,
+            "example": "Software Engineer"
+          },
+          "maritalStatus": {
+            "$ref": "#/components/schemas/MaritalStatus"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "Editable. Null if never set.",
+            "nullable": true,
+            "example": "Egyptian"
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "description": "Editable. Null if never set.",
+            "nullable": true,
+            "example": "Arabic"
+          },
+          "emergencyContactName": {
+            "type": "string",
+            "description": "Editable. Null if never set.",
+            "nullable": true,
+            "example": "Mona Ali Hassan"
+          },
+          "emergencyContactPhone": {
+            "type": "string",
+            "description": "Editable. Null if never set.",
+            "nullable": true,
+            "example": "01098765432"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Read-only. When the underlying CitizenProfile row was first created (automatically, at\r\n            registration).",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Read-only. Null until the first PUT /api/profile call.",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Response for GET/PUT /api/profile: read-only Patient identity plus the editable CitizenProfile\r\nfields. Patient identity fields (NationalId, Username, DateOfBirth, Gender, MobileNumber,\r\nGovernorate, District, Email, Address) are managed exclusively by Patient/Registration and are\r\nnever editable through this endpoint."
+      },
+      "RegisterRequestDto": {
+        "required": [
+          "address",
+          "dateOfBirth",
+          "district",
+          "firstName",
+          "fourthName",
+          "gender",
+          "governorate",
+          "mobileNumber",
+          "nationalId",
+          "password",
+          "secondName",
+          "thirdName",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "minLength": 1,
+            "pattern": "^\\d{14}$",
+            "type": "string",
+            "description": "Egyptian National ID. Required, exactly 14 digits, must be unique across all\r\n            accounts.",
+            "example": "29801011234567"
+          },
+          "firstName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "First given name. Required, max 50 characters.",
+            "example": "Ahmed"
+          },
+          "secondName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Second name (typically the father's name). Required, max 50 characters.",
+            "example": "Mohamed"
+          },
+          "thirdName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Third name (typically the grandfather's name). Required, max 50 characters.",
+            "example": "Ali"
+          },
+          "fourthName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Fourth name (typically the family name). Required, max 50 characters.",
+            "example": "Hassan"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "Date of birth. Required.",
+            "format": "date",
+            "example": "1998-01-01"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "mobileNumber": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Egyptian mobile number. Required, must be a valid phone number.",
+            "format": "tel",
+            "example": "01012345678"
+          },
+          "governorate": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "description": "Required, max 100 characters.",
+            "example": "Cairo"
+          },
+          "district": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "description": "Required, max 100 characters.",
+            "example": "Nasr City"
+          },
+          "email": {
+            "type": "string",
+            "description": "Optional. When provided, must be a valid email address.",
+            "format": "email",
+            "nullable": true,
+            "example": "ahmed.hassan@example.com"
+          },
+          "address": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string",
+            "description": "Full street address. Required, max 300 characters.",
+            "example": "12 El Nasr Street, Nasr City, Cairo"
+          },
+          "username": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string",
+            "description": "Login username. Required, max 50 characters, must be unique across all accounts.",
+            "example": "ahmed.hassan"
+          },
+          "password": {
+            "minLength": 1,
+            "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
+            "type": "string",
+            "description": "Plain-text password, hashed with BCrypt before being persisted - never stored or returned in\r\nplain text. Required: at least 8 characters, including letters, numbers, and at least one\r\nspecial character.",
+            "example": "SecurePass@123"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for patient self-registration. The resulting account is always created with role \"Patient\"."
+      },
+      "RelationshipType": {
+        "enum": [
+          "Spouse",
+          "Child",
+          "Parent",
+          "Guardian"
+        ],
+        "type": "string",
+        "description": "Closed set of family relationship types between a sponsoring Patient and a DependentPerson.\r\n            Values: Spouse, Child, Parent, Guardian."
+      },
+      "ReplacementReason": {
+        "enum": [
+          "Lost",
+          "Damaged",
+          "Stolen",
+          "Other"
+        ],
+        "type": "string",
+        "description": "Closed, structured reason captured on a card issued via Replace. Values: Lost, Damaged, Stolen,\r\nOther. \"Other\" plus the optional free-text ReasonNote covers anything not worth its own enum value."
+      },
+      "ReviewOutcome": {
+        "enum": [
+          "Approved",
+          "Rejected",
+          "NeedMoreDocuments"
+        ],
+        "type": "string",
+        "description": "The business decision behind a review action. Values: Approved, Rejected, NeedMoreDocuments.\r\nDistinct from ApplicationReview.NewStatus (the workflow-engine state) - this field is null on a\r\nreview row that just moves the application into UnderReview (e.g. picked up for review, or moved\r\nback from WaitingForDocuments) since there's no concluded outcome yet. Computed by\r\nInsuranceApplicationService from the requested NewStatus, never client-supplied directly."
+      },
+      "StartEnrollmentRequestDto": {
+        "required": [
+          "insuranceCategoryId"
+        ],
+        "type": "object",
+        "properties": {
+          "insuranceCategoryId": {
+            "type": "string",
+            "description": "Required. The Id of an active InsuranceCategory (from GET /api/insurance/categories) to\r\n            enroll under.",
+            "format": "uuid",
+            "example": "ab358e29-e9b3-4677-a762-e556d9fe0301"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for POST /api/insurance/enrollment/start."
+      },
+      "SubmissionChannel": {
+        "enum": [
+          "WebPortal",
+          "MobileApp",
+          "AdminPortal",
+          "Kiosk",
+          "GovernmentImport"
+        ],
+        "type": "string",
+        "description": "Where an application was submitted from. Values: WebPortal, MobileApp, AdminPortal, Kiosk,\r\nGovernmentImport. Only WebPortal is produced today - the only intake path this API exposes; the\r\nother values are reserved for future channels without needing another migration."
+      },
+      "TestTokenRequestDto": {
+        "required": [
+          "nationalId"
+        ],
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "minLength": 1,
+            "pattern": "^\\d{1,14}$",
+            "type": "string",
+            "description": "NationalId of any seeded or registered account (Patient, Doctor, or Admin). Unlike Register/Login,\r\nthis does not require exactly 14 digits - this endpoint is Development-only, so a short id is\r\nfine for quick manual testing."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for the development-only test-token endpoint. No password required."
+      },
+      "TimelineStageDto": {
+        "type": "object",
+        "properties": {
+          "stageName": {
+            "type": "string",
+            "description": "Display name of this stage, e.g. \"Submitted\", \"UnderReview\", \"Decision\".",
+            "nullable": true,
+            "example": "Submitted"
+          },
+          "isComplete": {
+            "type": "boolean",
+            "description": "True if the patient's application has reached or passed this stage."
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "When this stage was reached. Null if not yet reached.",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "One stage in a patient's insurance status timeline."
+      },
+      "UpdateProfileRequestDto": {
+        "type": "object",
+        "properties": {
+          "occupation": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Optional. Max 100 characters. Omit/null to clear.",
+            "nullable": true,
+            "example": "Software Engineer"
+          },
+          "maritalStatus": {
+            "$ref": "#/components/schemas/MaritalStatus"
+          },
+          "nationality": {
+            "maxLength": 100,
+            "type": "string",
+            "description": "Optional. Max 100 characters. Omit/null to clear.",
+            "nullable": true,
+            "example": "Egyptian"
+          },
+          "preferredLanguage": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "Optional. Max 50 characters. Omit/null to clear.",
+            "nullable": true,
+            "example": "Arabic"
+          },
+          "emergencyContactName": {
+            "maxLength": 200,
+            "type": "string",
+            "description": "Optional. Max 200 characters. Omit/null to clear.",
+            "nullable": true,
+            "example": "Mona Ali Hassan"
+          },
+          "emergencyContactPhone": {
+            "maxLength": 20,
+            "type": "string",
+            "description": "Optional. Must be a valid phone number if provided, max 20 characters. Omit/null to\r\n            clear.",
+            "format": "tel",
+            "nullable": true,
+            "example": "01098765432"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for PUT /api/profile. Covers only CitizenProfile-owned fields - Patient identity\r\nfields (NationalId, Username, DateOfBirth, Gender, MobileNumber, Address, etc.) are not part of this\r\nDTO and cannot be changed through this endpoint. <b>This is a full replace</b> of the CitizenProfile\r\nfields: send every field you want to keep on every call - an omitted/null field clears whatever\r\nwas there before, it does not leave it unchanged."
+      },
+      "UserRole": {
+        "enum": [
+          "Patient",
+          "Doctor",
+          "Admin"
+        ],
+        "type": "string",
+        "description": "Role assigned to an authenticated user, included as a claim in the issued JWT."
+      },
+      "ValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "VerificationContext": {
+        "enum": [
+          "Appointment",
+          "CheckIn",
+          "ClinicVisit",
+          "EmergencyAdmission",
+          "Billing"
+        ],
+        "type": "string",
+        "description": "Which operational workflow prompted an insurance verification. Values: Appointment, CheckIn,\r\nClinicVisit, EmergencyAdmission, Billing. A closed, curated set on purpose - if a new business\r\ncontext appears, add a new value rather than falling back to a generic \"Other\"."
+      },
+      "VerificationSource": {
+        "enum": [
+          "Manual",
+          "GovernmentApi",
+          "Imported",
+          "System"
+        ],
+        "type": "string",
+        "description": "Where a verification decision came from. Values: Manual, GovernmentApi, Imported, System. Only\r\nManual is produced today - no external integration exists yet. Kept independent from\r\nEligibilitySource (not reused) since the two features may evolve this concept differently over time."
+      },
+      "VerificationStatus": {
+        "enum": [
+          "Verified",
+          "NotVerified",
+          "Pending"
+        ],
+        "type": "string",
+        "description": "The outcome of a single insurance verification event, decided at the moment it was checked.\r\n            Values: Verified, NotVerified, Pending."
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Enter a JWT token. Example: \"Bearer eyJhbGciOi...\" (the \"Bearer \" prefix is added automatically).",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "**Frontend flow:** Register (once) → Login → receive a JWT → send it as `Authorization: Bearer <token>` on every other Domain 1 call."
+    },
+    {
+      "name": "Citizen Profile",
+      "description": "**Frontend flow:** GET the profile to display it → let the citizen edit the editable fields → PUT to save. A complete profile is a precondition for submitting an insurance application - see Insurance Enrollment Wizard."
+    },
+    {
+      "name": "Insurance Categories",
+      "description": "**Frontend flow:** GET the active category list (Step 1 of the enrollment wizard) → show each category's required documents and eligibility rules → citizen picks one to start enrollment with."
+    },
+    {
+      "name": "Insurance Enrollment Wizard",
+      "description": "**Frontend flow:** Start enrollment (pick a category) → Complete Profile → Manage Dependents → Upload Required Documents → poll Readiness → Review Summary → Submit. This group is the recommended path for a citizen applying for insurance - it wraps and validates the lower-level Applications/Documents/Dependents endpoints below."
+    },
+    {
+      "name": "Dependents",
+      "description": "**Frontend flow:** Add a family member (spouse/child/parent/guardian) → list them → end a relationship if it no longer applies. Used from Step 3 of the enrollment wizard."
+    },
+    {
+      "name": "Documents",
+      "description": "**Frontend flow:** Upload a document by type → list uploaded documents to show progress → upload again to replace an outdated one. Used from Step 4 of the enrollment wizard."
+    },
+    {
+      "name": "Insurance Applications",
+      "description": "**Frontend flow:** Create a Draft → submit it for review → track its status → cancel it if no longer needed. The enrollment wizard drives these automatically; call them directly only outside the wizard flow."
+    },
+    {
+      "name": "Insurance Eligibility",
+      "description": "**Admin-only.** Records a citizen's national health-insurance eligibility outcome, used as a read-only snapshot when an application is finally decided."
+    },
+    {
+      "name": "Insurance Verification",
+      "description": "**Frontend flow:** A doctor or admin verifies a citizen's coverage at the point of care (appointment, check-in, billing) and records the outcome."
+    },
+    {
+      "name": "Insurance Status Tracking",
+      "description": "**Frontend flow:** One call a citizen-facing dashboard can use to show application status, eligibility, verification, and document count together, instead of calling four endpoints."
+    },
+    {
+      "name": "Digital Insurance Card",
+      "description": "**Frontend flow:** Once an application is Approved, Admin issues a card → citizen/provider can fetch or verify it by its QR/NFC token."
+    }
+  ]
+}
