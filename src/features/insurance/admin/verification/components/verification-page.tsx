@@ -2,6 +2,7 @@
 
 import { ShieldCheck, UserCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useMe } from "@/features/auth/hooks/use-me";
 import { checkEligibilityAction, recordVerificationAction } from "../actions";
 import {
   ELIGIBILITY_STATUSES,
@@ -22,11 +23,13 @@ import { VerifyCardCard } from "./verify-card-card";
  */
 export default function VerificationPage() {
   const t = useTranslations("admin");
+  const { data: user } = useMe();
+  const isAdmin = user?.role === "Admin";
 
   return (
     <div className="flex flex-col gap-4">
       <VerifyCardCard />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className={`grid gap-4 ${isAdmin ? "lg:grid-cols-2" : ""}`}>
         <RecordDecisionCard
           contexts={VERIFICATION_CONTEXTS.map((value) => ({
             value,
@@ -53,26 +56,28 @@ export default function VerificationPage() {
           }}
           titleKey="verification.insurance.title"
         />
-        <RecordDecisionCard
-          descriptionKey="verification.eligibility.description"
-          icon={UserCheck}
-          idPrefix="elig"
-          statusLabel={(status) =>
-            t(`verification.eligibilityStatuses.${status}`)
-          }
-          statuses={ELIGIBILITY_STATUSES}
-          submit={async (input) => {
-            const res = await checkEligibilityAction({
-              patientId: input.patientId,
-              status: input.status,
-              reason: input.reason,
-              remarks: input.remarks,
-            });
-            if (!res.ok) throw res.error;
-            return res.data;
-          }}
-          titleKey="verification.eligibility.title"
-        />
+        {isAdmin ? (
+          <RecordDecisionCard
+            descriptionKey="verification.eligibility.description"
+            icon={UserCheck}
+            idPrefix="elig"
+            statusLabel={(status) =>
+              t(`verification.eligibilityStatuses.${status}`)
+            }
+            statuses={ELIGIBILITY_STATUSES}
+            submit={async (input) => {
+              const res = await checkEligibilityAction({
+                patientId: input.patientId,
+                status: input.status,
+                reason: input.reason,
+                remarks: input.remarks,
+              });
+              if (!res.ok) throw res.error;
+              return res.data;
+            }}
+            titleKey="verification.eligibility.title"
+          />
+        ) : null}
       </div>
       <p className="text-xs text-muted-foreground">
         {t("verification.doctorNote")}

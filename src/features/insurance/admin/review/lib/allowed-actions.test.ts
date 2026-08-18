@@ -41,8 +41,12 @@ describe("deriveAllowedActions", () => {
     expect(Array.isArray(deriveAllowedActions(status))).toBe(true);
   });
 
-  it("terminal statuses never allow any action", () => {
-    for (const status of ["Approved", "Rejected", "Cancelled"] as const) {
+  it("offers manual card issue after approval", () => {
+    expect(deriveAllowedActions("Approved")).toEqual(["issue-cards"]);
+  });
+
+  it("terminal non-approved statuses never allow any action", () => {
+    for (const status of ["Rejected", "Cancelled"] as const) {
       expect(deriveAllowedActions(status)).toEqual([]);
     }
   });

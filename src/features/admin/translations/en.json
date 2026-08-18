@@ -1,4 +1,25 @@
 {
+  "home": {
+    "title": "Administration",
+    "description": "Insurance back-office tools. Every action is enforced by the API — this UI only shows what this role can do.",
+    "applications": {
+      "title": "Application review",
+      "description": "Cross-patient queue, claim a case, and record a decision."
+    },
+    "categories": {
+      "title": "Categories",
+      "description": "Configure identity, eligibility rules, and required documents."
+    },
+    "verification": {
+      "title": "Verification",
+      "description": "Scan a card token, record coverage checks, and eligibility."
+    },
+    "cards": {
+      "title": "Card lifecycle",
+      "description": "History, issue fallback, and suspend / renew / replace.",
+      "hint": "Open a patient's cards from an application review — there is no global card list."
+    }
+  },
   "queue": {
     "title": "Application review",
     "description": "The cross-patient queue. Opening an application claims it for review.",
@@ -6,7 +27,7 @@
     "searchLabel": "Find by application number",
     "searchPlaceholder": "e.g. APP-2026-00000015",
     "search": "Find",
-    "search.notFound": "No application found with that number.",
+    "searchNotFound": "No application found with that number.",
     "refresh": "Refresh",
     "retry": "Try again",
     "open": "Open",
@@ -119,6 +140,12 @@
     "back-to-review": {
       "label": "Back to review",
       "title": "Back to review"
+    },
+    "issue": {
+      "label": "Issue cards",
+      "title": "Issue cards for this application?",
+      "description": "Use this only if approval did not create cards. The application must stay Approved.",
+      "confirm": "Creates a card for the applicant and each dependent on this application. Does nothing if cards already exist."
     },
     "cancel": "Cancel",
     "terminal": {
@@ -233,7 +260,22 @@
       "renewed": "Card renewed — successor issued.",
       "replaced": "Card replaced — successor issued.",
       "reactivated": "Card reactivated.",
-      "tokenRotated": "Token rotated."
+      "tokenRotated": "Token rotated.",
+      "issued": "{count, plural, one {# card issued.} other {# cards issued.}}"
+    },
+    "snapshot": {
+      "title": "Patient snapshot",
+      "description": "Current card, insurance status, and this patient's applications.",
+      "current": "Current card",
+      "noCurrent": "No currently valid card.",
+      "status": "Insurance status",
+      "noStatus": "No insurance status recorded.",
+      "applications": "Applications",
+      "noApplications": "No applications for this patient.",
+      "openReview": "Open review",
+      "detail": "Application detail",
+      "detailError": "Couldn't load application detail.",
+      "noHistory": "No review history."
     },
     "error": {
       "load": "Couldn't load the card history.",
@@ -242,6 +284,8 @@
       "noHistory": "No status changes recorded.",
       "invalidPatientId": "Invalid patient reference.",
       "invalidCardId": "Invalid card reference.",
+      "invalidApplicationId": "Invalid application reference.",
+      "alreadyIssued": "Cards already exist for this application, or it is not Approved.",
       "invalidReplacementReason": "Invalid replacement reason.",
       "noteTooLong": "Note is too long.",
       "reasonInvalid": "A reason of 1–1000 characters is required.",
@@ -317,6 +361,11 @@
       "yes": "Yes",
       "no": "No"
     },
+    "replace": {
+      "title": "Replace required types",
+      "description": "Full replace: every selected type stays required; omitted types are dropped. Use granular rows below for labels and help text.",
+      "save": "Replace types"
+    },
     "dialogs": {
       "create": {
         "title": "New category",
@@ -329,7 +378,8 @@
       "ruleUpdated": "Eligibility rule saved.",
       "requirementAdded": "Requirement added.",
       "requirementUpdated": "Requirement updated.",
-      "requirementDeleted": "Requirement removed."
+      "requirementDeleted": "Requirement removed.",
+      "requirementsReplaced": "Required document types replaced."
     },
     "errors": {
       "load": "Couldn't load the categories.",
@@ -351,7 +401,7 @@
     }
   },
   "verification": {
-    "doctorNote": "Card and insurance verification are also available to Doctor accounts once a Doctor surface ships.",
+    "doctorNote": "Doctors can verify a card and record an insurance check. Recording eligibility is Admin-only.",
     "card": {
       "title": "Verify a card",
       "description": "Scan or paste the card's QR token. Returns only what point-of-care needs.",

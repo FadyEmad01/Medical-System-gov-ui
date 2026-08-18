@@ -76,6 +76,7 @@ import {
 } from "../lib/allowed-card-actions";
 import { CARD_REASON_MAX } from "../lib/card-reason-validation";
 import type { ReplacementReason } from "../types";
+import { PatientSnapshot } from "./patient-snapshot";
 
 const REPLACEMENT_REASONS: ReplacementReason[] = [
   "Lost",
@@ -117,6 +118,7 @@ export default function CardsPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <PatientSnapshot patientId={Number.isFinite(patientId) ? patientId : 0} />
       <Card>
         <CardHeader>
           <CardTitle>{t("cards.title")}</CardTitle>

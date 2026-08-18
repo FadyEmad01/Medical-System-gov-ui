@@ -115,7 +115,7 @@ export default function QueuePage() {
                 if (res.ok) {
                   router.push(`/dashboard/admin/applications/${res.data.id}`);
                 } else {
-                  toast.error(t("queue.search.notFound"));
+                  toast.error(t("queue.searchNotFound"));
                 }
               }}
             >

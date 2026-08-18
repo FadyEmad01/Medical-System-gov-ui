@@ -20,15 +20,15 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  useAllCategories,
+  useCategory,
   useUpdateCategory,
 } from "../../hooks/use-categories-admin";
 
 /** Tab 1 — identity fields. The code is an identity field: read-only on edit. */
 export function GeneralTab({ categoryId }: { categoryId: string }) {
   const t = useTranslations("admin");
-  const query = useAllCategories();
-  const category = query.data?.find((item) => item.id === categoryId);
+  const query = useCategory(categoryId);
+  const category = query.data;
   const update = useUpdateCategory(categoryId);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");

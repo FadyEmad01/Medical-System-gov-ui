@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAllCategories } from "../hooks/use-categories-admin";
+import { useCategory } from "../hooks/use-categories-admin";
 import { GeneralTab } from "./tabs/general-tab";
 import { PreviewTab } from "./tabs/preview-tab";
 import { RequirementsTab } from "./tabs/requirements-tab";
@@ -25,8 +25,8 @@ type Tab = (typeof TABS)[number];
 export default function CategoryDetailPage() {
   const t = useTranslations("admin");
   const params = useParams<{ categoryId: string }>();
-  const query = useAllCategories();
-  const category = query.data?.find((item) => item.id === params.categoryId);
+  const query = useCategory(params.categoryId);
+  const category = query.data;
   const [tab, setTab] = useState<Tab>("general");
 
   if (query.isPending) {

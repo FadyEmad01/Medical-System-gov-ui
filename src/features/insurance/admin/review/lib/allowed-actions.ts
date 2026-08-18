@@ -5,7 +5,8 @@ export type ReviewAction =
   | "approve"
   | "reject"
   | "request-documents"
-  | "back-to-review";
+  | "back-to-review"
+  | "issue-cards";
 
 /**
  * Status → actions the backend will accept right now. Derived, never stored:
@@ -24,6 +25,8 @@ export function deriveAllowedActions(
       return ["approve", "reject", "request-documents"];
     case "WaitingForDocuments":
       return ["back-to-review"];
+    case "Approved":
+      return ["issue-cards"];
     default:
       return [];
   }

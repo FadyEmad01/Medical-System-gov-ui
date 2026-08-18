@@ -9,13 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAllCategories } from "../../hooks/use-categories-admin";
+import { useCategory } from "../../hooks/use-categories-admin";
 
 /** Tab 4 — the citizen-eye read-only view: what the wizard will render. */
 export function PreviewTab({ categoryId }: { categoryId: string }) {
   const t = useTranslations("admin");
-  const query = useAllCategories();
-  const category = query.data?.find((item) => item.id === categoryId);
+  const query = useCategory(categoryId);
+  const category = query.data;
   if (!category) return null;
 
   const activeRequirements = category.documentRequirements

@@ -120,6 +120,21 @@ export interface CardResponseDto {
   correlationId?: string;
 }
 
+/** One entry of a card's lifecycle audit trail (Admin-entered reason each). */
+export interface CardStatusChangeResponseDto {
+  id: string;
+  previousStatus: CardStatus;
+  newStatus: CardStatus;
+  reason: string | null;
+  changedBy: number;
+  changedAt: string;
+}
+
+/** GET /cards/detail/{cardId} — a card + its full status-change history. */
+export interface CardDetailResponseDto extends CardResponseDto {
+  statusHistory: CardStatusChangeResponseDto[];
+}
+
 /** The five fields a patient must complete before applying for a card. */
 export const PROFILE_GATE_FIELDS = [
   "occupation",

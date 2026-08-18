@@ -8,9 +8,21 @@ import type {
 import type {
   AddCategoryDocumentRequirementRequestDto,
   InsuranceCategoryRequestDto,
+  SetCategoryDocumentRequirementsRequestDto,
   SetCategoryEligibilityRuleRequestDto,
   UpdateCategoryDocumentRequirementRequestDto,
 } from "../types";
+
+/** GET /insurance/categories/{id} — one category, including inactive. */
+export function getCategory(
+  token: string,
+  categoryId: string,
+): Promise<InsuranceCategoryResponseDto> {
+  return apiClient.get<InsuranceCategoryResponseDto>(
+    `/insurance/categories/${categoryId}`,
+    { token },
+  );
+}
 
 /** GET /insurance/categories/all — every category, incl. inactive (Admin). */
 export function getAllCategories(
@@ -67,6 +79,19 @@ export function getRequirements(
 ): Promise<CategoryDocumentRequirementDto[]> {
   return apiClient.get<CategoryDocumentRequirementDto[]>(
     `/insurance/categories/${categoryId}/requirements`,
+    { token },
+  );
+}
+
+/** PUT /insurance/categories/{id}/requirements — full replace of the type set. */
+export function replaceRequirements(
+  token: string,
+  categoryId: string,
+  body: SetCategoryDocumentRequirementsRequestDto,
+): Promise<InsuranceCategoryResponseDto> {
+  return apiClient.put<InsuranceCategoryResponseDto>(
+    `/insurance/categories/${categoryId}/requirements`,
+    body,
     { token },
   );
 }

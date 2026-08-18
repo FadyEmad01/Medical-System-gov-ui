@@ -145,4 +145,15 @@ export function isKnownDocumentType(value: string): value is DocumentType {
   return DOCUMENT_TYPES.includes(value as DocumentType);
 }
 
+/** PUT /categories/{id}/requirements — full replace of the document-type set. */
+export function validateDocumentTypes(
+  input: string[],
+): { ok: true; data: DocumentType[] } | { ok: false; error: AuthActionError } {
+  const unique = [...new Set(input)];
+  if (!unique.every((value) => isKnownDocumentType(value))) {
+    return invalid("admin.categories.errors.documentType");
+  }
+  return { ok: true, data: unique };
+}
+
 export const KNOWN_DOCUMENT_TYPES = DOCUMENT_TYPES;

@@ -16,6 +16,11 @@ import type { CardResponseDto } from "../../../types";
 import {
   getCardDetailAction,
   getCardHistoryAction,
+  getCurrentCardAction,
+  getPatientApplicationDetailAction,
+  getPatientApplicationsAction,
+  getPatientStatusAction,
+  issueCardsAction,
   reactivateCardAction,
   renewCardAction,
   replaceCardAction,
@@ -38,7 +43,10 @@ export const CARD_DETAIL_QUERY_KEY = (cardId: string) =>
 export function useCardHistory(patientId: number) {
   const queryClient = useQueryClient();
   const meQuery = useMe();
-  const enabled = meQuery.data?.role === "Admin" && Number.isInteger(patientId);
+  const enabled =
+    meQuery.data?.role === "Admin" &&
+    Number.isInteger(patientId) &&
+    patientId >= 1;
 
   const query = useQuery({
     queryKey: CARD_HISTORY_QUERY_KEY(patientId),
@@ -219,3 +227,143 @@ export function useReplaceCard(
 }
 
 export type { CardDetailResponseDto };
+
+export const CURRENT_CARD_QUERY_KEY = (patientId: number) =>
+  ["admin", "cards", "current", patientId] as const;
+export const PATIENT_STATUS_QUERY_KEY = (patientId: number) =>
+  ["admin", "status", patientId] as const;
+export const PATIENT_APPLICATIONS_QUERY_KEY = (patientId: number) =>
+  ["admin", "applications", "patient", patientId] as const;
+export const PATIENT_APPLICATION_DETAIL_QUERY_KEY = (applicationId: string) =>
+  ["admin", "applications", "detail", applicationId] as const;
+
+function useAdminPatientQuery<T>(
+  queryKey: readonly unknown[],
+  enabled: boolean,
+  queryFn: () => Promise<T>,
+) {
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey,
+    queryFn,
+    enabled,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: (failureCount, error) =>
+      !(isAuthActionError(error) && isTerminalActionError(error)) &&
+      failureCount < 1,
+  });
+
+  useEffect(() => {
+    if (!isAuthActionError(query.error)) return;
+    handleSessionExpiry(queryClient, query.error);
+  }, [query.error, queryClient]);
+
+  return query;
+}
+
+export function useCurrentCard(patientId: number) {
+  const meQuery = useMe();
+  return useAdminPatientQuery(
+    CURRENT_CARD_QUERY_KEY(patientId),
+    meQuery.data?.role === "Admin" &&
+      Number.isInteger(patientId) &&
+      patientId >= 1,
+    async () => {
+      const res = await getCurrentCardAction(patientId);
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+  );
+}
+
+export function usePatientStatus(patientId: number) {
+  const meQuery = useMe();
+  return useAdminPatientQuery(
+    PATIENT_STATUS_QUERY_KEY(patientId),
+    meQuery.data?.role === "Admin" &&
+      Number.isInteger(patientId) &&
+      patientId >= 1,
+    async () => {
+      const res = await getPatientStatusAction(patientId);
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+  );
+}
+
+export function usePatientApplications(patientId: number) {
+  const meQuery = useMe();
+  return useAdminPatientQuery(
+    PATIENT_APPLICATIONS_QUERY_KEY(patientId),
+    meQuery.data?.role === "Admin" &&
+      Number.isInteger(patientId) &&
+      patientId >= 1,
+    async () => {
+      const res = await getPatientApplicationsAction(patientId);
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+  );
+}
+
+export function usePatientApplicationDetail(
+  applicationId: string,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: PATIENT_APPLICATION_DETAIL_QUERY_KEY(applicationId),
+    queryFn: async () => {
+      const res = await getPatientApplicationDetailAction(applicationId);
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+    enabled: enabled && applicationId !== "",
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+export function useIssueCards(applicationId: string, patientId?: number) {
+  const queryClient = useQueryClient();
+  const t = useTranslations("admin");
+
+  return useMutation({
+    mutationFn: async () => {
+      const res = await issueCardsAction(applicationId);
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+    onSuccess: (cards) => {
+      toast.success(t("cards.toasts.issued", { count: cards.length }));
+      if (patientId != null) {
+        queryClient.invalidateQueries({
+          queryKey: CARD_HISTORY_QUERY_KEY(patientId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: CURRENT_CARD_QUERY_KEY(patientId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: PATIENT_STATUS_QUERY_KEY(patientId),
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+      queryClient.invalidateQueries({ queryKey: ["insurance"] });
+    },
+    onError: (error: AuthActionError) => {
+      if (isForbidden(error)) {
+        toast.error(t("actions.errors.forbidden"));
+        return;
+      }
+      if (handleSessionExpiry(queryClient, error)) {
+        toast.error(t("actions.errors.sessionExpired"));
+        return;
+      }
+      if (error.kind === "conflict") {
+        toast.error(t("cards.errors.alreadyIssued"));
+        return;
+      }
+      toast.error(t("actions.errors.generic"));
+    },
+  });
+}

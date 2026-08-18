@@ -128,6 +128,7 @@ export default function ReviewPage() {
       <ReviewActionBar
         applicationId={detail.id}
         decisionReason={detail.decisionReason}
+        patientId={detail.patientId}
         status={detail.status}
       />
     </div>

@@ -18,7 +18,9 @@ import {
   createCategory,
   deleteRequirement,
   getAllCategories,
+  getCategory,
   getRequirements,
+  replaceRequirements,
   setEligibilityRule,
   updateCategory,
   updateRequirement,
@@ -26,6 +28,7 @@ import {
 import {
   isKnownDocumentType,
   validateCategoryInput,
+  validateDocumentTypes,
   validateEligibilityRule,
   validateRequirementFields,
 } from "./lib/category-validation";
@@ -45,6 +48,24 @@ function invalid(formError: string): { ok: false; error: AuthActionError } {
 
 function idOf(value: string): string {
   return value.trim();
+}
+
+/** GET /categories/{id} — one category, including inactive. */
+export async function getCategoryAction(
+  categoryId: string,
+): Promise<ActionResult<InsuranceCategoryResponseDto>> {
+  const token = await getSessionToken();
+  if (!token) return { ok: false, error: SESSION_EXPIRED_ERROR };
+
+  const id = idOf(categoryId);
+  if (id === "") return invalid("admin.categories.errors.invalidId");
+
+  try {
+    const category = await getCategory(token, id);
+    return { ok: true, data: category };
+  } catch (err) {
+    return { ok: false, error: await toSessionAwareError(err) };
+  }
 }
 
 /** GET /categories/all — every category incl. inactive. */
@@ -115,6 +136,30 @@ export async function setEligibilityRuleAction(
 
   try {
     const category = await setEligibilityRule(token, id, parsed.data);
+    return { ok: true, data: category };
+  } catch (err) {
+    return { ok: false, error: await toSessionAwareError(err) };
+  }
+}
+
+/** PUT /categories/{id}/requirements — full replace of the document-type set. */
+export async function replaceRequirementsAction(
+  categoryId: string,
+  documentTypes: string[],
+): Promise<ActionResult<InsuranceCategoryResponseDto>> {
+  const token = await getSessionToken();
+  if (!token) return { ok: false, error: SESSION_EXPIRED_ERROR };
+
+  const id = idOf(categoryId);
+  if (id === "") return invalid("admin.categories.errors.invalidId");
+
+  const parsed = validateDocumentTypes(documentTypes);
+  if (!parsed.ok) return { ok: false, error: parsed.error };
+
+  try {
+    const category = await replaceRequirements(token, id, {
+      documentTypes: parsed.data,
+    });
     return { ok: true, data: category };
   } catch (err) {
     return { ok: false, error: await toSessionAwareError(err) };

@@ -22,7 +22,9 @@ import {
   createCategoryAction,
   deleteRequirementAction,
   getAllCategoriesAction,
+  getCategoryAction,
   getRequirementsAction,
+  replaceRequirementsAction,
   setEligibilityRuleAction,
   updateCategoryAction,
   updateRequirementAction,
@@ -30,6 +32,8 @@ import {
 
 /** Cache keys — inside ["admin"] so session expiry purges them (S1). */
 export const ADMIN_CATEGORIES_QUERY_KEY = ["admin", "categories"] as const;
+export const CATEGORY_QUERY_KEY = (categoryId: string) =>
+  ["admin", "categories", "detail", categoryId] as const;
 export const REQUIREMENTS_QUERY_KEY = (categoryId: string) =>
   ["admin", "categories", categoryId, "requirements"] as const;
 
@@ -43,6 +47,34 @@ export function useAllCategories() {
     queryKey: ADMIN_CATEGORIES_QUERY_KEY,
     queryFn: async () => {
       const res = await getAllCategoriesAction();
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+    enabled,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: (failureCount, error) =>
+      !(isAuthActionError(error) && isTerminalActionError(error)) &&
+      failureCount < 1,
+  });
+
+  useEffect(() => {
+    if (!isAuthActionError(query.error)) return;
+    handleSessionExpiry(queryClient, query.error);
+  }, [query.error, queryClient]);
+
+  return query;
+}
+
+export function useCategory(categoryId: string) {
+  const queryClient = useQueryClient();
+  const meQuery = useMe();
+  const enabled = meQuery.data?.role === "Admin" && categoryId !== "";
+
+  const query = useQuery({
+    queryKey: CATEGORY_QUERY_KEY(categoryId),
+    queryFn: async () => {
+      const res = await getCategoryAction(categoryId);
       if (!res.ok) throw res.error;
       return res.data;
     },
@@ -151,6 +183,18 @@ export function useSetEligibilityRule(categoryId: string) {
       return res.data;
     },
     "categories.toasts.ruleUpdated",
+    true,
+  );
+}
+
+export function useReplaceRequirements(categoryId: string) {
+  return useCategoryMutation(
+    async (documentTypes: string[]) => {
+      const res = await replaceRequirementsAction(categoryId, documentTypes);
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+    "categories.toasts.requirementsReplaced",
     true,
   );
 }

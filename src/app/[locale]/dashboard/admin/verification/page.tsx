@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminGuard } from "@/components/role-guard";
+import { StaffGuard } from "@/components/role-guard";
 import VerificationPage from "@/features/insurance/admin/verification/components/verification-page";
 
 export const metadata: Metadata = {
@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <AdminGuard>
+    <StaffGuard>
       <VerificationPage />
-    </AdminGuard>
+    </StaffGuard>
   );
 }

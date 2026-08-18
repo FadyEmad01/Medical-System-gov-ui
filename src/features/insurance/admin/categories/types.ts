@@ -35,6 +35,11 @@ export interface AddCategoryDocumentRequirementRequestDto {
   isMandatory: boolean;
 }
 
+/** PUT .../requirements — full replace of the required document-type set. */
+export interface SetCategoryDocumentRequirementsRequestDto {
+  documentTypes: DocumentType[];
+}
+
 /** PUT .../requirements/{requirementId} — metadata update incl. isActive. */
 export interface UpdateCategoryDocumentRequirementRequestDto {
   displayName: string | null;

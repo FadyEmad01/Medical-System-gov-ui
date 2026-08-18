@@ -69,6 +69,19 @@ export function AppSidebar({
     },
   ];
 
+  if (user?.role === "Doctor") {
+    groups.push({
+      label: t("nav.groups.admin"),
+      items: [
+        {
+          title: t("nav.adminVerification"),
+          url: "/dashboard/admin/verification",
+          icon: ScanLine,
+        },
+      ],
+    });
+  }
+
   // The admin area is gated by <AdminGuard> on the page; keep it out of the
   // sidebar entirely for everyone else.
   if (user?.role === "Admin") {

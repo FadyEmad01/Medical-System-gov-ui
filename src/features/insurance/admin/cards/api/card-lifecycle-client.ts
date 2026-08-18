@@ -1,17 +1,22 @@
 import "server-only";
 
 import { apiClient } from "@/lib/api-client";
+import {
+  getCardDetail as getSharedCardDetail,
+  getCardHistory as getSharedCardHistory,
+} from "../../../api/card-client";
 import type { CardResponseDto } from "../../../types";
 import type { CardDetailResponseDto, ReplacementReason } from "../types";
 
-/** GET /insurance/cards/{patientId} — full card history (Admin only). */
+/**
+ * GET /insurance/cards/{patientId} — full card history. Same contract as the
+ * citizen client (own patientId for patients; any patientId for Admin).
+ */
 export function getCardHistory(
   token: string,
   patientId: number,
 ): Promise<CardResponseDto[]> {
-  return apiClient.get<CardResponseDto[]>(`/insurance/cards/${patientId}`, {
-    token,
-  });
+  return getSharedCardHistory(patientId, token);
 }
 
 /** GET /insurance/cards/detail/{cardId} — card + status-change audit trail. */
@@ -19,10 +24,7 @@ export function getCardDetail(
   token: string,
   cardId: string,
 ): Promise<CardDetailResponseDto> {
-  return apiClient.get<CardDetailResponseDto>(
-    `/insurance/cards/detail/${cardId}`,
-    { token },
-  );
+  return getSharedCardDetail(cardId, token);
 }
 
 /** PATCH /cards/{cardId}/suspend — Active → Suspended, reason required. */
@@ -88,6 +90,22 @@ export function replaceCard(
       replacementReason: body.replacementReason,
       ...(body.reasonNote === "" ? {} : { reasonNote: body.reasonNote }),
     },
+    { token },
+  );
+}
+
+/**
+ * POST /cards/issue/{applicationId} — manual fallback when approve's
+ * auto-issue did not create cards. 409 if not Approved or a non-terminal
+ * card already exists for the scope.
+ */
+export function issueCards(
+  token: string,
+  applicationId: string,
+): Promise<CardResponseDto[]> {
+  return apiClient.post<CardResponseDto[]>(
+    `/insurance/cards/issue/${applicationId}`,
+    undefined,
     { token },
   );
 }

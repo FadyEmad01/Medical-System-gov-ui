@@ -94,6 +94,23 @@
       "expires": "تاريخ الانتهاء",
       "version": "الإصدار",
       "versionPrefix": "{version}"
+    },
+    "history": {
+      "title": "سجل البطاقات",
+      "description": "كل البطاقات التي حصلت عليها أنت أو تابعوك، الأحدث أولاً.",
+      "latest": "الأحدث",
+      "dependent": "بطاقة تابع",
+      "dates": "صدرت {issued} · تنتهي {expires}",
+      "trail": "دورة الحياة",
+      "trailError": "تعذر تحميل دورة حياة البطاقة.",
+      "noChanges": "لا توجد تغييرات حالة مسجلة.",
+      "change": "{from} ← {to}",
+      "replacement": {
+        "Lost": "استبدال (فقدان)",
+        "Damaged": "استبدال (تلف)",
+        "Stolen": "استبدال (سرقة)",
+        "Other": "استبدال"
+      }
     }
   },
   "documents": {
