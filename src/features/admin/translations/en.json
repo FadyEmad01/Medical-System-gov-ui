@@ -17,7 +17,11 @@
     "cards": {
       "title": "Card lifecycle",
       "description": "History, issue fallback, and suspend / renew / replace.",
-      "hint": "Open a patient's cards from an application review — there is no global card list."
+      "hint": "Cards are per patient. Enter a patient ID, or open them from an application review.",
+      "patientId": "Patient ID",
+      "placeholder": "Patient ID",
+      "open": "Open cards",
+      "fromReview": "Open from application review"
     }
   },
   "queue": {
@@ -277,7 +281,7 @@
       "detailError": "Couldn't load application detail.",
       "noHistory": "No review history."
     },
-    "error": {
+    "errors": {
       "load": "Couldn't load the card history.",
       "none": "No cards have been issued for this patient yet.",
       "history": "Couldn't load the lifecycle history.",

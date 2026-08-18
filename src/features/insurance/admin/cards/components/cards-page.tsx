@@ -134,11 +134,11 @@ export default function CardsPage() {
             </div>
           ) : historyQuery.isError ? (
             <p className="text-sm text-muted-foreground">
-              {t("cards.error.load")}
+              {t("cards.errors.load")}
             </p>
           ) : cards.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {t("cards.error.none")}
+              {t("cards.errors.none")}
             </p>
           ) : (
             cards.map((card) => (
@@ -355,7 +355,7 @@ function CardRow({
             ) : detail.isError ? (
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CircleAlert className="size-4" />
-                {t("cards.error.history")}
+                {t("cards.errors.history")}
               </p>
             ) : detail.data && detail.data.statusHistory.length > 0 ? (
               <ol className="flex flex-col">
@@ -399,7 +399,7 @@ function CardRow({
               </ol>
             ) : (
               <p className="text-sm text-muted-foreground">
-                {t("cards.error.noHistory")}
+                {t("cards.errors.noHistory")}
               </p>
             )}
           </div>

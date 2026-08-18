@@ -100,6 +100,11 @@ export function AppSidebar({
           icon: FolderCog,
         },
         {
+          title: t("nav.adminCards"),
+          url: "/dashboard/admin/cards",
+          icon: IdCard,
+        },
+        {
           title: t("nav.adminVerification"),
           url: "/dashboard/admin/verification",
           icon: ScanLine,

@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { AdminGuard } from "@/components/role-guard";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -31,6 +30,12 @@ const LINKS = [
     titleKey: "home.verification.title",
     descriptionKey: "home.verification.description",
   },
+  {
+    href: "/dashboard/admin/cards",
+    icon: IdCard,
+    titleKey: "home.cards.title",
+    descriptionKey: "home.cards.description",
+  },
 ] as const;
 
 export default function AdminHomePage() {
@@ -52,7 +57,7 @@ function AdminHomeContent() {
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {LINKS.map((item) => (
-          <Link href={item.href} key={item.href}>
+          <Link className="block h-full" href={item.href} key={item.href}>
             <Card className="h-full transition-colors hover:bg-muted/40">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -64,20 +69,6 @@ function AdminHomeContent() {
             </Card>
           </Link>
         ))}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <IdCard className="size-4" />
-              {t("home.cards.title")}
-            </CardTitle>
-            <CardDescription>{t("home.cards.description")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">
-              {t("home.cards.hint")}
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
