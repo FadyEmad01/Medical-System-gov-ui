@@ -6,6 +6,17 @@ import type {
   ApplicationResponseDto,
 } from "../enrollment/types";
 
+/** GET /insurance/applications/{patientId} — all applications, newest first. */
+export function getApplications(
+  patientId: number,
+  token: string,
+): Promise<ApplicationResponseDto[]> {
+  return apiClient.get<ApplicationResponseDto[]>(
+    `/insurance/applications/${patientId}`,
+    { token },
+  );
+}
+
 /** GET /insurance/applications/detail/{applicationId} — application + review history. */
 export function getApplicationDetail(
   token: string,

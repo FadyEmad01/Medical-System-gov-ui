@@ -283,7 +283,9 @@
     "submittedAt": "تاريخ التقديم",
     "documentCount": "المستندات",
     "dependentCount": "المعالون",
-    "documentsSection": "رفع المستندات الناقصة"
+    "documentsSection": "رفع المستندات الناقصة",
+    "history": "الطلبات السابقة",
+    "progress": "اكتملت {done} من {total} مراحل"
   },
   "errors": {
     "sessionExpired": "انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.",

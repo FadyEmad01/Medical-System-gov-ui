@@ -20,6 +20,7 @@ import {
   cancelApplicationAction,
   endDependentAction,
   getApplicationDetailAction,
+  getApplicationsAction,
   getCategoriesAction,
   getCurrentEnrollmentAction,
   getDependentsAction,
@@ -73,6 +74,10 @@ export const DEPENDENTS_QUERY_KEY = (patientId: number) =>
 /** Cache key for one application's detail record. */
 export const APPLICATION_DETAIL_QUERY_KEY = (applicationId: string) =>
   ["insurance", "applications", applicationId] as const;
+
+/** Cache key for a patient's full application list (distinct from detail keys). */
+export const APPLICATIONS_QUERY_KEY = (patientId: number) =>
+  ["insurance", "applications", "list", patientId] as const;
 
 /** Cache key for a patient's application status snapshot. */
 export const STATUS_QUERY_KEY = (patientId: number) =>
@@ -195,6 +200,18 @@ export function useApplicationDetail(
     APPLICATION_DETAIL_QUERY_KEY(applicationId),
     () => getApplicationDetailAction(applicationId),
     options,
+  );
+}
+
+/**
+ * The patient's full application history, newest first — feeding the tracking
+ * page's past-applications list. Disabled until the patient ID is known.
+ */
+export function useApplications(patientId: number | null | undefined) {
+  return useInsuranceActionQuery(
+    APPLICATIONS_QUERY_KEY(patientId ?? 0),
+    () => getApplicationsAction(patientId ?? 0),
+    { enabled: patientId != null },
   );
 }
 
