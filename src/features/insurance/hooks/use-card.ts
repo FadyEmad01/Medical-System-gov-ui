@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { getCardStateAction } from "../actions";
+import { getCardDetailAction, getCardStateAction } from "../actions";
 import {
   handleSessionExpiry,
   isAuthActionError,
@@ -11,6 +11,10 @@ import {
 
 /** Cache key for the insurance card stepper state. */
 export const CARD_STATE_QUERY_KEY = ["insurance", "card-state"] as const;
+
+/** Cache key for one card's detail (status-change audit trail). */
+export const CARD_DETAIL_QUERY_KEY = (cardId: string) =>
+  ["insurance", "cards", "detail", cardId] as const;
 
 /**
  * Application status + current card for the insurance card dashboard.
@@ -40,6 +44,33 @@ export function useCardState() {
   // drops the identity cache and lets AuthGuard redirect immediately. Load
   // errors surface in the page's persistent inline Alert — no toast here —
   // and a forbidden error leaves the session and caches intact.
+  useEffect(() => {
+    if (!isAuthActionError(query.error)) return;
+    handleSessionExpiry(queryClient, query.error);
+  }, [query.error, queryClient]);
+
+  return query;
+}
+
+/**
+ * One card's detail with its lifecycle audit trail — fetched lazily when a
+ * history row expands. Enabled-gated so no request fires for collapsed rows.
+ * `changedBy` on the audit trail is an internal staff id and is never shown.
+ */
+export function useCardDetail(cardId: string, enabled: boolean) {
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: CARD_DETAIL_QUERY_KEY(cardId),
+    queryFn: async () => {
+      const res = await getCardDetailAction(cardId);
+      if (!res.ok) throw res.error;
+      return res.data;
+    },
+    enabled: enabled && cardId !== "",
+    staleTime: 60_000,
+    retry: false,
+  });
+
   useEffect(() => {
     if (!isAuthActionError(query.error)) return;
     handleSessionExpiry(queryClient, query.error);

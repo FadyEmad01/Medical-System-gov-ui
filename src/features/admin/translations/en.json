@@ -1,0 +1,461 @@
+{
+  "home": {
+    "title": "Administration",
+    "description": "Insurance back-office tools. Every action is enforced by the API — this UI only shows what this role can do.",
+    "applications": {
+      "title": "Application review",
+      "description": "Cross-patient queue, claim a case, and record a decision."
+    },
+    "categories": {
+      "title": "Categories",
+      "description": "Configure identity, eligibility rules, and required documents."
+    },
+    "verification": {
+      "title": "Verification",
+      "description": "Scan a card token, record coverage checks, and eligibility."
+    },
+    "cards": {
+      "title": "Card lifecycle",
+      "description": "History, issue fallback, and suspend / renew / replace.",
+      "hint": "Cards are per patient. Enter a patient ID, or open them from an application review.",
+      "patientId": "Patient ID",
+      "placeholder": "Patient ID",
+      "open": "Open cards",
+      "fromReview": "Open from application review"
+    }
+  },
+  "queue": {
+    "title": "Application review",
+    "description": "The cross-patient queue. Opening an application claims it for review.",
+    "allStatuses": "All statuses",
+    "searchLabel": "Find by application number",
+    "searchPlaceholder": "e.g. APP-2026-00000015",
+    "search": "Find",
+    "searchNotFound": "No application found with that number.",
+    "refresh": "Refresh",
+    "retry": "Try again",
+    "open": "Open",
+    "columns": {
+      "number": "Application",
+      "status": "Status",
+      "submittedAt": "Submitted",
+      "channel": "Channel",
+      "documents": "Docs",
+      "dependents": "Dependents"
+    },
+    "pagination": {
+      "summary": "Page {page} of {totalPages} · {count} applications",
+      "prev": "Previous page",
+      "next": "Next page"
+    },
+    "empty": {
+      "title": "Nothing here",
+      "forStatus": "No {status} applications right now.",
+      "forAll": "No applications have been submitted yet."
+    },
+    "error": {
+      "title": "Couldn't load the queue",
+      "description": "Something went wrong while fetching the applications."
+    }
+  },
+  "review": {
+    "header": {
+      "submittedAt": "Submitted {date}",
+      "viewCards": "View cards"
+    },
+    "applicant": {
+      "title": "Applicant",
+      "fullName": "Full name",
+      "nationalId": "National ID",
+      "dateOfBirth": "Date of birth",
+      "gender": "Gender",
+      "mobile": "Mobile",
+      "email": "Email",
+      "address": "Address",
+      "occupation": "Occupation",
+      "maritalStatus": "Marital status"
+    },
+    "category": {
+      "title": "{category} — required documents",
+      "optional": "optional",
+      "notUploaded": "Not uploaded yet",
+      "missing": "Missing",
+      "viewFile": "View file"
+    },
+    "documents": {
+      "title": "Uploaded documents",
+      "noneCurrent": "No current documents on file.",
+      "superseded": "Previous versions ({count})",
+      "supersededBadge": "Superseded",
+      "reviewStatus": {
+        "Pending": "Pending",
+        "Approved": "Approved",
+        "Rejected": "Rejected"
+      }
+    },
+    "dependents": {
+      "title": "Dependents",
+      "none": "No dependents on this application.",
+      "active": "Active",
+      "inactive": "Ended",
+      "relationship": {
+        "Spouse": "Spouse",
+        "Child": "Child",
+        "Parent": "Parent",
+        "Guardian": "Guardian"
+      }
+    },
+    "checks": {
+      "title": "Eligibility & verification",
+      "eligibility": "Eligibility",
+      "verification": "Verification",
+      "notChecked": "Not checked yet"
+    },
+    "history": {
+      "title": "Review history",
+      "transition": "{from} → {to}"
+    },
+    "error": {
+      "title": "Couldn't open this application",
+      "notFound": "This application doesn't exist — it may have been removed.",
+      "description": "Something went wrong while fetching the review details.",
+      "retry": "Try again"
+    }
+  },
+  "actions": {
+    "approve": {
+      "label": "Approve",
+      "title": "Approve this application?",
+      "description": "Cards are issued automatically for the applicant and their dependents. This cannot be undone.",
+      "confirm": "Approve application"
+    },
+    "reject": {
+      "label": "Reject",
+      "title": "Reject this application?",
+      "description": "The citizen sees your reason and can start over with a new application.",
+      "confirm": "Reject application"
+    },
+    "request-documents": {
+      "label": "Request documents",
+      "title": "Send back for documents?",
+      "description": "The application returns to the citizen. They upload the missing documents, then it comes back to review.",
+      "confirm": "Request documents"
+    },
+    "back-to-review": {
+      "label": "Back to review",
+      "title": "Back to review"
+    },
+    "issue": {
+      "label": "Issue cards",
+      "title": "Issue cards for this application?",
+      "description": "Use this only if approval did not create cards. The application must stay Approved.",
+      "confirm": "Creates a card for the applicant and each dependent on this application. Does nothing if cards already exist."
+    },
+    "cancel": "Cancel",
+    "terminal": {
+      "title": "This application is {status}"
+    },
+    "fields": {
+      "citizenReason": "Reason shown to the citizen",
+      "citizenReasonPlaceholder": "Explain what you decided and why…",
+      "citizenReasonHint": "Shown on the citizen's tracking page.",
+      "internalNotes": "Internal notes",
+      "internalNotesPlaceholder": "Admin-only context for the record…",
+      "internalNotesHint": "Never shown to the citizen."
+    },
+    "approved": "Application approved — cards issued.",
+    "rejected": "Application rejected.",
+    "requestedDocuments": "Sent back to the citizen for documents.",
+    "backToReview": "Back under review.",
+    "errors": {
+      "reasonRequired": "A reason shown to the citizen is required for this decision.",
+      "reason": "Must be 1–1000 characters.",
+      "notesTooLong": "Internal notes are too long.",
+      "notes": "Must be at most 2000 characters.",
+      "forbidden": "You don't have permission to do that.",
+      "sessionExpired": "Your session expired. Please sign in again.",
+      "conflict": "This application changed — another reviewer may have acted first. Refreshing.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "statuses": {
+    "Draft": "Draft",
+    "Submitted": "Submitted",
+    "UnderReview": "Under review",
+    "WaitingForDocuments": "Waiting for documents",
+    "Approved": "Approved",
+    "Rejected": "Rejected",
+    "Cancelled": "Cancelled"
+  },
+  "channels": {
+    "WebPortal": "Web portal",
+    "MobileApp": "Mobile app",
+    "AdminPortal": "Admin portal",
+    "Kiosk": "Kiosk",
+    "GovernmentImport": "Government import"
+  },
+  "errors": {
+    "invalidId": "Invalid application reference.",
+    "invalidNumber": "Invalid application number."
+  },
+  "cards": {
+    "title": "Card management",
+    "description": "The patient's full card history, including dependents' cards. Lifecycle actions apply per card.",
+    "latest": "Latest",
+    "dependentCard": "dependent card",
+    "dates": "Issued {issued} · expires {expires}",
+    "terminal": "No actions — this card is {status}.",
+    "change": "{from} → {to}",
+    "historyToggle": "Lifecycle history",
+    "actions": {
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "renew": "Renew",
+      "replace": "Replace",
+      "rotateToken": "Rotate token",
+      "revoke": "Revoke",
+      "confirm": "Confirm"
+    },
+    "status": {
+      "Active": "Active",
+      "Suspended": "Suspended",
+      "Revoked": "Revoked",
+      "Superseded": "Superseded"
+    },
+    "replacementReason": {
+      "Lost": "Lost",
+      "Damaged": "Damaged",
+      "Stolen": "Stolen",
+      "Other": "Other"
+    },
+    "dialogs": {
+      "suspend": {
+        "title": "Suspend this card?",
+        "description": "The card stops verifying temporarily. It can be reactivated later."
+      },
+      "revoke": {
+        "title": "Revoke this card?",
+        "description": "Permanent — this cannot be undone. Only revoke for fraud or eligibility loss."
+      },
+      "renew": {
+        "title": "Renew this card?",
+        "description": "Issues a fresh successor card with a new validity period."
+      },
+      "replace": {
+        "title": "Replace this card",
+        "description": "Issues a successor card; expiry carries forward from this one when still valid.",
+        "reason": "Replacement reason",
+        "note": "Note (optional)"
+      },
+      "reactivate": {
+        "title": "Reactivate this card?",
+        "description": "Returns a suspended card to active status."
+      },
+      "rotate-token": {
+        "title": "Rotate the card token?",
+        "description": "The embedded QR/NFC secret changes; status and validity stay the same."
+      },
+      "reason": "Reason",
+      "reasonHint": "Recorded in the card's audit trail."
+    },
+    "toasts": {
+      "suspended": "Card suspended.",
+      "revoked": "Card revoked.",
+      "renewed": "Card renewed — successor issued.",
+      "replaced": "Card replaced — successor issued.",
+      "reactivated": "Card reactivated.",
+      "tokenRotated": "Token rotated.",
+      "issued": "{count, plural, one {# card issued.} other {# cards issued.}}"
+    },
+    "snapshot": {
+      "title": "Patient snapshot",
+      "description": "Current card, insurance status, and this patient's applications.",
+      "current": "Current card",
+      "noCurrent": "No currently valid card.",
+      "status": "Insurance status",
+      "noStatus": "No insurance status recorded.",
+      "applications": "Applications",
+      "noApplications": "No applications for this patient.",
+      "openReview": "Open review",
+      "detail": "Application detail",
+      "detailError": "Couldn't load application detail.",
+      "noHistory": "No review history."
+    },
+    "errors": {
+      "load": "Couldn't load the card history.",
+      "none": "No cards have been issued for this patient yet.",
+      "history": "Couldn't load the lifecycle history.",
+      "noHistory": "No status changes recorded.",
+      "invalidPatientId": "Invalid patient reference.",
+      "invalidCardId": "Invalid card reference.",
+      "invalidApplicationId": "Invalid application reference.",
+      "alreadyIssued": "Cards already exist for this application, or it is not Approved.",
+      "invalidReplacementReason": "Invalid replacement reason.",
+      "noteTooLong": "Note is too long.",
+      "reasonInvalid": "A reason of 1–1000 characters is required.",
+      "conflict": "The card's state changed — refreshing."
+    }
+  },
+  "categories": {
+    "title": "Insurance categories",
+    "description": "The reference data the citizen wizard reads. Edits apply without a deploy.",
+    "create": "New category",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "order": "Order",
+      "documents": "Documents",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "marital": {
+      "Single": "Single",
+      "Married": "Married",
+      "Divorced": "Divorced",
+      "Widowed": "Widowed"
+    },
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "order": "Display order",
+      "status": "Status"
+    },
+    "tabs": {
+      "general": "General",
+      "rule": "Eligibility rule",
+      "requirements": "Required documents",
+      "preview": "Preview"
+    },
+    "general": {
+      "description": "Identity fields. The code is fixed after creation.",
+      "codeImmutable": "The code identifies the category and cannot be changed.",
+      "save": "Save changes"
+    },
+    "rule": {
+      "description": "Age range, marital-status restriction, guardian and dependent rules.",
+      "minimumAge": "Minimum age",
+      "maximumAge": "Maximum age",
+      "maritalStatuses": "Allowed marital statuses",
+      "maritalHint": "Leave all unselected for no restriction.",
+      "guardianRequired": "Guardian required",
+      "dependentsAllowed": "Dependents allowed",
+      "save": "Save rule"
+    },
+    "requirements": {
+      "description": "Granular requirement rows — add, update, or remove one at a time.",
+      "add": "Add requirement",
+      "edit": "Edit",
+      "delete": "Remove",
+      "deleteConfirm": "Remove this requirement?",
+      "deleteDescription": "The citizen wizard stops asking for this document immediately.",
+      "none": "No requirements configured yet.",
+      "mandatory": "Required",
+      "optional": "Optional",
+      "documentType": "Document type",
+      "displayName": "Display name",
+      "helpText": "Help text",
+      "sampleUrl": "Sample document URL"
+    },
+    "preview": {
+      "description": "What the citizen sees on the apply page.",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "replace": {
+      "title": "Replace required types",
+      "description": "Full replace: every selected type stays required; omitted types are dropped. Use granular rows below for labels and help text.",
+      "save": "Replace types"
+    },
+    "dialogs": {
+      "create": {
+        "title": "New category",
+        "description": "Creates a category; add its requirements and rule next."
+      }
+    },
+    "toasts": {
+      "created": "Category created.",
+      "updated": "Category updated.",
+      "ruleUpdated": "Eligibility rule saved.",
+      "requirementAdded": "Requirement added.",
+      "requirementUpdated": "Requirement updated.",
+      "requirementDeleted": "Requirement removed.",
+      "requirementsReplaced": "Required document types replaced."
+    },
+    "errors": {
+      "load": "Couldn't load the categories.",
+      "none": "No categories exist yet.",
+      "invalidId": "Invalid category reference.",
+      "code": "Code must be 1–50 characters.",
+      "name": "Name must be 1–100 characters.",
+      "description": "Description is over 500 characters.",
+      "displayOrder": "Display order must be a whole number.",
+      "age": "Ages must be non-negative whole numbers.",
+      "ageRange": "Minimum age is above maximum age.",
+      "maritalStatuses": "Unknown marital status.",
+      "displayName": "Display name is over 200 characters.",
+      "helpText": "Help text is over 500 characters.",
+      "url": "Sample URL must be a valid http(s) link.",
+      "documentType": "Unknown document type.",
+      "validation": "Check the form — some values are invalid.",
+      "conflict": "The category changed on the server — refreshing."
+    }
+  },
+  "verification": {
+    "doctorNote": "Doctors can verify a card and record an insurance check. Recording eligibility is Admin-only.",
+    "card": {
+      "title": "Verify a card",
+      "description": "Scan or paste the card's QR token. Returns only what point-of-care needs.",
+      "placeholder": "Verification token…",
+      "verify": "Verify",
+      "checking": "Checking…",
+      "expires": "Expires {date}",
+      "valid": "Card is currently valid",
+      "notValid": "Card is NOT currently valid"
+    },
+    "insurance": {
+      "title": "Record verification",
+      "description": "Record an insurance verification decision for a patient."
+    },
+    "eligibility": {
+      "title": "Eligibility check",
+      "description": "Record an eligibility decision for a patient."
+    },
+    "patientId": "Patient ID",
+    "status": "Decision",
+    "context": "Context",
+    "reason": "Reason",
+    "remarks": "Remarks",
+    "record": "Record decision",
+    "recorded": "Decision recorded.",
+    "statuses": {
+      "Verified": "Verified",
+      "NotVerified": "Not verified",
+      "Pending": "Pending"
+    },
+    "contexts": {
+      "Appointment": "Appointment",
+      "CheckIn": "Check-in",
+      "ClinicVisit": "Clinic visit",
+      "EmergencyAdmission": "Emergency admission",
+      "Billing": "Billing"
+    },
+    "eligibilityStatuses": {
+      "Eligible": "Eligible",
+      "NotEligible": "Not eligible",
+      "PendingReview": "Pending review",
+      "Suspended": "Suspended",
+      "Expired": "Expired"
+    },
+    "errors": {
+      "invalidToken": "Enter the scanned token.",
+      "invalidInput": "Check the form values.",
+      "reason": "A reason of 1–1000 characters is required.",
+      "remarks": "Remarks are over 2000 characters.",
+      "notFound": "No card or patient matched."
+    }
+  }
+}

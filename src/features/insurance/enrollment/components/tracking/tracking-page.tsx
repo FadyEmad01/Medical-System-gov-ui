@@ -31,6 +31,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Link } from "@/i18n/navigation";
 import { isAuthActionError } from "../../../hooks/session-guard";
 import { useProfile } from "../../../hooks/use-profile";
+import { APPLICATION_STATUS_TONE } from "../../../lib/application-status-tone";
 import type { ApplicationStatus, TimelineStageDto } from "../../../types";
 import {
   useApplicationDetail,
@@ -48,17 +49,6 @@ import type {
 } from "../../types";
 import { CancelDialog } from "./cancel-dialog";
 import { WaitingDocumentsSection } from "./waiting-documents";
-
-/** Application status → badge tone built from the semantic status tokens. */
-const APPLICATION_STATUS_TONE: Record<ApplicationStatus, string> = {
-  Draft: "bg-muted text-muted-foreground",
-  Submitted: "bg-info/10 text-info",
-  UnderReview: "bg-info/10 text-info",
-  WaitingForDocuments: "bg-warning/10 text-warning",
-  Approved: "bg-success/10 text-success",
-  Rejected: "bg-revoked/10 text-revoked",
-  Cancelled: "bg-muted text-muted-foreground",
-};
 
 /**
  * Maps a tracking load error to an insurance translation key. `unauthorized`

@@ -94,6 +94,23 @@
       "expires": "Expires",
       "version": "Version",
       "versionPrefix": "v{version}"
+    },
+    "history": {
+      "title": "Card history",
+      "description": "Every card you and your dependents have held, newest first.",
+      "latest": "Latest",
+      "dependent": "dependent's card",
+      "dates": "Issued {issued} · expires {expires}",
+      "trail": "Lifecycle",
+      "trailError": "Couldn't load the card's lifecycle.",
+      "noChanges": "No status changes recorded.",
+      "change": "{from} → {to}",
+      "replacement": {
+        "Lost": "Replaced (lost)",
+        "Damaged": "Replaced (damaged)",
+        "Stolen": "Replaced (stolen)",
+        "Other": "Replaced"
+      }
     }
   },
   "documents": {

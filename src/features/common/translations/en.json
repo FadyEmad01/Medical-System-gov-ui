@@ -25,6 +25,10 @@
       "insurance": "Insurance",
       "appointments": "Appointments",
       "admin": "Admin"
-    }
+    },
+    "adminApplications": "Application review",
+    "adminCategories": "Categories",
+    "adminCards": "Card lifecycle",
+    "adminVerification": "Verification"
   }
 }

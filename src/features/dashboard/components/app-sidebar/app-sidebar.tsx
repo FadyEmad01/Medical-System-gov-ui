@@ -4,8 +4,11 @@ import {
   CalendarDays,
   CircleUser,
   FilePlus2,
+  FileSearch,
+  FolderCog,
   House,
   IdCard,
+  ScanLine,
   Shield,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -66,12 +69,47 @@ export function AppSidebar({
     },
   ];
 
+  if (user?.role === "Doctor") {
+    groups.push({
+      label: t("nav.groups.admin"),
+      items: [
+        {
+          title: t("nav.adminVerification"),
+          url: "/dashboard/admin/verification",
+          icon: ScanLine,
+        },
+      ],
+    });
+  }
+
   // The admin area is gated by <AdminGuard> on the page; keep it out of the
   // sidebar entirely for everyone else.
   if (user?.role === "Admin") {
     groups.push({
       label: t("nav.groups.admin"),
-      items: [{ title: t("nav.admin"), url: "/dashboard/admin", icon: Shield }],
+      items: [
+        { title: t("nav.admin"), url: "/dashboard/admin", icon: Shield },
+        {
+          title: t("nav.adminApplications"),
+          url: "/dashboard/admin/applications",
+          icon: FileSearch,
+        },
+        {
+          title: t("nav.adminCategories"),
+          url: "/dashboard/admin/categories",
+          icon: FolderCog,
+        },
+        {
+          title: t("nav.adminCards"),
+          url: "/dashboard/admin/cards",
+          icon: IdCard,
+        },
+        {
+          title: t("nav.adminVerification"),
+          url: "/dashboard/admin/verification",
+          icon: ScanLine,
+        },
+      ],
     });
   }
 
