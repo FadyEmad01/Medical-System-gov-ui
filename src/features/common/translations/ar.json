@@ -25,6 +25,9 @@
       "insurance": "التأمين",
       "appointments": "المواعيد",
       "admin": "الإدارة"
-    }
+    },
+    "adminApplications": "مراجعة الطلبات",
+    "adminCategories": "الفئات",
+    "adminVerification": "التحقق"
   }
 }

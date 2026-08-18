@@ -8,7 +8,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ? requested
     : routing.defaultLocale;
 
-  const [auth, insurance, common] = await Promise.all([
+  const [auth, insurance, common, admin] = await Promise.all([
     import(`../features/auth/translations/${locale}.json`).then(
       (m) => m.default,
     ),
@@ -18,10 +18,13 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../features/common/translations/${locale}.json`).then(
       (m) => m.default,
     ),
+    import(`../features/admin/translations/${locale}.json`).then(
+      (m) => m.default,
+    ),
   ]);
 
   return {
     locale,
-    messages: { auth, insurance, common },
+    messages: { auth, insurance, common, admin },
   };
 });
