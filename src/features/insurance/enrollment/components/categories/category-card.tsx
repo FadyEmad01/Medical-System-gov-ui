@@ -91,8 +91,15 @@ export function CategoryCard({
         toast.error(t("errors.sessionExpired"));
         return;
       }
+      // 409: a non-terminal enrollment already exists — the contract says to
+      // redirect into it rather than surface a raw error. The wizard resumes
+      // from the refreshed current-enrollment cache.
       if (error.kind === "conflict") {
-        toast.error(t("enrollment.errors.alreadyExists"));
+        queryClient.invalidateQueries({
+          queryKey: CURRENT_ENROLLMENT_QUERY_KEY,
+        });
+        toast.info(t("enrollment.errors.alreadyExists"));
+        router.push("/dashboard/insurance/apply");
         return;
       }
       if (error.kind === "notFound") {

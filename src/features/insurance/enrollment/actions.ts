@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/api-client";
 import {
   cancelApplication,
   getApplicationDetail,
+  getApplications,
 } from "../api/applications-client";
 import {
   addDependent,
@@ -450,6 +451,21 @@ export async function getStatusAction(
     if (err instanceof ApiError && err.kind === "notFound") {
       return { ok: true, data: null };
     }
+    return { ok: false, error: await toSessionAwareError(err) };
+  }
+}
+
+/** GET /insurance/applications/{patientId} — all applications, newest first. */
+export async function getApplicationsAction(
+  patientId: number,
+): Promise<ActionResult<ApplicationResponseDto[]>> {
+  const token = await getSessionToken();
+  if (!token) return { ok: false, error: SESSION_EXPIRED_ERROR };
+
+  try {
+    const applications = await getApplications(patientId, token);
+    return { ok: true, data: applications };
+  } catch (err) {
     return { ok: false, error: await toSessionAwareError(err) };
   }
 }

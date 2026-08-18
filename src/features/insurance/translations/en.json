@@ -283,7 +283,9 @@
     "submittedAt": "Submitted",
     "documentCount": "Documents",
     "dependentCount": "Dependents",
-    "documentsSection": "Upload the missing documents"
+    "documentsSection": "Upload the missing documents",
+    "history": "Previous applications",
+    "progress": "{done} of {total} stages complete"
   },
   "errors": {
     "sessionExpired": "Your session has expired. Please sign in again.",

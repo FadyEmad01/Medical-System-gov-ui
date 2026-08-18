@@ -109,7 +109,8 @@ export interface CitizenDocumentResponseDto {
   uploadedAt: string;
   expiresAt: string | null;
   reviewStatus: DocumentReviewStatus;
-  reviewedBy: string | null;
+  /** AdminId of the reviewer — integer, null until first review. */
+  reviewedBy: number | null;
   reviewedAt: string | null;
   rejectionReason: string | null;
   isCurrent: boolean;
@@ -168,7 +169,8 @@ export interface ApplicationResponseDto {
   status: ApplicationStatus;
   submissionChannel: SubmissionChannel;
   submittedAt: string | null;
-  reviewedBy: string | null;
+  /** AdminId of the most recent reviewer — integer, null until first review. */
+  reviewedBy: number | null;
   reviewedAt: string | null;
   /** Only present when the status is Approved or Rejected. */
   decisionReason: string | null;
@@ -182,10 +184,12 @@ export interface ApplicationResponseDto {
 
 /** One review-history entry — newest first. */
 export interface ApplicationReviewResponseDto {
+  id: string;
   previousStatus: ApplicationStatus;
   newStatus: ApplicationStatus;
   reviewOutcome: ReviewOutcome | null;
-  reviewedBy: string;
+  /** AdminId of whoever performed this review. */
+  reviewedBy: number;
   reviewedAt: string;
   citizenVisibleReason: string | null;
   /** Always null for a patient caller. */
