@@ -145,10 +145,23 @@
       "storageUnavailable": "File storage is temporarily unavailable. Please try again."
     }
   },
+  "pageHeaders": {
+    "categories": "Apply for insurance",
+    "categoriesDescription": "Choose the insurance category that fits your needs",
+    "apply": "Insurance application",
+    "applyDescription": "Complete the steps to apply for your insurance card",
+    "track": "Application tracking",
+    "trackDescription": "Follow the progress of your insurance application",
+    "card": "My insurance card",
+    "cardDescription": "View your card details and history",
+    "profile": "My profile",
+    "profileDescription": "Manage your personal and insurance information"
+  },
   "categories": {
     "title": "Apply for insurance",
     "description": "Choose the insurance category that fits you",
     "empty": "No insurance categories are available right now.",
+    "applyNow": "Apply now",
     "documentsRequired": "{count, plural, one {# required document} other {# required documents}}",
     "ageRange": "{min}–{max}",
     "ageMinOnly": "{min}+",

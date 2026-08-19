@@ -145,10 +145,23 @@
       "storageUnavailable": "التخزين غير متاح مؤقتاً. يرجى المحاولة مرة أخرى."
     }
   },
+  "pageHeaders": {
+    "categories": "التقديم على التأمين",
+    "categoriesDescription": "اختر فئة التأمين المناسبة لاحتياجاتك",
+    "apply": "طلب التأمين",
+    "applyDescription": "أكمل الخطوات للتقديم على بطاقة التأمين الخاصة بك",
+    "track": "متابعة الطلب",
+    "trackDescription": "تابع تقدم طلب التأمين الخاص بك",
+    "card": "بطاقة التأمين الخاصة بي",
+    "cardDescription": "عرض تفاصيل البطاقة وسجلها",
+    "profile": "ملفي الشخصي",
+    "profileDescription": "إدارة بياناتك الشخصية وبيانات التأمين"
+  },
   "categories": {
     "title": "التقديم على التأمين",
     "description": "اختر فئة التأمين المناسبة لك",
     "empty": "لا تتوفر فئات تأمين حالياً.",
+    "applyNow": "قدّم الآن",
     "documentsRequired": "{count, plural, zero {لا مستندات مطلوبة} one {مستند واحد مطلوب} two {مستندان مطلوبان} few {# مستندات مطلوبة} many {# مستنداً مطلوباً} other {# مستنداً مطلوباً}}",
     "ageRange": "{min}–{max}",
     "ageMinOnly": "{min}+",

@@ -181,9 +181,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { CreditCard, FileText, ShieldCheck, UploadCloud } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 export default function MakeCardBanner() {
+  const t = useTranslations("dashboard");
   const [step, setStep] = useState(0);
 
   useEffect(() => {
@@ -218,7 +220,7 @@ export default function MakeCardBanner() {
       {/* Header */}
       <div className="relative z-20 px-6 pt-6 sm:px-8 sm:pt-8 text-start pointer-events-none">
         <h3 className="text-balance text-xl font-bold leading-tight tracking-tight text-white">
-          Get your card in a few steps
+          {t("makeCard.title")}
         </h3>
         {/* <p className="mt-2 text-pretty text-sm leading-snug text-gray-300">
           Upload files, get authorized, and receive your card.
@@ -242,21 +244,21 @@ export default function MakeCardBanner() {
             active={step >= 0}
             current={step === 0}
             icon={UploadCloud}
-            label="Upload"
+            label={t("makeCard.steps.upload")}
           />
           <Node
             position="50%"
             active={step >= 1}
             current={step === 1}
             icon={ShieldCheck}
-            label="Authorize"
+            label={t("makeCard.steps.authorize")}
           />
           <Node
             position="100%"
             active={step >= 2}
             current={step === 2}
             icon={CreditCard}
-            label="Finished"
+            label={t("makeCard.steps.finished")}
           />
 
           <motion.div

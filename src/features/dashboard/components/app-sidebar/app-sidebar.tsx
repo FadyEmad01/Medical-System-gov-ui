@@ -32,43 +32,51 @@ export function AppSidebar({
   const { data: user } = useMe();
   const t = useTranslations("common");
 
+  // 1. Initialize with only the common platform group that everyone sees
   const groups: NavGroup[] = [
     {
       label: t("nav.groups.platform"),
       items: [{ title: t("nav.home"), url: "/dashboard", icon: House }],
     },
-    {
-      label: t("nav.groups.insurance"),
-      items: [
-        {
-          title: t("nav.profile"),
-          url: "/dashboard/profile",
-          icon: CircleUser,
-        },
-        {
-          title: t("nav.insuranceCard"),
-          url: "/dashboard/insurance-card",
-          icon: IdCard,
-        },
-        {
-          title: t("nav.apply"),
-          url: "/dashboard/insurance",
-          icon: FilePlus2,
-        },
-      ],
-    },
-    {
-      label: t("nav.groups.appointments"),
-      items: [
-        {
-          title: t("nav.appointments"),
-          url: "/dashboard/appointments",
-          icon: CalendarDays,
-        },
-      ],
-    },
   ];
 
+  // 2. Add Insurance and Appointments ONLY if the user is not an Admin and not a Doctor
+  if (user?.role !== "Admin" && user?.role !== "Doctor") {
+    groups.push(
+      {
+        label: t("nav.groups.insurance"),
+        items: [
+          {
+            title: t("nav.profile"),
+            url: "/dashboard/profile",
+            icon: CircleUser,
+          },
+          {
+            title: t("nav.insuranceCard"),
+            url: "/dashboard/insurance-card",
+            icon: IdCard,
+          },
+          {
+            title: t("nav.apply"),
+            url: "/dashboard/insurance",
+            icon: FilePlus2,
+          },
+        ],
+      },
+      {
+        label: t("nav.groups.appointments"),
+        items: [
+          {
+            title: t("nav.appointments"),
+            url: "/dashboard/appointments",
+            icon: CalendarDays,
+          },
+        ],
+      }
+    );
+  }
+
+  // 3. Add Doctor-specific groups
   if (user?.role === "Doctor") {
     groups.push({
       label: t("nav.groups.admin"),
@@ -82,6 +90,7 @@ export function AppSidebar({
     });
   }
 
+  // 4. Add Admin-specific groups
   // The admin area is gated by <AdminGuard> on the page; keep it out of the
   // sidebar entirely for everyone else.
   if (user?.role === "Admin") {

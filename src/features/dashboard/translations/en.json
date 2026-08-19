@@ -1,0 +1,35 @@
+{
+  "welcome": {
+    "greeting": "Welcome back, {name}!",
+    "profileNudge": "Your profile is {level}. Complete it to get your insurance card.",
+    "profileComplete": "Your profile is complete. You can apply for your insurance card.",
+    "generalWelcome": "Manage your insurance policies, view your digital card, and update your personal details all in one place.",
+    "adminDescription": "Access your administrative tools to manage users, monitor platform health, and oversee insurance policies.",
+    "adminCta": "Open Admin Dashboard",
+    "cta": "Complete profile",
+    "viewCard": "View card"
+  },
+  "makeCard": {
+    "title": "Get your card in a few steps",
+    "steps": {
+      "upload": "Upload",
+      "authorize": "Authorize",
+      "finished": "Finished"
+    }
+  },
+  "status": {
+    "cardStatus": "Card Status",
+    "profileProgress": "Profile Progress",
+    "applicationStatus": "Application Status",
+    "noCard": "No card yet",
+    "noApplication": "No application",
+    "inProgress": "In progress"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "apply": "Apply",
+    "track": "Track",
+    "card": "Card",
+    "profile": "Profile"
+  }
+}
