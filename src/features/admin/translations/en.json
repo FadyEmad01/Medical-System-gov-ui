@@ -1,7 +1,11 @@
 {
   "home": {
     "title": "Administration",
+    "greeting": "Welcome back, {name}",
     "description": "Insurance back-office tools. Every action is enforced by the API — this UI only shows what this role can do.",
+    "heroCta": "Open application review",
+    "toolsTitle": "Admin tools",
+    "toolsDescription": "Jump into the desk you need.",
     "applications": {
       "title": "Application review",
       "description": "Cross-patient queue, claim a case, and record a decision."

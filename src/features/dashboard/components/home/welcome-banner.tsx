@@ -83,39 +83,49 @@ import { Link } from "@/i18n/navigation";
 export default function WelcomeBanner() {
   const t = useTranslations("dashboard");
   const { data: user } = useMe();
-  const { data: profile } = useProfile();
-  
+  const isPatient = user?.role === "Patient";
+  const { data: profile } = useProfile({ enabled: isPatient });
+
   if (user === undefined) {
     return (
       <div className="relative flex min-h-[220px] w-full items-end overflow-hidden rounded-xl bg-muted shadow-md animate-pulse" />
     );
   }
 
-  // Determine if the user is an admin (adjust "admin" / "ADMIN" to match your exact database enum)
-  const isAdmin = user?.role === "Admin";
+  if (user === null) {
+    return null;
+  }
 
-  // Standard user logic
+  const isAdmin = user.role === "Admin";
+  const isDoctor = user.role === "Doctor";
+
+  // Standard patient logic — skipped for staff (no citizen profile).
   const completeness = computeProfileCompleteness(profile);
   const hasProfile = profile != null;
   const isComplete = completeness.level === "high";
   const hasCard = hasProfile && isComplete;
 
-  // Conditionally set content based on role
   const description = isAdmin
-    ? t("welcome.adminDescription") // Add this to your translation files
-    : t("welcome.generalWelcome");
+    ? t("welcome.adminDescription")
+    : isDoctor
+      ? t("welcome.doctorDescription")
+      : t("welcome.generalWelcome");
 
   const ctaHref = isAdmin
-    ? "/dashboard/admin" // Change this to your actual admin route
-    : hasCard 
-      ? "/dashboard/insurance-card" 
-      : "/dashboard/profile";
+    ? "/dashboard/admin"
+    : isDoctor
+      ? "/dashboard/doctor"
+      : hasCard
+        ? "/dashboard/insurance-card"
+        : "/dashboard/profile";
 
   const ctaLabel = isAdmin
-    ? t("welcome.adminCta") // Add this to your translation files
-    : hasCard
-      ? t("welcome.viewCard")
-      : t("welcome.cta");
+    ? t("welcome.adminCta")
+    : isDoctor
+      ? t("welcome.doctorCta")
+      : hasCard
+        ? t("welcome.viewCard")
+        : t("welcome.cta");
 
   return (
     <div className="group relative flex min-h-[220px] w-full items-end overflow-hidden rounded-xl bg-slate-900 shadow-md">

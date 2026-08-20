@@ -1,7 +1,5 @@
-"use client";
-
 import { CalendarDays } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,8 +18,8 @@ import {
 } from "@/components/ui/empty";
 import { Link } from "@/i18n/navigation";
 
-export default function AppointmentsPage() {
-  const t = useTranslations("common");
+export default async function AppointmentsPage() {
+  const t = await getTranslations("common");
 
   return (
     <Card>

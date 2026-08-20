@@ -1,9 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { CreditCard, FilePlus, FileSearch, User } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMe } from "@/features/auth/hooks/use-me";
+import { Link } from "@/i18n/navigation";
 
 const actions = [
   { key: "apply", icon: FilePlus, href: "/dashboard/insurance" },
@@ -14,6 +15,13 @@ const actions = [
 
 export function QuickActions() {
   const t = useTranslations("dashboard");
+  const { data: user } = useMe();
+
+  // Patient-only shortcuts; Admin/Doctor use their own desks.
+  // While identity is loading, keep the strip mounted to avoid layout jump.
+  if (user != null && user.role !== "Patient") {
+    return null;
+  }
 
   return (
     <Card>

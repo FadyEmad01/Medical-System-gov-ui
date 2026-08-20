@@ -1,56 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Stepper,
-  StepperIndicator,
-  StepperItem,
-  StepperSeparator,
-  StepperTitle,
-  StepperTrigger,
-} from "@/components/ui/stepper";
 import { useRouter } from "@/i18n/navigation";
 import { isAuthActionError } from "../../../hooks/session-guard";
 import { useProfile } from "../../../hooks/use-profile";
+import { errorMessageKey } from "../../../lib/error-message-key";
 import { useCurrentEnrollment, useReadiness } from "../../hooks/use-enrollment";
+import { deriveInitialWizardStep } from "../../lib/derive-wizard-step";
 import {
-  deriveInitialWizardStep,
-  type WizardStep,
-} from "../../lib/derive-wizard-step";
-import { DependentsStep } from "./dependents-step";
-import { DocumentsStep } from "./documents-step";
-import { EligibilityStep } from "./eligibility-step";
-import { ProfileStep } from "./profile-step";
-import { ReviewStep } from "./review-step";
-
-const STEP_ORDER: readonly WizardStep[] = [
-  "eligibility",
-  "profile",
-  "documents",
-  "dependents",
-  "review",
-];
-
-function stepIndexOf(step: WizardStep): number {
-  return STEP_ORDER.indexOf(step);
-}
-
-/**
- * Maps a wizard load error to an insurance translation key. `unauthorized`
- * (401) means the session is dead; `forbidden` (403) means the user is signed
- * in but lacks permission — both are terminal, so no retry is offered.
- */
-function errorMessageKey(error: unknown): string {
-  if (!isAuthActionError(error)) return "errors.generic";
-  if (error.kind === "unauthorized") return "errors.sessionExpired";
-  if (error.kind === "forbidden") return "errors.forbidden";
-  if (error.kind === "notFound") return "errors.notFound";
-  return "errors.generic";
-}
+  EnrollmentWizardChrome,
+  STEP_ORDER,
+  stepIndexOf,
+} from "./enrollment-wizard-chrome";
+import { EnrollmentWizardStepBody } from "./enrollment-wizard-step-body";
 
 /** True when a retry could heal the load error (everything but auth states). */
 function isRetryableError(error: unknown): boolean {
@@ -160,78 +126,18 @@ export function EnrollmentWizardPage() {
   const step = STEP_ORDER[stepIndex];
 
   return (
-    <Card className="mx-auto w-full max-w-3xl">
-      <CardHeader>
-        <CardTitle>{t("enrollment.title")}</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {t("enrollment.applicationNumber", {
-            number: enrollment.applicationNumber,
-          })}
-        </p>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-6">
-        <Stepper
-          className="items-center"
-          value={stepIndex}
-          onValueChange={setStepIndex}
-        >
-          {STEP_ORDER.map((currentStep, index) => (
-            <Fragment key={currentStep}>
-              <StepperItem step={index}>
-                <StepperTrigger className="rounded-full">
-                  <StepperIndicator />
-                  <div className="hidden flex-col items-start text-start sm:flex">
-                    <StepperTitle>
-                      {t(`enrollment.steps.${currentStep}`)}
-                    </StepperTitle>
-                  </div>
-                </StepperTrigger>
-              </StepperItem>
-              {index < STEP_ORDER.length - 1 ? <StepperSeparator /> : null}
-            </Fragment>
-          ))}
-        </Stepper>
-
-        {step === "eligibility" ? (
-          <EligibilityStep enrollment={enrollment} readiness={readiness} />
-        ) : null}
-        {step === "profile" ? (
-          <ProfileStep profile={profile} readiness={readiness} />
-        ) : null}
-        {step === "documents" ? (
-          <DocumentsStep patientId={profile.patientId} />
-        ) : null}
-        {step === "dependents" ? (
-          <DependentsStep patientId={profile.patientId} />
-        ) : null}
-        {step === "review" ? (
-          <ReviewStep
-            readiness={readiness}
-            applicationCreatedAt={enrollment.createdAt}
-            onBack={() => setStepIndex((index) => index - 1)}
-          />
-        ) : null}
-
-        {stepIndex < STEP_ORDER.length - 1 ? (
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={stepIndex === 0}
-              onClick={() => setStepIndex((index) => index - 1)}
-            >
-              {t("enrollment.back")}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setStepIndex((index) => index + 1)}
-            >
-              {t("enrollment.next")}
-            </Button>
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
+    <EnrollmentWizardChrome
+      applicationNumber={enrollment.applicationNumber}
+      stepIndex={stepIndex}
+      onStepIndexChange={setStepIndex}
+    >
+      <EnrollmentWizardStepBody
+        step={step}
+        profile={profile}
+        enrollment={enrollment}
+        readiness={readiness}
+        onBack={() => setStepIndex((index) => index - 1)}
+      />
+    </EnrollmentWizardChrome>
   );
 }

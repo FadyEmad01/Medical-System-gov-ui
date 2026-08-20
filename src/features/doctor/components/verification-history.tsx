@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { InsuranceVerificationResponseDto } from "@/features/insurance/admin/review/types";
+import type { InsuranceVerificationResponseDto } from "@/features/insurance/verification/types";
 import { verificationStatusTone } from "@/features/insurance/verification/lib/status-tones";
 
 type VerificationHistoryProps = {

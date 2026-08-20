@@ -4,22 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import type { AuthActionError } from "@/features/auth/lib/action-error";
 import { useRouter } from "@/i18n/navigation";
 import { handleSessionExpiry, isForbidden } from "../../../hooks/session-guard";
@@ -29,6 +14,7 @@ import type {
   EnrollmentResponseDto,
   InsuranceCategoryResponseDto,
 } from "../../types";
+import { CategoryCardBody } from "./category-card-body";
 
 /**
  * One selectable insurance category on the landing page.
@@ -110,82 +96,20 @@ export function CategoryCard({
     },
   });
 
-  const activeDocuments = category.documentRequirements.filter(
-    (requirement) => requirement.isActive,
-  ).length;
-
-  const ageLabel = (() => {
-    const { minimumAge: min, maximumAge: max } = category;
-    if (min !== null && max !== null) {
-      return t("categories.ageRange", { min, max });
-    }
-    if (min !== null) return t("categories.ageMinOnly", { min });
-    if (max !== null) return t("categories.ageMaxOnly", { max });
-    return null;
-  })();
-
-  const maritalStatuses =
-    category.allowedMaritalStatuses.length > 0
-      ? category.allowedMaritalStatuses
-          .map((status) => t(`profile.maritalStatus.${status}`))
-          .join(", ")
-      : null;
-
   return (
     <Card className="flex flex-col">
-      <CardHeader>
-        <CardTitle>{category.name}</CardTitle>
-        {category.description ? (
-          <CardDescription>{category.description}</CardDescription>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-2">
-          {ageLabel ? <Badge variant="secondary">{ageLabel}</Badge> : null}
-          {maritalStatuses ? (
-            <Badge variant="secondary">
-              {t("categories.maritalEligible")}: {maritalStatuses}
-            </Badge>
-          ) : null}
-          <Badge variant="outline">
-            {t("categories.documentsRequired", { count: activeDocuments })}
-          </Badge>
-        </div>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-2">
-        {category.dependentsAllowed === false ? (
-          <p className="text-xs text-muted-foreground">
-            {t("categories.dependentsNotAllowed")}
-          </p>
-        ) : null}
-        {category.guardianRequired ? (
-          <p className="text-xs text-muted-foreground">
-            {t("categories.guardianRequired")}
-          </p>
-        ) : null}
-      </CardContent>
-
-      <CardFooter>
-        <Select
-          value={selected}
-          disabled={startMutation.isPending}
-          onValueChange={(value) => {
-            if (value) {
-              // Reset before mutating: with the controlled value back to "",
-              // the next pick re-fires onValueChange, so a failed start
-              // (conflict/network) can be retried without a page reload.
-              setSelected("");
-              startMutation.mutate(category.id);
-            }
-          }}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={category.name} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={category.id}>{category.name}</SelectItem>
-          </SelectContent>
-        </Select>
-      </CardFooter>
+      <CategoryCardBody
+        category={category}
+        pending={startMutation.isPending}
+        selected={selected}
+        onSelect={() => {
+          // Reset before mutating: with the controlled value back to "",
+          // the next pick re-fires onValueChange, so a failed start
+          // (conflict/network) can be retried without a page reload.
+          setSelected("");
+          startMutation.mutate(category.id);
+        }}
+      />
     </Card>
   );
 }

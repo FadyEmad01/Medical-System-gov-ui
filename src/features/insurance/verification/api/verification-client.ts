@@ -4,7 +4,7 @@ import { apiClient } from "@/lib/api-client";
 import type {
   InsuranceEligibilityResponseDto,
   InsuranceVerificationResponseDto,
-} from "../../admin/review/types";
+} from "../types";
 import type {
   CardVerificationResultDto,
   CheckEligibilityInput,

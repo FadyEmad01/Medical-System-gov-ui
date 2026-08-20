@@ -18,6 +18,17 @@ import type {
   Gender,
   MaritalStatus,
 } from "../../types";
+import type {
+  InsuranceEligibilityResponseDto,
+  InsuranceVerificationResponseDto,
+} from "../../verification/types";
+
+export type {
+  InsuranceEligibilityResponseDto,
+  InsuranceVerificationResponseDto,
+  VerificationContext,
+  VerificationSource,
+} from "../../verification/types";
 
 /** Server-paged result envelope (queue endpoint). */
 export interface PagedResult<T> {
@@ -47,48 +58,6 @@ export interface ApplicantSummaryDto {
   nationality: string | null;
   emergencyContactName: string | null;
   emergencyContactPhone: string | null;
-}
-
-/** Latest recorded eligibility decision (POST /eligibility/check writer). */
-export interface InsuranceEligibilityResponseDto {
-  id: string;
-  patientId: number;
-  patientFullName: string | null;
-  patientNationalId: string | null;
-  status: EligibilityStatus;
-  reason: string | null;
-  checkedAt: string;
-  checkedBy: number;
-  remarks: string | null;
-  createdAt: string;
-  updatedAt: string | null;
-}
-
-export type VerificationContext =
-  | "Appointment"
-  | "CheckIn"
-  | "ClinicVisit"
-  | "EmergencyAdmission"
-  | "Billing";
-
-export type VerificationSource = "Doctor" | "Admin" | "System";
-
-/** Latest recorded insurance verification (POST /verification/verify writer). */
-export interface InsuranceVerificationResponseDto {
-  id: string;
-  patientId: number;
-  patientFullName: string | null;
-  patientNationalId: string | null;
-  status: "Verified" | "NotVerified" | "Pending";
-  context: VerificationContext | null;
-  source: VerificationSource | null;
-  reason: string | null;
-  remarks: string | null;
-  verifiedAt: string;
-  expiresAt: string | null;
-  verifiedBy: number;
-  correlationId: string;
-  isCurrentlyValid: boolean;
 }
 
 /**

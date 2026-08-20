@@ -6,6 +6,8 @@
     "generalWelcome": "Manage your insurance policies, view your digital card, and update your personal details all in one place.",
     "adminDescription": "Access your administrative tools to manage users, monitor platform health, and oversee insurance policies.",
     "adminCta": "Open Admin Dashboard",
+    "doctorDescription": "Open the point-of-care desk to verify coverage and record eligibility checks.",
+    "doctorCta": "Open Doctor Desk",
     "cta": "Complete profile",
     "viewCard": "View card"
   },
@@ -23,7 +25,9 @@
     "applicationStatus": "Application Status",
     "noCard": "No card yet",
     "noApplication": "No application",
-    "inProgress": "In progress"
+    "inProgress": "In progress",
+    "loadErrorTitle": "Couldn't load your status",
+    "retry": "Retry"
   },
   "quickActions": {
     "title": "Quick Actions",

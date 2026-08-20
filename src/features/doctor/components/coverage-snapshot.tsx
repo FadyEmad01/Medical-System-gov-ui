@@ -16,7 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import type {
   InsuranceEligibilityResponseDto,
   InsuranceVerificationResponseDto,
-} from "@/features/insurance/admin/review/types";
+} from "@/features/insurance/verification/types";
 import { eligibilityTone } from "@/features/insurance/verification/lib/status-tones";
 
 type CoverageSnapshotProps = {

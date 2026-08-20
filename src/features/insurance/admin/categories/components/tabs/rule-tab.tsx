@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { InsuranceCategoryResponseDto } from "@/features/insurance/enrollment/types";
+import type { MaritalStatus } from "@/features/insurance/types";
 import { useSetEligibilityRule } from "../../hooks/use-categories-admin";
 import { KNOWN_MARITAL_STATUSES } from "../../lib/category-validation";
 
@@ -21,27 +22,38 @@ export function RuleTab({
 }: {
   category: InsuranceCategoryResponseDto;
 }) {
+  return (
+    <RuleTabForm
+      category={category}
+      key={`${category.id}-${category.updatedAt ?? category.minimumAge}-${category.maximumAge}`}
+    />
+  );
+}
+
+function RuleTabForm({
+  category,
+}: {
+  category: InsuranceCategoryResponseDto;
+}) {
   const t = useTranslations("admin");
   const rule = useSetEligibilityRule(category.id);
-  const [minimumAge, setMinimumAge] = useState("");
-  const [maximumAge, setMaximumAge] = useState("");
-  const [allowed, setAllowed] = useState<string[]>([]);
-  const [guardianRequired, setGuardianRequired] = useState(false);
-  const [dependentsAllowed, setDependentsAllowed] = useState(false);
+  const [minimumAge, setMinimumAge] = useState(
+    category.minimumAge != null ? String(category.minimumAge) : "",
+  );
+  const [maximumAge, setMaximumAge] = useState(
+    category.maximumAge != null ? String(category.maximumAge) : "",
+  );
+  const [allowed, setAllowed] = useState<MaritalStatus[]>(
+    category.allowedMaritalStatuses,
+  );
+  const [guardianRequired, setGuardianRequired] = useState(
+    category.guardianRequired,
+  );
+  const [dependentsAllowed, setDependentsAllowed] = useState(
+    category.dependentsAllowed,
+  );
 
-  useEffect(() => {
-    setMinimumAge(
-      category.minimumAge != null ? String(category.minimumAge) : "",
-    );
-    setMaximumAge(
-      category.maximumAge != null ? String(category.maximumAge) : "",
-    );
-    setAllowed(category.allowedMaritalStatuses);
-    setGuardianRequired(category.guardianRequired);
-    setDependentsAllowed(category.dependentsAllowed);
-  }, [category]);
-
-  const toggle = (status: string) => {
+  const toggle = (status: MaritalStatus) => {
     setAllowed((current) =>
       current.includes(status)
         ? current.filter((value) => value !== status)
@@ -94,6 +106,7 @@ export function RuleTab({
                 key={status}
                 onClick={() => toggle(status)}
                 size="sm"
+                type="button"
                 variant={allowed.includes(status) ? "default" : "outline"}
               >
                 {t(`categories.marital.${status}`)}
@@ -138,6 +151,7 @@ export function RuleTab({
                 dependentsAllowed,
               })
             }
+            type="button"
           >
             {t("categories.rule.save")}
           </Button>

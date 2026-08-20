@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { InsuranceCategoryResponseDto } from "@/features/insurance/enrollment/types";
 import {
   useCategory,
   useUpdateCategory,
@@ -26,25 +27,30 @@ import {
 
 /** Tab 1 — identity fields. The code is an identity field: read-only on edit. */
 export function GeneralTab({ categoryId }: { categoryId: string }) {
-  const t = useTranslations("admin");
   const query = useCategory(categoryId);
   const category = query.data;
-  const update = useUpdateCategory(categoryId);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [displayOrder, setDisplayOrder] = useState("0");
-  const [isActive, setIsActive] = useState(true);
-
-  useEffect(() => {
-    if (category) {
-      setName(category.name);
-      setDescription(category.description ?? "");
-      setDisplayOrder(String(category.displayOrder));
-      setIsActive(category.isActive);
-    }
-  }, [category]);
-
   if (!category) return null;
+  return (
+    <GeneralTabForm
+      category={category}
+      key={`${category.id}-${category.updatedAt ?? category.name}`}
+    />
+  );
+}
+
+function GeneralTabForm({
+  category,
+}: {
+  category: InsuranceCategoryResponseDto;
+}) {
+  const t = useTranslations("admin");
+  const update = useUpdateCategory(category.id);
+  const [name, setName] = useState(category.name);
+  const [description, setDescription] = useState(category.description ?? "");
+  const [displayOrder, setDisplayOrder] = useState(
+    String(category.displayOrder),
+  );
+  const [isActive, setIsActive] = useState(category.isActive);
 
   return (
     <Card>

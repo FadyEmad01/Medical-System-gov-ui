@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { useMe } from "@/features/auth/hooks/use-me";
+import { dashboardHomePath } from "@/features/auth/lib/dashboard-home-path";
+import type { MeResponse } from "@/features/auth/types";
 import { Link } from "@/i18n/navigation";
 import type { UserRole } from "@/types/enums";
 
@@ -67,13 +69,13 @@ function RoleGuard({
   if (user === null) return null;
 
   if (!allowedRoles.includes(user.role)) {
-    return <AccessDenied />;
+    return <AccessDenied user={user} />;
   }
 
   return <>{children}</>;
 }
 
-function AccessDenied() {
+function AccessDenied({ user }: { user: MeResponse }) {
   const t = useTranslations("common");
 
   return (
@@ -87,7 +89,7 @@ function AccessDenied() {
       </EmptyHeader>
       <EmptyContent>
         <Button asChild variant="outline">
-          <Link href="/dashboard">{t("nav.home")}</Link>
+          <Link href={dashboardHomePath(user.role)}>{t("nav.home")}</Link>
         </Button>
       </EmptyContent>
     </Empty>

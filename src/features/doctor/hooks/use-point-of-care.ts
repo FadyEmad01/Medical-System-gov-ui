@@ -2,14 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 import { toast } from "sonner";
 import { useMe } from "@/features/auth/hooks/use-me";
 import type { AuthActionError } from "@/features/auth/lib/action-error";
-import type {
-  InsuranceEligibilityResponseDto,
-  InsuranceVerificationResponseDto,
-} from "@/features/insurance/admin/review/types";
+import { useActionMutationError } from "@/features/insurance/hooks/use-action-mutation-error";
+import {
+  actionQueryRetry,
+  useSessionExpiryGuard,
+} from "@/features/insurance/hooks/use-action-query";
 import {
   getCurrentVerificationAction,
   getEligibilityAction,
@@ -20,14 +20,10 @@ import {
 } from "@/features/insurance/verification/actions";
 import type {
   CardVerificationResultDto,
+  InsuranceEligibilityResponseDto,
+  InsuranceVerificationResponseDto,
   VerifyInsuranceInput,
 } from "@/features/insurance/verification/types";
-import {
-  handleSessionExpiry,
-  isAuthActionError,
-  isForbidden,
-  isTerminalActionError,
-} from "@/features/insurance/hooks/session-guard";
 
 /** Cache keys — purged with ["doctor"] on session expiry. */
 export const DOCTOR_ELIGIBILITY_KEY = (patientId: number) =>
@@ -49,25 +45,11 @@ function useDoctorEnabled(patientId: number | null) {
   );
 }
 
-function useDoctorSessionGuard(error: unknown) {
-  const queryClient = useQueryClient();
-  useEffect(() => {
-    if (!isAuthActionError(error)) return;
-    handleSessionExpiry(queryClient, error);
-  }, [error, queryClient]);
-}
-
-function doctorRetry(failureCount: number, error: unknown) {
-  return (
-    !(isAuthActionError(error) && isTerminalActionError(error)) &&
-    failureCount < 1
-  );
-}
-
 /** Parallel snapshot reads when a valid patientId is loaded. */
 export function useCoverageSnapshot(patientId: number | null) {
   const enabled = useDoctorEnabled(patientId);
   const id = patientId ?? 0;
+  const queryClient = useQueryClient();
 
   const eligibility = useQuery({
     queryKey: DOCTOR_ELIGIBILITY_KEY(id),
@@ -79,7 +61,7 @@ export function useCoverageSnapshot(patientId: number | null) {
     enabled,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    retry: doctorRetry,
+    retry: actionQueryRetry,
   });
 
   const current = useQuery({
@@ -92,7 +74,7 @@ export function useCoverageSnapshot(patientId: number | null) {
     enabled,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    retry: doctorRetry,
+    retry: actionQueryRetry,
   });
 
   const latest = useQuery({
@@ -105,10 +87,13 @@ export function useCoverageSnapshot(patientId: number | null) {
     enabled,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    retry: doctorRetry,
+    retry: actionQueryRetry,
   });
 
-  useDoctorSessionGuard(eligibility.error ?? current.error ?? latest.error);
+  useSessionExpiryGuard(
+    queryClient,
+    eligibility.error ?? current.error ?? latest.error,
+  );
 
   return { eligibility, current, latest, enabled };
 }
@@ -116,6 +101,7 @@ export function useCoverageSnapshot(patientId: number | null) {
 export function useVerificationHistory(patientId: number | null) {
   const enabled = useDoctorEnabled(patientId);
   const id = patientId ?? 0;
+  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: DOCTOR_HISTORY_KEY(id),
@@ -127,36 +113,22 @@ export function useVerificationHistory(patientId: number | null) {
     enabled,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
-    retry: doctorRetry,
+    retry: actionQueryRetry,
   });
 
-  useDoctorSessionGuard(query.error);
+  useSessionExpiryGuard(queryClient, query.error);
   return query;
 }
 
 function useDoctorMutationError() {
   const t = useTranslations("doctor");
-  const queryClient = useQueryClient();
-
-  return (error: AuthActionError) => {
-    if (handleSessionExpiry(queryClient, error)) {
-      toast.error(t("errors.sessionExpired"));
-      return;
-    }
-    if (error.kind === "validation") {
-      toast.error(t("errors.reason"));
-      return;
-    }
-    if (isForbidden(error)) {
-      toast.error(t("errors.forbidden"));
-      return;
-    }
-    if (error.kind === "notFound") {
-      toast.error(t("errors.notFound"));
-      return;
-    }
-    toast.error(t("errors.generic"));
-  };
+  return useActionMutationError({
+    onSessionExpired: () => toast.error(t("errors.sessionExpired")),
+    onForbidden: () => toast.error(t("errors.forbidden")),
+    onValidation: () => toast.error(t("errors.reason")),
+    onNotFound: () => toast.error(t("errors.notFound")),
+    onGeneric: () => toast.error(t("errors.generic")),
+  });
 }
 
 export function useVerifyCardMutation() {
