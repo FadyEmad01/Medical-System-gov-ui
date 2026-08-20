@@ -1,0 +1,99 @@
+{
+  "title": "نقطة الرعاية",
+  "description": "امسح البطاقة الرقمية، حمّل المريض بالمعرّف، ثم سجّل قرار التغطية.",
+  "strip": {
+    "patientId": "معرّف المريض",
+    "load": "تحميل المريض",
+    "loaded": "محمّل",
+    "eligibility": "الأهلية",
+    "coverageNow": "التغطية الآن",
+    "noName": "مريض {id}",
+    "nidMasked": "الرقم القومي - {masked}",
+    "none": "لا يوجد",
+    "notLoaded": "أدخل معرّف المريض لتحميل التغطية.",
+    "inaccessible": "المريض غير موجود أو غير متاح."
+  },
+  "scan": {
+    "title": "١ - مسح البطاقة",
+    "hint": "POST /insurance/cards/verify",
+    "ready": "جاهز لـ QR / NFC",
+    "pasteHint": "الصق الرمز إذا كان الماسح غير متصل",
+    "placeholder": "verificationToken (uuid)",
+    "verify": "تحقق من الرمز",
+    "checking": "جارٍ التحقق…",
+    "accept": "قبول",
+    "reject": "غير صالح",
+    "expires": "isCurrentlyValid - {valid} - ينتهي {date}"
+  },
+  "snapshot": {
+    "title": "٢ - لقطة التغطية",
+    "hint": "الأهلية + الحالي + الأحدث",
+    "eligibility": "الأهلية",
+    "current": "التحقق الحالي",
+    "latest": "الأحدث (أي)",
+    "validNow": "صالح الآن",
+    "noEligibility": "لا يوجد سجل أهلية بعد.",
+    "noCurrent": "لا يوجد تحقق صالح حالياً.",
+    "noLatest": "لا توجد أحداث تحقق بعد.",
+    "expiresIn": "ينتهي {relative} - المصدر {source}",
+    "sameEvent": "نفس الحدث - ما زال ضمن النافذة",
+    "accessNote": "يمكن للطبيب قراءة المرضى الذين زارهم أو تم تعيينهم فقط. غير المعروف / غير المتاح → نفس 404.",
+    "needPatient": "حمّل مريضاً لعرض التغطية."
+  },
+  "record": {
+    "title": "٣ - تسجيل التحقق",
+    "hint": "POST /insurance/verification/verify",
+    "context": "السياق",
+    "outcome": "النتيجة",
+    "reason": "السبب",
+    "remarks": "ملاحظات (اختياري)",
+    "remarksPlaceholder": "ملاحظة داخلية…",
+    "save": "حفظ حدث التحقق",
+    "saving": "جارٍ الحفظ…",
+    "footnote": "يُدرج دائماً حدثاً جديداً. ExpiresAt يُحدد من الخادم (~٢٤ ساعة عند Verified).",
+    "needPatient": "حمّل مريضاً قبل التسجيل.",
+    "recorded": "تم تسجيل التحقق.",
+    "contexts": {
+      "Appointment": "موعد",
+      "CheckIn": "تسجيل دخول",
+      "ClinicVisit": "زيارة عيادة",
+      "EmergencyAdmission": "طوارئ",
+      "Billing": "فوترة"
+    },
+    "statuses": {
+      "Verified": "Verified",
+      "NotVerified": "NotVerified",
+      "Pending": "Pending"
+    }
+  },
+  "history": {
+    "title": "سجل التحقق",
+    "hint": "GET /insurance/verification/{patientId}/history",
+    "newestFirst": "الأحدث أولاً",
+    "when": "متى",
+    "status": "الحالة",
+    "context": "السياق",
+    "validNow": "صالح الآن",
+    "reason": "السبب",
+    "yes": "نعم",
+    "no": "لا",
+    "empty": "لا يوجد سجل تحقق لهذا المريض.",
+    "needPatient": "حمّل مريضاً لعرض السجل."
+  },
+  "eligibilityStatuses": {
+    "Eligible": "مؤهل",
+    "NotEligible": "غير مؤهل",
+    "PendingReview": "قيد المراجعة",
+    "Suspended": "موقوف",
+    "Expired": "منتهٍ"
+  },
+  "errors": {
+    "forbidden": "ليس لديك صلاحية لهذا الإجراء.",
+    "sessionExpired": "انتهت جلستك. سجّل الدخول مجدداً.",
+    "notFound": "المريض غير موجود أو غير متاح.",
+    "generic": "حدث خطأ. حاول مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "invalidToken": "أدخل رمز تحقق صالحاً.",
+    "reason": "مطلوب سبب من ١–١٠٠٠ حرف."
+  }
+}

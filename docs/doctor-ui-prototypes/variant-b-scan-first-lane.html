@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doctor PoC — Variant B · Scan-first lane (system theme)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./theme.css" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: "var(--background)",
+              foreground: "var(--foreground)",
+              card: "var(--card)",
+              "card-foreground": "var(--card-foreground)",
+              primary: "var(--primary)",
+              "primary-foreground": "var(--primary-foreground)",
+              secondary: "var(--secondary)",
+              "secondary-foreground": "var(--secondary-foreground)",
+              muted: "var(--muted)",
+              "muted-foreground": "var(--muted-foreground)",
+              accent: "var(--accent)",
+              "accent-foreground": "var(--accent-foreground)",
+              destructive: "var(--destructive)",
+              success: "var(--success)",
+              warning: "var(--warning)",
+              info: "var(--info)",
+              border: "var(--border)",
+              input: "var(--input)",
+              ring: "var(--ring)",
+              sidebar: "var(--sidebar)",
+              "sidebar-foreground": "var(--sidebar-foreground)",
+              "sidebar-primary": "var(--sidebar-primary)",
+              "sidebar-accent": "var(--sidebar-accent)",
+              "sidebar-border": "var(--sidebar-border)",
+            },
+            borderRadius: {
+              lg: "var(--radius)",
+              xl: "calc(var(--radius) * 1.4)",
+            },
+            fontFamily: {
+              sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+              mono: ['"Geist Mono"', "ui-monospace", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="min-h-screen bg-background font-sans text-foreground">
+    <div class="mx-auto max-w-5xl px-4 py-6 md:py-8">
+      <header class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="text-xs font-medium text-muted-foreground">Doctor · Point of care</p>
+          <h1 class="mt-0.5 text-lg font-medium">Check-in verification</h1>
+        </div>
+        <div
+          class="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm"
+        >
+          <span class="size-2 rounded-full bg-success"></span>
+          Dr. Sara · Station 3
+        </div>
+      </header>
+
+      <!-- Stepper -->
+      <ol class="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <li class="rounded-xl bg-primary px-3 py-3 text-primary-foreground">
+          <p class="text-[10px] uppercase tracking-wide opacity-70">Step 1</p>
+          <p class="text-sm font-medium">Scan</p>
+        </li>
+        <li class="rounded-xl bg-muted px-3 py-3">
+          <p class="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Step 2
+          </p>
+          <p class="text-sm font-medium text-muted-foreground">Patient</p>
+        </li>
+        <li class="rounded-xl bg-muted px-3 py-3">
+          <p class="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Step 3
+          </p>
+          <p class="text-sm font-medium text-muted-foreground">Decide</p>
+        </li>
+        <li class="rounded-xl bg-muted px-3 py-3">
+          <p class="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Step 4
+          </p>
+          <p class="text-sm font-medium text-muted-foreground">Done</p>
+        </li>
+      </ol>
+
+      <!-- Scan stage -->
+      <section class="ui-card overflow-hidden py-0">
+        <div class="grid lg:grid-cols-[1.15fr_0.85fr]">
+          <div class="flex flex-col gap-6 border-b border-border p-5 md:p-6 lg:border-b-0 lg:border-r">
+            <div>
+              <p class="text-xs text-muted-foreground">
+                POST /insurance/cards/verify
+              </p>
+              <h2 class="mt-1 text-base font-medium">Present the digital card</h2>
+              <p class="mt-1 max-w-md text-sm text-muted-foreground">
+                Opaque token only — no National ID in the response. Key off
+                <span class="font-mono text-xs">isCurrentlyValid</span>.
+              </p>
+            </div>
+            <div
+              class="flex min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/50 px-6 py-12 text-center"
+            >
+              <div
+                class="mb-3 flex size-12 items-center justify-center rounded-xl bg-card ring-1 ring-foreground/10"
+              >
+                <svg
+                  class="size-6 text-muted-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M4 7h16M4 12h10M4 17h7" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+              </div>
+              <p class="text-sm font-medium">Waiting for scanner…</p>
+              <p class="mt-1 text-xs text-muted-foreground">or paste token below</p>
+            </div>
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <input
+                class="ui-input font-mono text-xs"
+                placeholder="verificationToken"
+                value="0f1e2d3c-4b5a-6978-8f0e-1d2c3b4a5968"
+              />
+              <button class="ui-btn ui-btn-primary shrink-0" type="button">
+                Verify
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-muted/40 p-5 md:p-6">
+            <p class="text-xs text-muted-foreground">Result</p>
+            <div class="mt-3 rounded-xl bg-success p-5 text-white">
+              <p class="text-xs font-medium uppercase tracking-wide opacity-80">
+                Accept at desk
+              </p>
+              <p class="mt-1 text-2xl font-semibold">Valid</p>
+              <p class="mt-0.5 text-sm text-white/80">isCurrentlyValid = true</p>
+            </div>
+            <dl class="mt-5 space-y-3 text-sm">
+              <div
+                class="flex justify-between gap-4 border-b border-border pb-3"
+              >
+                <dt class="text-muted-foreground">Card</dt>
+                <dd class="font-mono text-xs">INS-2026-00000015</dd>
+              </div>
+              <div
+                class="flex justify-between gap-4 border-b border-border pb-3"
+              >
+                <dt class="text-muted-foreground">Holder</dt>
+                <dd>E2E Review Flow Test</dd>
+              </div>
+              <div
+                class="flex justify-between gap-4 border-b border-border pb-3"
+              >
+                <dt class="text-muted-foreground">Status</dt>
+                <dd><span class="ui-badge ui-badge-success">Active</span></dd>
+              </div>
+              <div class="flex justify-between gap-4">
+                <dt class="text-muted-foreground">Expires</dt>
+                <dd class="font-mono text-xs">2027-08-18</dd>
+              </div>
+            </dl>
+            <p class="mt-5 text-xs leading-relaxed text-muted-foreground">
+              Denied state uses the same layout with a destructive board and
+              isCurrentlyValid false.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <section class="ui-card p-5">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-sm font-medium">Bind patient</h3>
+            <span class="ui-badge ui-badge-muted">Step 2</span>
+          </div>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Card verify does not return patientId. Enter the clinic patient ID
+            to load eligibility and current verification.
+          </p>
+          <div class="mt-4 flex gap-2">
+            <input
+              class="ui-input font-mono"
+              inputmode="numeric"
+              placeholder="Patient ID"
+              value="24"
+            />
+            <button class="ui-btn ui-btn-primary shrink-0" type="button">
+              Load
+            </button>
+          </div>
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <div class="rounded-xl bg-muted p-3">
+              <p class="text-xs text-muted-foreground">Eligibility</p>
+              <p class="mt-1 text-sm font-medium text-success">Eligible</p>
+            </div>
+            <div class="rounded-xl bg-muted p-3">
+              <p class="text-xs text-muted-foreground">Coverage now</p>
+              <p class="mt-1 text-sm font-medium text-success">Valid</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="ui-card p-5">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-sm font-medium">Record decision</h3>
+            <span class="ui-badge ui-badge-muted">Step 3</span>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <button class="ui-chip ui-chip-active" type="button">CheckIn</button>
+            <button class="ui-chip" type="button">ClinicVisit</button>
+            <button class="ui-chip" type="button">Emergency</button>
+          </div>
+          <div class="mt-3 grid grid-cols-3 gap-1.5">
+            <button class="ui-btn text-xs" style="background: var(--success); color: white" type="button">
+              Verified
+            </button>
+            <button class="ui-btn ui-btn-outline text-xs" type="button">
+              NotVerified
+            </button>
+            <button class="ui-btn ui-btn-outline text-xs" type="button">
+              Pending
+            </button>
+          </div>
+          <textarea
+            class="ui-input mt-3 min-h-[3.5rem] resize-y"
+            placeholder="Reason (required)"
+            rows="2"
+          >
+Card accepted at Station 3 check-in.</textarea
+          >
+          <button class="ui-btn ui-btn-primary mt-3 w-full" type="button">
+            Write verification event
+          </button>
+        </section>
+      </div>
+
+      <section class="ui-card mt-4 p-5">
+        <div class="mb-3 flex items-end justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-medium">Recent trail</h3>
+            <p class="text-xs text-muted-foreground">
+              GET /verification/{patientId}/history
+            </p>
+          </div>
+          <button class="ui-btn ui-btn-ghost text-sm text-primary" type="button">
+            View all
+          </button>
+        </div>
+        <ul class="divide-y divide-border">
+          <li class="flex items-center justify-between gap-3 py-3">
+            <div>
+              <p class="text-sm font-medium">Verified · CheckIn</p>
+              <p class="text-xs text-muted-foreground">Today 09:12 · Manual</p>
+            </div>
+            <span class="ui-badge ui-badge-success">Valid</span>
+          </li>
+          <li class="flex items-center justify-between gap-3 py-3">
+            <div>
+              <p class="text-sm font-medium">Pending · Appointment</p>
+              <p class="text-xs text-muted-foreground">Aug 18 · Manual</p>
+            </div>
+            <span class="ui-badge ui-badge-warning">Expired</span>
+          </li>
+        </ul>
+      </section>
+
+      <p class="mt-6 pb-4 text-center text-xs text-muted-foreground">
+        Variant B · Scan-first lane · system theme (same tokens as the app)
+      </p>
+    </div>
+  </body>
+</html>

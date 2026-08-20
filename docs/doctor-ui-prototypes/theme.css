@@ -1,0 +1,163 @@
+/* Mirrors src/styles/globals.css :root tokens for static HTML prototypes. */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.148 0.004 228.8);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.148 0.004 228.8);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.148 0.004 228.8);
+  --primary: oklch(0.5 0.134 242.749);
+  --primary-foreground: oklch(0.977 0.013 236.62);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.963 0.002 197.1);
+  --muted-foreground: oklch(0.56 0.021 213.5);
+  --accent: oklch(0.963 0.002 197.1);
+  --accent-foreground: oklch(0.218 0.008 223.9);
+  --destructive: oklch(0.577 0.245 27.325);
+  --success: oklch(0.514 0.136 150.218);
+  --warning: oklch(0.617 0.13 71.515);
+  --info: oklch(0.526 0.149 251.625);
+  --revoked: oklch(0.548 0.182 16.045);
+  --superseded: oklch(0.527 0.067 19.569);
+  --border: oklch(0.925 0.005 214.3);
+  --input: oklch(0.925 0.005 214.3);
+  --ring: oklch(0.723 0.014 214.4);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.987 0.002 197.1);
+  --sidebar-foreground: oklch(0.148 0.004 228.8);
+  --sidebar-primary: oklch(0.588 0.158 241.966);
+  --sidebar-primary-foreground: oklch(0.977 0.013 236.62);
+  --sidebar-accent: oklch(0.963 0.002 197.1);
+  --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
+  --sidebar-border: oklch(0.925 0.005 214.3);
+  --sidebar-ring: oklch(0.723 0.014 214.4);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono {
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.ui-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border-radius: calc(var(--radius) * 1.4);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--border) 70%, transparent);
+}
+
+.ui-input {
+  width: 100%;
+  border: 1px solid var(--input);
+  background: var(--background);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.ui-input:focus {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 45%, transparent);
+}
+
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: var(--radius);
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.ui-btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.ui-btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.ui-btn-outline {
+  background: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.ui-btn-outline:hover {
+  background: var(--muted);
+}
+
+.ui-btn-ghost {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.ui-btn-ghost:hover {
+  background: var(--muted);
+}
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+
+.ui-badge-success {
+  background: color-mix(in oklch, var(--success) 12%, white);
+  color: var(--success);
+  border-color: transparent;
+}
+
+.ui-badge-warning {
+  background: color-mix(in oklch, var(--warning) 14%, white);
+  color: var(--warning);
+  border-color: transparent;
+}
+
+.ui-badge-destructive {
+  background: color-mix(in oklch, var(--destructive) 12%, white);
+  color: var(--destructive);
+  border-color: transparent;
+}
+
+.ui-badge-muted {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-color: transparent;
+}
+
+.ui-chip {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.ui-chip-active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: transparent;
+}

@@ -72,18 +72,18 @@ export function AppSidebar({
             icon: CalendarDays,
           },
         ],
-      }
+      },
     );
   }
 
   // 3. Add Doctor-specific groups
   if (user?.role === "Doctor") {
     groups.push({
-      label: t("nav.groups.admin"),
+      label: t("nav.groups.doctor"),
       items: [
         {
-          title: t("nav.adminVerification"),
-          url: "/dashboard/admin/verification",
+          title: t("nav.doctorPointOfCare"),
+          url: "/dashboard/doctor",
           icon: ScanLine,
         },
       ],

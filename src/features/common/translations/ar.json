@@ -24,11 +24,13 @@
       "platform": "المنصة",
       "insurance": "التأمين",
       "appointments": "المواعيد",
-      "admin": "الإدارة"
+      "admin": "الإدارة",
+      "doctor": "الطبيب"
     },
     "adminApplications": "مراجعة الطلبات",
     "adminCategories": "الفئات",
     "adminCards": "دورة حياة البطاقة",
-    "adminVerification": "التحقق"
+    "adminVerification": "التحقق",
+    "doctorPointOfCare": "نقطة الرعاية"
   }
 }
