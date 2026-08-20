@@ -1,0 +1,99 @@
+{
+  "title": "Point of care",
+  "description": "Scan a digital card, load the patient by ID, then record a coverage decision.",
+  "strip": {
+    "patientId": "Patient ID",
+    "load": "Load patient",
+    "loaded": "Loaded",
+    "eligibility": "Eligibility",
+    "coverageNow": "Coverage now",
+    "noName": "Patient {id}",
+    "nidMasked": "NID - {masked}",
+    "none": "None",
+    "notLoaded": "Enter a patient ID to load coverage.",
+    "inaccessible": "Patient not found or not accessible."
+  },
+  "scan": {
+    "title": "1 - Scan card",
+    "hint": "POST /insurance/cards/verify",
+    "ready": "Ready for QR / NFC",
+    "pasteHint": "Paste token if the scanner is offline",
+    "placeholder": "verificationToken (uuid)",
+    "verify": "Verify token",
+    "checking": "Checking…",
+    "accept": "Accept",
+    "reject": "Not valid",
+    "expires": "isCurrentlyValid - {valid} - expires {date}"
+  },
+  "snapshot": {
+    "title": "2 - Coverage snapshot",
+    "hint": "eligibility + current + latest",
+    "eligibility": "Eligibility",
+    "current": "Current verification",
+    "latest": "Latest (any)",
+    "validNow": "Valid now",
+    "noEligibility": "No eligibility record yet.",
+    "noCurrent": "No currently valid verification.",
+    "noLatest": "No verification events yet.",
+    "expiresIn": "Expires {relative} - Source {source}",
+    "sameEvent": "Same event - still within window",
+    "accessNote": "Doctor can only read patients they already visited or are assigned to. Unknown / inaccessible → same 404.",
+    "needPatient": "Load a patient to see coverage."
+  },
+  "record": {
+    "title": "3 - Record verification",
+    "hint": "POST /insurance/verification/verify",
+    "context": "Context",
+    "outcome": "Outcome",
+    "reason": "Reason",
+    "remarks": "Remarks (optional)",
+    "remarksPlaceholder": "Internal note…",
+    "save": "Save verification event",
+    "saving": "Saving…",
+    "footnote": "Always inserts a new event. ExpiresAt set by server (~24h when Verified).",
+    "needPatient": "Load a patient before recording.",
+    "recorded": "Verification recorded.",
+    "contexts": {
+      "Appointment": "Appointment",
+      "CheckIn": "CheckIn",
+      "ClinicVisit": "ClinicVisit",
+      "EmergencyAdmission": "Emergency",
+      "Billing": "Billing"
+    },
+    "statuses": {
+      "Verified": "Verified",
+      "NotVerified": "NotVerified",
+      "Pending": "Pending"
+    }
+  },
+  "history": {
+    "title": "Verification history",
+    "hint": "GET /insurance/verification/{patientId}/history",
+    "newestFirst": "Newest first",
+    "when": "When",
+    "status": "Status",
+    "context": "Context",
+    "validNow": "Valid now",
+    "reason": "Reason",
+    "yes": "Yes",
+    "no": "No",
+    "empty": "No verification history for this patient.",
+    "needPatient": "Load a patient to see history."
+  },
+  "eligibilityStatuses": {
+    "Eligible": "Eligible",
+    "NotEligible": "Not eligible",
+    "PendingReview": "Pending review",
+    "Suspended": "Suspended",
+    "Expired": "Expired"
+  },
+  "errors": {
+    "forbidden": "You do not have permission for this action.",
+    "sessionExpired": "Your session expired. Sign in again.",
+    "notFound": "Patient not found or not accessible.",
+    "generic": "Something went wrong. Try again.",
+    "retry": "Retry",
+    "invalidToken": "Enter a valid verification token.",
+    "reason": "A reason of 1–1000 characters is required."
+  }
+}

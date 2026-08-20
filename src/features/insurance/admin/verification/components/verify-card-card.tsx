@@ -17,12 +17,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { AuthActionError } from "@/features/auth/lib/action-error";
+import { verifyCardAction } from "@/features/insurance/verification/actions";
+import type { CardVerificationResultDto } from "@/features/insurance/verification/types";
 import { CARD_STATUS_TONE } from "../../../lib/card-status-tone";
-import { verifyCardAction } from "../actions";
 import { useVerificationMutationError } from "../hooks/use-verification-mutation-error";
-import type { CardVerificationResultDto } from "../types";
 
-/** The point-of-care token check: scan a card QR token, get the minimal result. */
+/** Point-of-care token check: scan a card QR token, get the minimal result. */
 export function VerifyCardCard() {
   const t = useTranslations("admin");
   const locale = useLocale();

@@ -62,5 +62,7 @@ export function handleSessionExpiry(
   // Admin bundles carry full applicant PII (nationalId, address, mobile) —
   // they must never survive a session switch on a shared machine.
   queryClient.removeQueries({ queryKey: ["admin"] });
+  // Doctor point-of-care caches also include patient name / national ID.
+  queryClient.removeQueries({ queryKey: ["doctor"] });
   return true;
 }

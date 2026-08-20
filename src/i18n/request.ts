@@ -8,26 +8,31 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ? requested
     : routing.defaultLocale;
 
-  const [auth, insurance, common, admin, dashboard] = await Promise.all([
-    import(`../features/auth/translations/${locale}.json`).then(
-      (m) => m.default,
-    ),
-    import(`../features/insurance/translations/${locale}.json`).then(
-      (m) => m.default,
-    ),
-    import(`../features/common/translations/${locale}.json`).then(
-      (m) => m.default,
-    ),
-    import(`../features/admin/translations/${locale}.json`).then(
-      (m) => m.default,
-    ),
-    import(`../features/dashboard/translations/${locale}.json`).then(
-      (m) => m.default,
-    ),
-  ]);
+  const [auth, insurance, common, admin, dashboard, doctor] = await Promise.all(
+    [
+      import(`../features/auth/translations/${locale}.json`).then(
+        (m) => m.default,
+      ),
+      import(`../features/insurance/translations/${locale}.json`).then(
+        (m) => m.default,
+      ),
+      import(`../features/common/translations/${locale}.json`).then(
+        (m) => m.default,
+      ),
+      import(`../features/admin/translations/${locale}.json`).then(
+        (m) => m.default,
+      ),
+      import(`../features/dashboard/translations/${locale}.json`).then(
+        (m) => m.default,
+      ),
+      import(`../features/doctor/translations/${locale}.json`).then(
+        (m) => m.default,
+      ),
+    ],
+  );
 
   return {
     locale,
-    messages: { auth, insurance, common, admin, dashboard },
+    messages: { auth, insurance, common, admin, dashboard, doctor },
   };
 });

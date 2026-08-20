@@ -44,6 +44,11 @@ export function StaffGuard({ children }: RoleGuardProps) {
   return <RoleGuard allowedRoles={["Admin", "Doctor"]}>{children}</RoleGuard>;
 }
 
+/** Doctor-only Point of Care desk. */
+export function DoctorGuard({ children }: RoleGuardProps) {
+  return <RoleGuard allowedRoles={["Doctor"]}>{children}</RoleGuard>;
+}
+
 function RoleGuard({
   children,
   allowedRoles,

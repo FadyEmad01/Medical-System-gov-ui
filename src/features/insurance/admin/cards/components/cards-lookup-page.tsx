@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useRouter } from "@/i18n/navigation";
+import { parsePatientId } from "@/features/insurance/lib/parse-patient-id";
 
 /** Entry point when there is no global card list — resolve a patient, then open history. */
 export default function CardsLookupPage() {
@@ -22,8 +23,8 @@ export default function CardsLookupPage() {
   const [patientId, setPatientId] = useState("");
 
   const openCards = () => {
-    const id = Number.parseInt(patientId.trim(), 10);
-    if (!Number.isInteger(id) || id < 1) {
+    const id = parsePatientId(patientId);
+    if (id === null) {
       toast.error(t("cards.errors.invalidPatientId"));
       return;
     }

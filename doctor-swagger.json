@@ -1,0 +1,1183 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Doctor / Point of Care API",
+    "description": "Clinical workspace APIs for a treating Doctor: patient search, medical summary, visit history, visit/medication/attachment management, and the point-of-care insurance-verification and card-verification checks.",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logs in with NationalId and password.",
+        "description": "Call this from the login screen every time a returning user signs in. Works for any role -\r\nPatient, Doctor, or Admin - since all three are checked by NationalId. Anyone (unauthenticated)\r\nmay call it. Returns the same generic error for an unknown NationalId or a wrong password, so\r\ncallers cannot use this endpoint to enumerate which national IDs are registered.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              },
+              "example": {
+                "nationalId": "29801011234567",
+                "password": "SecurePass@123"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credentials valid. Returns a JWT and the user's basic info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "expiresAtUtc": "2026-08-11T07:59:10Z",
+                  "userId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "role": "Patient"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "NationalId or password is incorrect.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/test-token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Issues a JWT for an existing account without checking a password. Development environment only.",
+        "description": "Not for frontend use - QA/tooling only, to skip typing a password while exploring the API in\r\nSwagger. Returns 404 outside the Development environment, so it can never be reached in\r\nproduction. Pass any seeded or registered NationalId and get back a valid token instantly.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestTokenRequestDto"
+              },
+              "example": {
+                "nationalId": "12345678901234"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestTokenRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestTokenRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account found. Returns a JWT and the user's basic info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "expiresAtUtc": "2026-08-11T07:59:10Z",
+                  "userId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "role": "Patient"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No account with this NationalId, or the API is not running in Development.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Returns the identity of the currently authenticated user, as read from their JWT.",
+        "description": "Useful for a frontend to confirm a stored token is still valid and see who it belongs to (e.g.\r\non app startup, before showing a logged-in UI). Requires a valid Bearer token from\r\n/register, /login, or /test-token - any authenticated role may call it.",
+        "responses": {
+          "200": {
+            "description": "Returns the caller's identity as read from the JWT claims.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                },
+                "example": {
+                  "userId": 1,
+                  "nationalId": "29801011234567",
+                  "username": "ahmed.hassan",
+                  "fullName": "Ahmed Mohamed Ali Hassan",
+                  "role": "Patient"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/cards/verify": {
+      "post": {
+        "tags": [
+          "Digital Insurance Card"
+        ],
+        "summary": "Verifies a scanned card token - the hospital/point-of-care check-in action.",
+        "description": "Call this when a citizen presents their digital card (QR/NFC scan) at a point of care. Restricted\r\nto Doctor + Admin, matching Insurance Verification's point-of-care precedent. Takes only an\r\nopaque VerificationToken (never raw card data). The response is deliberately minimal - no\r\nNationalId, Address, Mobile, or internal Id, even for an authenticated caller.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCardRequestDto"
+              },
+              "example": {
+                "verificationToken": "0f1e2d3c-4b5a-6978-8f0e-1d2c3b4a5968"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCardRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCardRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the minimal verification result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardVerificationResultDto"
+                },
+                "example": {
+                  "cardNumber": "INS-2026-00000015",
+                  "holderFullName": "Ahmed Mohamed Ali Hassan",
+                  "isCurrentlyValid": true,
+                  "expiresAt": "2027-08-10T00:00:00Z",
+                  "status": "Active"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Admin.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No card matches this token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/eligibility/{patientId}": {
+      "get": {
+        "tags": [
+          "Insurance Eligibility"
+        ],
+        "summary": "Gets a patient's current insurance eligibility.",
+        "description": "Call this to display a citizen's eligibility state, e.g. on a case-review or status screen.\r\nRestricted to Doctor and Patient: a Doctor only a patient they have an existing visit with or are\r\nexplicitly assigned to; a Patient only their own record. Admin no longer has direct access here -\r\nuse GET /api/insurance/applications/{applicationId}/review, which includes the applicant's\r\ncurrent eligibility alongside everything else needed to review an application. An inaccessible\r\npatient returns the same 404 as a patient that doesn't exist at all. A patient who exists but has\r\nnever been checked also returns 404 - that's a normal, expected state, not an error.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the patient's current eligibility.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceEligibilityResponseDto"
+                },
+                "example": {
+                  "id": "4b3a2c1d-0e9f-8a7b-6c5d-4e3f2a1b0c9d",
+                  "patientId": 1,
+                  "patientFullName": "Ahmed Mohamed Ali Hassan",
+                  "patientNationalId": "29801011234567",
+                  "status": "Eligible",
+                  "reason": "Verified against Ministry of Health enrollment records.",
+                  "checkedAt": "2026-08-04T09:30:00Z",
+                  "checkedBy": 1,
+                  "remarks": null,
+                  "createdAt": "2026-08-04T09:30:00Z",
+                  "updatedAt": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, the caller has no access, or no eligibility record exists yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/verification/verify": {
+      "post": {
+        "tags": [
+          "Insurance Verification"
+        ],
+        "summary": "Records an insurance verification decision for a patient.",
+        "description": "Call this at the point of care - appointment check-in, clinic visit, emergency admission, or\r\nbilling - to confirm coverage is currently usable. Restricted to Doctor and Admin. Always\r\ninserts a new verification event - there is no current-state row to upsert (unlike Insurance\r\nEligibility). Status/Reason/Context are supplied by the caller; Source is always Manual today,\r\nand ExpiresAt (when Status is Verified) is computed from the configured\r\nInsurance:Verification:DefaultValidityHours - neither is client-supplied.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyInsuranceRequestDto"
+              },
+              "example": {
+                "patientId": 1,
+                "status": "Verified",
+                "context": "CheckIn",
+                "reason": "Confirmed active coverage via national insurance portal.",
+                "remarks": null
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyInsuranceRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyInsuranceRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recorded. Returns the new verification event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceVerificationResponseDto"
+                },
+                "example": {
+                  "id": "6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a",
+                  "patientId": 1,
+                  "patientFullName": "Ahmed Mohamed Ali Hassan",
+                  "patientNationalId": "29801011234567",
+                  "status": "Verified",
+                  "context": "CheckIn",
+                  "source": "Manual",
+                  "reason": "Confirmed active coverage via national insurance portal.",
+                  "remarks": null,
+                  "verifiedAt": "2026-08-04T10:00:00Z",
+                  "expiresAt": "2026-08-05T10:00:00Z",
+                  "verifiedBy": 1,
+                  "correlationId": "5c4b3a2f-1e0d-9c8b-7a6f-5e4d3c2b1a0f",
+                  "isCurrentlyValid": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A required field is missing, or PatientId does not reference an existing account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Admin.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/verification/{patientId}/latest": {
+      "get": {
+        "tags": [
+          "Insurance Verification"
+        ],
+        "summary": "Gets a patient's most recent insurance verification, regardless of whether it's still valid.",
+        "description": "Restricted to Doctor and Patient: a Doctor only a patient they have an existing visit with or are\r\nexplicitly assigned to; a Patient only their own record. Admin no longer has direct access here -\r\nuse GET /api/insurance/applications/{applicationId}/review, which includes the applicant's most\r\nrecent verification alongside everything else needed to review an application.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the most recent verification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceVerificationResponseDto"
+                },
+                "example": {
+                  "id": "6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a",
+                  "patientId": 1,
+                  "patientFullName": "Ahmed Mohamed Ali Hassan",
+                  "patientNationalId": "29801011234567",
+                  "status": "Verified",
+                  "context": "CheckIn",
+                  "source": "Manual",
+                  "reason": "Confirmed active coverage via national insurance portal.",
+                  "remarks": null,
+                  "verifiedAt": "2026-08-04T10:00:00Z",
+                  "expiresAt": "2026-08-05T10:00:00Z",
+                  "verifiedBy": 1,
+                  "correlationId": "5c4b3a2f-1e0d-9c8b-7a6f-5e4d3c2b1a0f",
+                  "isCurrentlyValid": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, the caller has no access, or no verification exists yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/verification/current/{patientId}": {
+      "get": {
+        "tags": [
+          "Insurance Verification"
+        ],
+        "summary": "Gets a patient's currently valid insurance verification, if one exists.",
+        "description": "Call this to gate an action on \"is this patient's insurance usable right now\" - unlike \"latest\",\r\nthis does not simply return the most recent row, it applies the same validity rule\r\n(Status = Verified and not yet expired) everywhere else in this API. If the most recent\r\nverification is stale, not verified, or pending, this returns 404 even though \"latest\" would\r\nstill return that row.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the currently valid verification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceVerificationResponseDto"
+                },
+                "example": {
+                  "id": "6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a",
+                  "patientId": 1,
+                  "patientFullName": "Ahmed Mohamed Ali Hassan",
+                  "patientNationalId": "29801011234567",
+                  "status": "Verified",
+                  "context": "CheckIn",
+                  "source": "Manual",
+                  "reason": "Confirmed active coverage via national insurance portal.",
+                  "remarks": null,
+                  "verifiedAt": "2026-08-04T10:00:00Z",
+                  "expiresAt": "2026-08-05T10:00:00Z",
+                  "verifiedBy": 1,
+                  "correlationId": "5c4b3a2f-1e0d-9c8b-7a6f-5e4d3c2b1a0f",
+                  "isCurrentlyValid": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, the caller has no access, or no currently valid verification exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insurance/verification/{patientId}/history": {
+      "get": {
+        "tags": [
+          "Insurance Verification"
+        ],
+        "summary": "Gets a patient's full insurance verification history, newest first.",
+        "description": "Same access policy as the other read endpoints in this controller.",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the verification history (empty list if none).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InsuranceVerificationResponseDto"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a",
+                    "patientId": 1,
+                    "patientFullName": "Ahmed Mohamed Ali Hassan",
+                    "patientNationalId": "29801011234567",
+                    "status": "Verified",
+                    "context": "CheckIn",
+                    "source": "Manual",
+                    "reason": "Confirmed active coverage via national insurance portal.",
+                    "remarks": null,
+                    "verifiedAt": "2026-08-04T10:00:00Z",
+                    "expiresAt": "2026-08-05T10:00:00Z",
+                    "verifiedBy": 1,
+                    "correlationId": "5c4b3a2f-1e0d-9c8b-7a6f-5e4d3c2b1a0f",
+                    "isCurrentlyValid": true
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is neither Doctor nor Patient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such patient, or the caller has no access.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The JWT bearer token. Pass it in Swagger's Authorize dialog, or in an\r\n            \"Authorization: Bearer <token>\" header on every other call.",
+            "nullable": true,
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "expiresAtUtc": {
+            "type": "string",
+            "description": "UTC expiry of the token - the frontend should re-authenticate (log in again) once past\r\n            this time.",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "Internal numeric id of the account (Patient, Doctor, or Admin row).",
+            "format": "int32",
+            "example": 1
+          },
+          "nationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "example": "ahmed.hassan"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Response returned after a successful register, login, or test-token request."
+      },
+      "CardStatus": {
+        "enum": [
+          "Active",
+          "Suspended",
+          "Revoked",
+          "Superseded"
+        ],
+        "type": "string",
+        "description": "Closed set of Digital Insurance Card states. Values: Active, Suspended, Revoked, Superseded.\r\nDeliberately no \"Expired\" value - expiry is derived at read/verify time from ExpiresAt, never a\r\nstored status flip. Superseded is system-set only, when a replacement/renewal card is issued - never\r\na client-requested transition."
+      },
+      "CardVerificationResultDto": {
+        "type": "object",
+        "properties": {
+          "cardNumber": {
+            "type": "string",
+            "nullable": true,
+            "example": "INS-2026-00000015"
+          },
+          "holderFullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "isCurrentlyValid": {
+            "type": "boolean",
+            "description": "The single field a point-of-care check should key off: true = accept this card right\r\n            now."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CardStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The minimal set of information a hospital actually needs at check-in - deliberately no NationalId,\r\nAddress, Mobile, or internal Guid Id, even for an authenticated Doctor/Admin caller."
+      },
+      "EligibilityStatus": {
+        "enum": [
+          "Eligible",
+          "NotEligible",
+          "PendingReview",
+          "Suspended",
+          "Expired"
+        ],
+        "type": "string",
+        "description": "A citizen's national health insurance eligibility outcome. Values: Eligible, NotEligible,\r\n            PendingReview, Suspended, Expired."
+      },
+      "InsuranceEligibilityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "patientFullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "patientNationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EligibilityStatus"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "example": "Verified against Ministry of Health enrollment records."
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedBy": {
+            "type": "integer",
+            "description": "AdminId of whoever recorded this decision.",
+            "format": "int32",
+            "example": 1
+          },
+          "remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Null if this is the first decision ever recorded for this patient.",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "A patient's current national health insurance eligibility state."
+      },
+      "InsuranceVerificationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "patientFullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "patientNationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "status": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "context": {
+            "$ref": "#/components/schemas/VerificationContext"
+          },
+          "source": {
+            "$ref": "#/components/schemas/VerificationSource"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "example": "Confirmed active coverage via national insurance portal."
+          },
+          "remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Set only when Status is Verified - computed from\r\n            Insurance:Verification:DefaultValidityHours (24 hours by default) at the moment of\r\n            verification.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "verifiedBy": {
+            "type": "integer",
+            "description": "DoctorId or AdminId of whoever performed this verification.",
+            "format": "int32",
+            "example": 1
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isCurrentlyValid": {
+            "type": "boolean",
+            "description": "Computed by the service, never the client: true when Status is Verified and ExpiresAt\r\n            (if set) has not yet passed."
+          }
+        },
+        "additionalProperties": false,
+        "description": "A single insurance verification event."
+      },
+      "LoginRequestDto": {
+        "required": [
+          "nationalId",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "minLength": 1,
+            "pattern": "^\\d{14}$",
+            "type": "string",
+            "description": "Egyptian National ID of the account to log in as. Required, exactly 14\r\n            digits.",
+            "example": "29801011234567"
+          },
+          "password": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Account password, in plain text over HTTPS. Required.",
+            "example": "SecurePass@123"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for logging in. Works for any role (Patient, Doctor, Admin)."
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "nationalId": {
+            "type": "string",
+            "nullable": true,
+            "example": "29801011234567"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "example": "ahmed.hassan"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Ahmed Mohamed Ali Hassan"
+          },
+          "role": {
+            "type": "string",
+            "description": "\"Patient\", \"Doctor\", or \"Admin\", read directly from the JWT's role claim.",
+            "nullable": true,
+            "example": "Patient"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Response for GET /api/auth/me, reflecting the claims present in the caller's JWT."
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "TestTokenRequestDto": {
+        "required": [
+          "nationalId"
+        ],
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "minLength": 1,
+            "pattern": "^\\d{1,14}$",
+            "type": "string",
+            "description": "NationalId of any seeded or registered account (Patient, Doctor, or Admin). Unlike Register/Login,\r\nthis does not require exactly 14 digits - this endpoint is Development-only, so a short id is\r\nfine for quick manual testing."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for the development-only test-token endpoint. No password required."
+      },
+      "UserRole": {
+        "enum": [
+          "Patient",
+          "Doctor",
+          "Admin"
+        ],
+        "type": "string",
+        "description": "Role assigned to an authenticated user, included as a claim in the issued JWT."
+      },
+      "VerificationContext": {
+        "enum": [
+          "Appointment",
+          "CheckIn",
+          "ClinicVisit",
+          "EmergencyAdmission",
+          "Billing"
+        ],
+        "type": "string",
+        "description": "Which operational workflow prompted an insurance verification. Values: Appointment, CheckIn,\r\nClinicVisit, EmergencyAdmission, Billing. A closed, curated set on purpose - if a new business\r\ncontext appears, add a new value rather than falling back to a generic \"Other\"."
+      },
+      "VerificationSource": {
+        "enum": [
+          "Manual",
+          "GovernmentApi",
+          "Imported",
+          "System"
+        ],
+        "type": "string",
+        "description": "Where a verification decision came from. Values: Manual, GovernmentApi, Imported, System. Only\r\nManual is produced today - no external integration exists yet. Kept independent from\r\nEligibilitySource (not reused) since the two features may evolve this concept differently over time."
+      },
+      "VerificationStatus": {
+        "enum": [
+          "Verified",
+          "NotVerified",
+          "Pending"
+        ],
+        "type": "string",
+        "description": "The outcome of a single insurance verification event, decided at the moment it was checked.\r\n            Values: Verified, NotVerified, Pending."
+      },
+      "VerifyCardRequestDto": {
+        "required": [
+          "verificationToken"
+        ],
+        "type": "object",
+        "properties": {
+          "verificationToken": {
+            "type": "string",
+            "description": "Required. The opaque secret decoded from the card's QR/NFC payload.",
+            "format": "uuid",
+            "example": "0f1e2d3c-4b5a-6978-8f0e-1d2c3b4a5968"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for the hospital-facing verify endpoint - a scanned QR/NFC decodes to this\r\n            token, never raw card data."
+      },
+      "VerifyInsuranceRequestDto": {
+        "required": [
+          "context",
+          "patientId",
+          "reason",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "patientId": {
+            "type": "integer",
+            "description": "Required. Must reference an existing patient.",
+            "format": "int32",
+            "example": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "context": {
+            "$ref": "#/components/schemas/VerificationContext"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "description": "Required, max 500 characters.",
+            "example": "Confirmed active coverage via national insurance portal."
+          },
+          "remarks": {
+            "maxLength": 1000,
+            "type": "string",
+            "description": "Optional, max 1000 characters.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request payload for recording an insurance verification decision. Status/Reason/Context are\r\nsupplied by the calling Doctor or Admin - this sprint does not call an external source. Source is\r\nset internally by the service (always Manual); ExpiresAt is computed internally from\r\nInsurance:Verification:DefaultValidityHours (24 hours by default) - neither is accepted from the\r\nclient."
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Enter a JWT token. Example: \"Bearer eyJhbGciOi...\" (the \"Bearer \" prefix is added automatically).",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "**Frontend flow:** Register (once) → Login → receive a JWT → send it as `Authorization: Bearer <token>` on every other Domain 1 call."
+    },
+    {
+      "name": "Insurance Eligibility",
+      "description": "**Admin-only.** Records a citizen's national health-insurance eligibility outcome, used as a read-only snapshot when an application is finally decided."
+    },
+    {
+      "name": "Insurance Verification",
+      "description": "**Frontend flow:** A doctor or admin verifies a citizen's coverage at the point of care (appointment, check-in, billing) and records the outcome."
+    },
+    {
+      "name": "Digital Insurance Card",
+      "description": "**Frontend flow:** Once an application is Approved, Admin issues a card → citizen/provider can fetch or verify it by its QR/NFC token."
+    }
+  ]
+}
