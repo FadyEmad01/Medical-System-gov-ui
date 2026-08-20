@@ -68,7 +68,7 @@
   },
   "history": {
     "title": "سجل التحقق",
-    "hint": "GET /insurance/verification/{patientId}/history",
+    "hint": "GET /insurance/verification/'{patientId}'/history",
     "newestFirst": "الأحدث أولاً",
     "when": "متى",
     "status": "الحالة",
