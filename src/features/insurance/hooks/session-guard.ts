@@ -1,8 +1,8 @@
 "use client";
 
 import type { QueryClient } from "@tanstack/react-query";
-import { ME_QUERY_KEY } from "@/features/auth/hooks/use-me";
 import type { AuthActionError } from "@/features/auth/lib/action-error";
+import { purgeSessionCaches } from "@/features/auth/lib/purge-session-caches";
 
 /**
  * Type guard for the structured error thrown by insurance server actions.
@@ -57,12 +57,6 @@ export function handleSessionExpiry(
   error: AuthActionError,
 ): boolean {
   if (!isSessionExpiry(error)) return false;
-  queryClient.removeQueries({ queryKey: ME_QUERY_KEY });
-  queryClient.removeQueries({ queryKey: ["insurance"] });
-  // Admin bundles carry full applicant PII (nationalId, address, mobile) —
-  // they must never survive a session switch on a shared machine.
-  queryClient.removeQueries({ queryKey: ["admin"] });
-  // Doctor point-of-care caches also include patient name / national ID.
-  queryClient.removeQueries({ queryKey: ["doctor"] });
+  purgeSessionCaches(queryClient);
   return true;
 }

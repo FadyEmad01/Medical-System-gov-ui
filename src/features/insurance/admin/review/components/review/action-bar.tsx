@@ -1,25 +1,6 @@
 "use client";
 
-import {
-  CheckCircle2,
-  CircleX,
-  CreditCard,
-  FileClock,
-  Undo2,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ApplicationStatus } from "../../../../types";
 import { useIssueCards } from "../../../cards/hooks/use-card-lifecycle";
@@ -31,7 +12,13 @@ import {
 } from "../../hooks/use-review-actions";
 import { deriveAllowedActions } from "../../lib/allowed-actions";
 import type { DecisionInput } from "../../types";
+import {
+  ApprovedStatusBanner,
+  ReviewActionButtons,
+  TerminalStatusSummary,
+} from "./action-bar-controls";
 import { DecisionDialog, type DecisionKind } from "./decision-dialog";
+import { IssueCardsDialog } from "./issue-cards-dialog";
 
 /**
  * The review action bar. Always re-derived from the (fresh) status — after a
@@ -50,7 +37,6 @@ export function ReviewActionBar({
   status: ApplicationStatus;
   decisionReason: string | null;
 }) {
-  const t = useTranslations("admin");
   const [dialog, setDialog] = useState<DecisionKind | null>(null);
   const [issueOpen, setIssueOpen] = useState(false);
 
@@ -77,18 +63,10 @@ export function ReviewActionBar({
 
   if (actions.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col gap-1 py-4">
-          <p className="text-sm font-medium">
-            {t("actions.terminal.title", {
-              status: t(`statuses.${status}`),
-            })}
-          </p>
-          {decisionReason ? (
-            <p className="text-sm text-muted-foreground">{decisionReason}</p>
-          ) : null}
-        </CardContent>
-      </Card>
+      <TerminalStatusSummary
+        status={status}
+        decisionReason={decisionReason}
+      />
     );
   }
 
@@ -96,70 +74,21 @@ export function ReviewActionBar({
     <Card>
       <CardContent className="flex flex-col gap-3 py-4">
         {status === "Approved" ? (
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium">
-              {t("actions.terminal.title", {
-                status: t(`statuses.${status}`),
-              })}
-            </p>
-            {decisionReason ? (
-              <p className="text-sm text-muted-foreground">{decisionReason}</p>
-            ) : null}
-            <p className="text-xs text-muted-foreground">
-              {t("actions.issue.description")}
-            </p>
-          </div>
+          <ApprovedStatusBanner
+            status={status}
+            decisionReason={decisionReason}
+          />
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-2">
-          {actions.includes("approve") ? (
-            <Button disabled={pending} onClick={() => setDialog("approve")}>
-              <CheckCircle2 data-icon="inline-start" />
-              {t("actions.approve.label")}
-            </Button>
-          ) : null}
-          {actions.includes("reject") ? (
-            <Button
-              disabled={pending}
-              onClick={() => setDialog("reject")}
-              variant="destructive"
-            >
-              <CircleX data-icon="inline-start" />
-              {t("actions.reject.label")}
-            </Button>
-          ) : null}
-          {actions.includes("request-documents") ? (
-            <Button
-              disabled={pending}
-              onClick={() => setDialog("request-documents")}
-              variant="outline"
-            >
-              <FileClock data-icon="inline-start" />
-              {t("actions.request-documents.label")}
-            </Button>
-          ) : null}
-          {actions.includes("back-to-review") ? (
-            <Button
-              disabled={pending}
-              onClick={() =>
-                back.mutate({ citizenVisibleReason: "", internalNotes: "" })
-              }
-            >
-              <Undo2 data-icon="inline-start" />
-              {t("actions.back-to-review.label")}
-            </Button>
-          ) : null}
-          {actions.includes("issue-cards") ? (
-            <Button
-              disabled={pending}
-              onClick={() => setIssueOpen(true)}
-              variant="outline"
-            >
-              <CreditCard data-icon="inline-start" />
-              {t("actions.issue.label")}
-            </Button>
-          ) : null}
-        </div>
+        <ReviewActionButtons
+          actions={actions}
+          pending={pending}
+          onDecision={setDialog}
+          onBackToReview={() =>
+            back.mutate({ citizenVisibleReason: "", internalNotes: "" })
+          }
+          onIssueCards={() => setIssueOpen(true)}
+        />
       </CardContent>
 
       <DecisionDialog
@@ -170,30 +99,12 @@ export function ReviewActionBar({
         open={dialog !== null}
       />
 
-      <AlertDialog onOpenChange={setIssueOpen} open={issueOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("actions.issue.title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("actions.issue.confirm")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("actions.cancel")}</AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button
-                disabled={pending}
-                onClick={() => {
-                  issue.mutate();
-                  setIssueOpen(false);
-                }}
-              >
-                {t("actions.issue.label")}
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <IssueCardsDialog
+        isPending={pending}
+        onConfirm={() => issue.mutate()}
+        onOpenChange={setIssueOpen}
+        open={issueOpen}
+      />
     </Card>
   );
 }

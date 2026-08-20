@@ -22,13 +22,13 @@
 
 This repository contains the **frontend** of a government health-insurance platform. It is a Next.js App Router application that talks to a .NET backend (see the OpenAPI contracts in the repo root) and serves three roles from a single codebase:
 
-| Role | What they can do |
-| --- | --- |
-| **Citizen** | Register with a multi-step form, complete a profile, add dependents, browse insurance categories, apply for enrollment with document uploads, track application status, and view their digital insurance card. |
-| **Doctor** | Point-of-care workspace: scan a patient's insurance card, check coverage eligibility, record verification decisions, and review decision history. |
-| **Admin** | Manage insurance categories and requirements, work the application review queue, control the card lifecycle (issue / suspend / revoke / renew), and verify cards. |
+| Role | Home after login | What they can do |
+| --- | --- | --- |
+| **Citizen** | `/dashboard` | Register, complete a profile, add dependents, browse categories, enroll with document uploads, track applications, and view a digital insurance card. |
+| **Doctor** | `/dashboard/doctor` | Point-of-care desk: verify a card token, check eligibility (GET), record verification decisions, and review history. |
+| **Admin** | `/dashboard/admin` | Hero hub into categories, application review queue, card lifecycle, and verification. |
 
-The UI is designed to feel official, calm, and trustworthy (see [PRODUCT.md](PRODUCT.md) for the design register) — WCAG AA contrast, Arabic-first with full RTL support, and English as a first-class second locale.
+The UI is designed to feel official, calm, and trustworthy (see [PRODUCT.md](PRODUCT.md)) — WCAG AA contrast, Arabic-first with full RTL support, and English as a first-class second locale.
 
 ## Key routes
 
@@ -36,21 +36,23 @@ The UI is designed to feel official, calm, and trustworthy (see [PRODUCT.md](PRO
 | --- | --- |
 | `/` | Public portal landing (login / register) |
 | `/auth/register` | Multi-step citizen registration |
-| `/dashboard` | Patient home: status cards and quick actions |
+| `/dashboard` | Citizen home: welcome hero, status cards, quick actions |
 | `/dashboard/insurance` | Insurance categories landing |
 | `/dashboard/insurance/apply` | Enrollment wizard (profile, dependents, documents, review) |
-| `/dashboard/insurance/track` | Application status tracking |
+| `/dashboard/insurance/track` | Application status tracking + past applications |
 | `/dashboard/insurance-card` | Digital insurance card with status and history |
 | `/dashboard/profile` | Profile details, editing, and completeness |
 | `/dashboard/doctor` | Doctor point-of-care workspace |
-| `/dashboard/admin` | Admin hub |
+| `/dashboard/admin` | Admin hub (hero + tool shortcuts) |
 | `/dashboard/admin/applications` | Review queue and per-application decision |
-| `/dashboard/admin/categories` | Insurance category and requirement management |
-| `/dashboard/admin/cards` | Card lifecycle management per patient |
+| `/dashboard/admin/categories` | Category and requirement management |
+| `/dashboard/admin/cards` | Card lifecycle per patient |
 | `/dashboard/admin/verification` | Card verification desk |
 
 > [!NOTE]
 > `/dashboard/appointments` is intentionally a "coming soon" stub — the backend does not implement scheduling yet.
+>
+> Admin and Doctor who open `/dashboard` are redirected to their role home. Citizen-only status queries are gated so staff never hit patient `/profile` endpoints.
 
 ## Tech stack
 
@@ -59,7 +61,7 @@ The UI is designed to feel official, calm, and trustworthy (see [PRODUCT.md](PRO
 | Framework | Next.js 16 (App Router, Server Actions, React Compiler enabled) |
 | UI | React 19, shadcn/ui primitives (Radix), Tailwind CSS v4 (CSS-first tokens in `src/styles/globals.css`), `motion` for animation |
 | i18n | `next-intl` — `ar` (default, RTL) and `en`, locale always prefixed |
-| Data fetching | TanStack Query on the client; a typed `ApiClient` + Server Actions on the server |
+| Data fetching | TanStack Query on the client; typed feature API clients + Server Actions on the server |
 | Forms & validation | `react-hook-form` + `zod` schemas shared by client forms and server action inputs |
 | Charts | Recharts |
 | Code quality | Biome (lint + format), TypeScript strict mode |
@@ -72,17 +74,20 @@ The app uses **feature-based (vertical-slice) architecture**: each domain owns e
 ```text
 src/
 ├── app/[locale]/        # Routes only — thin wrappers that delegate to features
-├── components/          # Cross-cutting UI: 29 shadcn primitives, guards, language switcher
+├── components/          # Cross-cutting UI: shadcn primitives, AuthGuard, role guards
 ├── features/
-│   ├── auth/            # Session, login/register, QueryProvider, server actions
-│   ├── dashboard/       # Shell: sidebar, header, patient home
+│   ├── auth/            # Session, login/register, QueryProvider, purgeSessionCaches
+│   ├── admin/           # Admin hub shell (hero + tool grid)
+│   ├── dashboard/       # Shell: sidebar, header, citizen home
 │   ├── doctor/          # Point-of-care workspace
-│   ├── insurance/       # Largest feature:
-│   │   ├── enrollment/  #   wizard steps, dependents, document upload
+│   ├── insurance/       # Shared insurance domain:
+│   │   ├── actions/     #   profile + card-state server actions (barrel re-exports)
+│   │   ├── enrollment/  #   wizard, tracking, dependents, documents
 │   │   ├── card/        #   digital card UI
 │   │   ├── profile/     #   profile pages and completeness
-│   │   ├── verification/
-│   │   └── admin/       #   review queue, categories, card lifecycle, verification
+│   │   ├── verification/#   shared Admin + Doctor verify/eligibility/record
+│   │   ├── admin/       #   review queue, categories, card lifecycle, verification UI
+│   │   └── hooks/       #   useActionQuery, session guard, mutation error ladder
 │   └── */translations/  # ar.json + en.json per feature
 ├── i18n/                # next-intl routing, request-time message merging
 ├── lib/                 # ApiClient, zod-validated env, ProblemDetails parsing
@@ -90,7 +95,7 @@ src/
 └── proxy.ts             # Next.js middleware: auth-cookie gate + locale negotiation
 ```
 
-A typical feature module bundles `components/`, `hooks/`, `lib/` (pure, unit-tested logic), `api/` (typed backend clients), `validation/` (zod schemas), `actions.ts` (server actions), `types.ts`, and `translations/{ar,en}.json`.
+A typical feature module bundles `components/`, `hooks/` (often split into queries/mutations + a barrel), `lib/` (pure, unit-tested logic), `api/` (typed backend clients), `actions/` (`"use server"` leaf modules) + `actions.ts` barrel, `types.ts`, and `translations/{ar,en}.json`.
 
 ### Rendering pipeline
 
@@ -98,7 +103,9 @@ A request passes through three gates before a page renders:
 
 1. **`src/proxy.ts`** — Next.js 16 middleware: negotiates the locale and redirects logged-out users away from `/dashboard`.
 2. **`AuthGuard`** — mounted in the dashboard layout; verifies the session cookie and redirects on expiry.
-3. **Role guards** (`DoctorGuard`, `AdminGuard`, `PatientGuard`, `StaffGuard`) — wrap role-specific pages. These are UI-only; the backend remains the source of truth for authorization, guards merely hide content the current role cannot use.
+3. **Role guards** (`DoctorGuard`, `AdminGuard`, `PatientGuard`, `StaffGuard`) — wrap role-specific pages. These are UI-only; the backend remains the source of truth for authorization.
+
+Post-login navigation uses `dashboardHomePath(role)` so each role lands on the correct desk.
 
 ### Data flow
 
@@ -124,18 +131,19 @@ The conventions every feature follows — worth knowing before opening a PR:
 
 | Pattern | How it's applied |
 | --- | --- |
-| **Result-type server actions** | Every `actions.ts` returns `ActionResult<T>` — `{ ok: true, data }` or `{ ok: false, error }` — so errors cross the server/client boundary as values, never as exceptions. |
-| **Parse at the boundary** | Action inputs are validated with zod and normalized (trimmed, empty → `null`) before any network call; the same schemas drive the client-side forms. |
-| **Discriminated API errors** | `ApiError.kind` (`validation`, `conflict`, `unauthorized`, `forbidden`, `notFound`, `server`, `timeout`, `network`) is mapped from the HTTP status and RFC 7807 `ProblemDetails`; callers branch on `kind`, never on status codes. |
-| **Session-aware errors** | A missing or expired session clears the cookie and returns a localized `SESSION_EXPIRED_ERROR`; query hooks then drop the identity cache so `AuthGuard` redirects on the next render. |
-| **Query hooks over actions** | `use-*.ts` hooks normalize action results to throws (`if (!res.ok) throw res.error`), use factory query keys, skip retries for deterministic failures, and handle session expiry in an effect (TanStack Query v5 removed query-level `onError`). |
-| **Server errors → form fields** | `applyActionError` maps `fieldErrors` onto react-hook-form fields (ProblemDetails keys are normalized to camelCase so they line up with schema names), with a root-level fallback so a failure is never silent. |
-| **Pure logic, co-located tests** | Business rules live in plain functions in each feature's `lib/`, with `*.test.ts` files right next to them — no snapshot or DOM tests, just the logic. |
+| **Result-type server actions** | Leaf `"use server"` modules return `ActionResult<T>` — `{ ok: true, data }` or `{ ok: false, error }` — so errors cross the boundary as values. Barrels re-export without `"use server"`. |
+| **Parse at the boundary** | Action inputs are validated and normalized (trimmed, empty → `null`) in pure `lib/parse-*` helpers before any network call. |
+| **Discriminated API errors** | `ApiError.kind` (`validation`, `conflict`, `unauthorized`, `forbidden`, `notFound`, `server`, `timeout`, `network`) is mapped from HTTP status and RFC 7807 `ProblemDetails`; callers branch on `kind`. |
+| **Session-aware errors** | Expired session clears the cookie and returns `SESSION_EXPIRED_ERROR`; hooks call `purgeSessionCaches` so identity + `insurance` / `admin` / `doctor` PII caches drop together. |
+| **Shared query / mutation adapters** | `useActionQuery` and `useActionMutationError` centralize ActionResult → Query throws, terminal retry skips, forbidden toasts, and session expiry. |
+| **Query hooks over actions** | Feature `use-*.ts` hooks use factory query keys, skip retries for deterministic failures, and handle session expiry in an effect (TanStack Query v5 has no query-level `onError`). |
+| **Server errors → form fields** | `applyActionError` maps `fieldErrors` onto react-hook-form fields (ProblemDetails keys normalized to camelCase), with a root-level fallback so a failure is never silent. |
+| **Pure logic, co-located tests** | Business rules live in plain functions in each feature's `lib/`, with `*.test.ts` next to them. |
 | **Server-only enforcement** | `ApiClient` and the env module import `server-only`, making it a build error to pull them into a client bundle. |
-| **Per-feature i18n** | Each feature ships its own `translations/ar.json` + `en.json`; `src/i18n/request.ts` lazily loads and merges them into namespaces per request. |
-| **Token-driven theming** | Tailwind v4 CSS-first tokens in `src/styles/globals.css`, including semantic status colors (`success`, `warning`, `info`, `revoked`, `superseded`) reused across features. |
+| **Per-feature i18n** | Each feature ships `translations/ar.json` + `en.json`; `src/i18n/request.ts` merges them into namespaces per request. |
+| **Token-driven theming** | Tailwind v4 CSS-first tokens in `src/styles/globals.css`, including semantic status colors (`success`, `warning`, `info`, `revoked`, `superseded`). |
 
-To see these working together, read `src/features/insurance/actions.ts` and `src/features/insurance/hooks/use-card.ts` end to end.
+To see these working together, read a leaf action under `src/features/insurance/actions/` and a consumer hook such as `src/features/insurance/hooks/use-card.ts`.
 
 ## Getting started
 
@@ -176,7 +184,18 @@ Validated at runtime with zod in `src/lib/env.ts` — the app fails fast on miss
 
 ## Testing
 
-Vitest runs unit tests for the pure feature logic (`src/**/*.test.ts`, node environment, `@` alias configured in `vitest.config.mts`). Coverage focuses on the rules that would be dangerous to get wrong: wizard step derivation, card status transitions, review-queue filters, document file validation, and ProblemDetails parsing. Component and E2E tests are not set up yet.
+Vitest runs unit tests for the pure feature logic (`src/**/*.test.ts`, node environment, `@` alias configured in `vitest.config.mts`). Coverage focuses on the rules that would be dangerous to get wrong: wizard step derivation, card status transitions, review-queue filters, document file validation, ProblemDetails parsing, and role home paths. Component and E2E tests are not set up yet.
+
+## Contributing
+
+1. Branch from the active feature/integration branch (or `main` when agreed).
+2. Keep pages thin; put logic in the owning feature under `src/features/`.
+3. Prefer splitting large files: `"use server"` leaves, pure parsers, presentational UI siblings, query/mutation hooks + barrels that preserve import paths.
+4. Add or update co-located unit tests for pure `lib/` changes.
+5. Run `npm run lint` and `npm run test` before opening a PR.
+6. Use the [pull request template](.github/PULL_REQUEST_TEMPLATE.md) — fill Summary, Test plan, and the checklist.
+
+Do not invent backend capabilities that are not in the OpenAPI contracts. Doctor PoC is bound to `doctor-swagger.json` (no invented visits/search/meds). Eligibility **POST** remains Admin-only where the API says so.
 
 ## Working with the backend
 

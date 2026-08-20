@@ -2,9 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { meAction } from "../actions";
+import { ME_QUERY_KEY } from "../lib/me-query-key";
 
-/** Cache key for the current-user identity query. */
-export const ME_QUERY_KEY = ["auth", "me"] as const;
+export { ME_QUERY_KEY };
 
 /**
  * Source of truth for the authenticated user's identity.

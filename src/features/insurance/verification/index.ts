@@ -16,7 +16,6 @@ export {
 } from "./lib/constants";
 export type {
   EligibilityStatus,
-  VerificationContext,
   VerificationStatus,
 } from "./lib/constants";
 export {
@@ -27,5 +26,9 @@ export {
 export type {
   CardVerificationResultDto,
   CheckEligibilityInput,
+  InsuranceEligibilityResponseDto,
+  InsuranceVerificationResponseDto,
+  VerificationContext,
+  VerificationSource,
   VerifyInsuranceInput,
 } from "./types";

@@ -18,6 +18,7 @@ import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { useLogin } from "../../hooks/use-auth";
 import { applyActionError } from "../../lib/apply-action-error";
+import { dashboardHomePath } from "../../lib/dashboard-home-path";
 import {
   type LoginFormData,
   loginFormSchema,
@@ -71,11 +72,11 @@ export function LoginForm({
 
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
-      await login.mutateAsync({
+      const auth = await login.mutateAsync({
         nationalId: data.nationalId,
         password: data.password,
       });
-      router.replace(from ?? { pathname: "/dashboard" });
+      router.replace(from ?? dashboardHomePath(auth.role));
     } catch (raw) {
       applyActionError(raw, form);
     }

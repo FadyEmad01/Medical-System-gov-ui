@@ -12,17 +12,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { parsePatientId } from "@/features/insurance/lib/parse-patient-id";
 import { useRecordDecision } from "../hooks/use-record-decision";
+import { RecordDecisionFields } from "./record-decision-fields";
 
 /**
  * Shared record-decision card: patient id, decision select, optional
@@ -98,86 +90,23 @@ export function RecordDecisionCard<TStatus extends string, TResult>({
         <CardDescription>{t(descriptionKey)}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <label
-            className="text-sm font-medium"
-            htmlFor={`${idPrefix}-patient`}
-          >
-            {t("verification.patientId")} *
-          </label>
-          <Input
-            id={`${idPrefix}-patient`}
-            inputMode="numeric"
-            min={1}
-            onBlur={onPatientIdBlur}
-            onChange={(event) => onPatientIdChange(event.target.value)}
-            type="number"
-            value={patientId}
-          />
-        </div>
-
-        {contexts ? (
-          <div className="grid grid-cols-2 gap-3">
-            <StatusSelect
-              idPrefix={idPrefix}
-              onValueChange={(value) => setStatus(value as TStatus)}
-              statusLabel={statusLabel}
-              statuses={statuses}
-              value={status}
-            />
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium">
-                {t("verification.context")}
-              </span>
-              <Select onValueChange={setContext} value={context}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {contexts.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        ) : (
-          <StatusSelect
-            idPrefix={idPrefix}
-            onValueChange={(value) => setStatus(value as TStatus)}
-            statusLabel={statusLabel}
-            statuses={statuses}
-            value={status}
-          />
-        )}
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium" htmlFor={`${idPrefix}-reason`}>
-            {t("verification.reason")} *
-          </label>
-          <Textarea
-            id={`${idPrefix}-reason`}
-            maxLength={1001}
-            onChange={(event) => form.setReason(event.target.value)}
-            value={form.reason}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label
-            className="text-sm font-medium"
-            htmlFor={`${idPrefix}-remarks`}
-          >
-            {t("verification.remarks")}
-          </label>
-          <Textarea
-            id={`${idPrefix}-remarks`}
-            maxLength={2001}
-            onChange={(event) => form.setRemarks(event.target.value)}
-            value={form.remarks}
-          />
-        </div>
+        <RecordDecisionFields
+          context={context}
+          contexts={contexts}
+          idPrefix={idPrefix}
+          onContextChange={setContext}
+          onPatientIdBlur={onPatientIdBlur}
+          onPatientIdChange={onPatientIdChange}
+          onReasonChange={form.setReason}
+          onRemarksChange={form.setRemarks}
+          onStatusChange={setStatus}
+          patientId={patientId}
+          reason={form.reason}
+          remarks={form.remarks}
+          status={status}
+          statusLabel={statusLabel}
+          statuses={statuses}
+        />
         <Button
           className="self-end"
           disabled={!form.canSubmit}
@@ -188,38 +117,5 @@ export function RecordDecisionCard<TStatus extends string, TResult>({
         </Button>
       </CardContent>
     </Card>
-  );
-}
-
-function StatusSelect<TStatus extends string>({
-  idPrefix,
-  onValueChange,
-  statusLabel,
-  statuses,
-  value,
-}: {
-  idPrefix: string;
-  onValueChange: (value: string) => void;
-  statusLabel: (status: TStatus) => string;
-  statuses: readonly TStatus[];
-  value: TStatus;
-}) {
-  const t = useTranslations("admin");
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium">{t("verification.status")}</span>
-      <Select onValueChange={onValueChange} value={value}>
-        <SelectTrigger id={`${idPrefix}-status`}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {statuses.map((item) => (
-            <SelectItem key={item} value={item}>
-              {statusLabel(item)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
   );
 }

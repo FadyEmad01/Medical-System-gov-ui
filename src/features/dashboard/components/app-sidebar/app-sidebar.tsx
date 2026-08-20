@@ -9,7 +9,6 @@ import {
   House,
   IdCard,
   ScanLine,
-  Shield,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
@@ -21,6 +20,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useMe } from "@/features/auth/hooks/use-me";
+import { dashboardHomePath } from "@/features/auth/lib/dashboard-home-path";
 import { Logo } from "./logo";
 import { type NavGroup, NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -31,12 +31,13 @@ export function AppSidebar({
 }: React.ComponentProps<typeof Sidebar>) {
   const { data: user } = useMe();
   const t = useTranslations("common");
+  const homeUrl = user ? dashboardHomePath(user.role) : "/dashboard";
 
   // 1. Initialize with only the common platform group that everyone sees
   const groups: NavGroup[] = [
     {
       label: t("nav.groups.platform"),
-      items: [{ title: t("nav.home"), url: "/dashboard", icon: House }],
+      items: [{ title: t("nav.home"), url: homeUrl, icon: House }],
     },
   ];
 
@@ -97,7 +98,6 @@ export function AppSidebar({
     groups.push({
       label: t("nav.groups.admin"),
       items: [
-        { title: t("nav.admin"), url: "/dashboard/admin", icon: Shield },
         {
           title: t("nav.adminApplications"),
           url: "/dashboard/admin/applications",

@@ -24,8 +24,11 @@ export const PROFILE_QUERY_KEY = ["insurance", "profile"] as const;
  * Wraps `getProfileAction` and normalizes its `ActionResult` so react-query's
  * error state holds the structured `AuthActionError` (consumers branch on
  * `error.kind` instead of unwrapping an `ok` flag).
+ *
+ * Pass `enabled: false` for Admin/Doctor shells that share the dashboard route
+ * but must not hit patient-only `/profile`.
  */
-export function useProfile() {
+export function useProfile(options: { enabled?: boolean } = {}) {
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: PROFILE_QUERY_KEY,
@@ -41,6 +44,7 @@ export function useProfile() {
     retry: (failureCount, error) =>
       !(isAuthActionError(error) && isTerminalActionError(error)) &&
       failureCount < 1,
+    ...(options.enabled === undefined ? {} : { enabled: options.enabled }),
   });
 
   // v5 dropped query-level `onError`; watch the error state so a dead session

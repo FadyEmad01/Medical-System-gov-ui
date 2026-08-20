@@ -21,8 +21,11 @@ export const CARD_DETAIL_QUERY_KEY = (cardId: string) =>
  *
  * Same normalize-to-throw pattern as `useProfile`; components derive the
  * stepper step from the result via `deriveCardState`.
+ *
+ * Pass `enabled: false` on staff dashboards so Admin/Doctor never hit
+ * patient-scoped card endpoints.
  */
-export function useCardState() {
+export function useCardState(options: { enabled?: boolean } = {}) {
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: CARD_STATE_QUERY_KEY,
@@ -38,6 +41,7 @@ export function useCardState() {
     retry: (failureCount, error) =>
       !(isAuthActionError(error) && isTerminalActionError(error)) &&
       failureCount < 1,
+    ...(options.enabled === undefined ? {} : { enabled: options.enabled }),
   });
 
   // v5 dropped query-level `onError`; watch the error state so a dead session
