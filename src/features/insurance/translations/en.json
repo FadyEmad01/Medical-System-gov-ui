@@ -169,6 +169,11 @@
     "maritalEligible": "Eligible for",
     "dependentsNotAllowed": "This category does not cover dependents.",
     "guardianRequired": "A guardian is required for this category.",
+    "alreadyHasCard": {
+      "title": "You already have an insurance card",
+      "description": "Your coverage is active, so you don’t need to apply again. Open your card to view the details.",
+      "viewCard": "View my insurance card"
+    },
     "errors": {
       "selectCategory": "Please select an insurance category."
     }

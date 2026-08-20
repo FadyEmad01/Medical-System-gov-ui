@@ -298,6 +298,43 @@
       "noteTooLong": "الملاحظة طويلة جدًا.",
       "reasonInvalid": "يلزم سبب من ١ إلى ١٠٠٠ حرف.",
       "conflict": "تغيّرت حالة البطاقة — جارٍ التحديث."
+    },
+    "statuses": {
+      "Active": "نشطة",
+      "Suspended": "موقوفة",
+      "Revoked": "ملغاة",
+      "Superseded": "بديلة"
+    },
+    "table": {
+      "title": "بطاقات المرضى",
+      "description": "جميع المرضى الذين لديهم طلبات. انقر على مريض لإدارة دورة حياته.",
+      "columns": {
+        "patientName": "المريض",
+        "nationalId": "الرقم القومي",
+        "applicationNumber": "الطلب",
+        "status": "الحالة",
+        "cardStatus": "البطاقة",
+        "documents": "المستندات"
+      },
+      "open": "عرض البطاقات",
+      "searchPlaceholder": "بحث بالاسم أو الرقم القومي…",
+      "allStatuses": "جميع الحالات",
+      "refresh": "تحديث",
+      "pagination": {
+        "summary": "صفحة {page} من {totalPages} · {count} مريض",
+        "prev": "الصفحة السابقة",
+        "next": "الصفحة التالية"
+      },
+      "empty": {
+        "title": "لا يوجد مرضى",
+        "forAll": "لم يقدم أي مرضى طلبات بعد.",
+        "forStatus": "لا يوجد مرضى بطلبات {status}.",
+        "forSearch": "لا يوجد مرضى يطابقون \"{search}\"."
+      },
+      "error": {
+        "title": "تعذر تحميل قائمة المرضى",
+        "retry": "حاول مرة أخرى"
+      }
     }
   },
   "categories": {

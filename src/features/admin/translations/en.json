@@ -298,6 +298,43 @@
       "noteTooLong": "Note is too long.",
       "reasonInvalid": "A reason of 1–1000 characters is required.",
       "conflict": "The card's state changed — refreshing."
+    },
+    "statuses": {
+      "Active": "Active",
+      "Suspended": "Suspended",
+      "Revoked": "Revoked",
+      "Superseded": "Superseded"
+    },
+    "table": {
+      "title": "Patient cards",
+      "description": "All patients with applications. Click a patient to manage their card lifecycle.",
+      "columns": {
+        "patientName": "Patient",
+        "nationalId": "National ID",
+        "applicationNumber": "Application",
+        "status": "Status",
+        "cardStatus": "Card",
+        "documents": "Docs"
+      },
+      "open": "View cards",
+      "searchPlaceholder": "Search by name or national ID…",
+      "allStatuses": "All statuses",
+      "refresh": "Refresh",
+      "pagination": {
+        "summary": "Page {page} of {totalPages} · {count} patients",
+        "prev": "Previous page",
+        "next": "Next page"
+      },
+      "empty": {
+        "title": "No patients",
+        "forAll": "No patients have applications yet.",
+        "forStatus": "No patients with {status} applications.",
+        "forSearch": "No patients matching \"{search}\"."
+      },
+      "error": {
+        "title": "Couldn't load patient list",
+        "retry": "Try again"
+      }
     }
   },
   "categories": {

@@ -169,6 +169,11 @@
     "maritalEligible": "متاح للحالات",
     "dependentsNotAllowed": "لا تسمح هذه الفئة بإضافة معالين.",
     "guardianRequired": "تتطلب هذه الفئة وجود ولي أمر.",
+    "alreadyHasCard": {
+      "title": "لديك بالفعل بطاقة تأمين",
+      "description": "تغطيتك سارية، ولا حاجة لتقديم طلب جديد. يمكنك فتح بطاقتك لعرض التفاصيل.",
+      "viewCard": "عرض بطاقة التأمين"
+    },
     "errors": {
       "selectCategory": "يرجى اختيار فئة التأمين."
     }

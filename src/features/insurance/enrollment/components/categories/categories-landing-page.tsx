@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleAlert } from "lucide-react";
+import { CircleAlert, CircleCheck, CreditCard, IdCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import {
@@ -17,10 +17,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { isAuthActionError } from "../../../hooks/session-guard";
+import { useCardState } from "../../../hooks/use-card";
+import { deriveCardState } from "../../../lib/card-status";
 import {
   useCategories,
   useCurrentEnrollment,
@@ -92,6 +102,39 @@ function CategoriesError({
   );
 }
 
+function AlreadyHasCardEmpty() {
+  const t = useTranslations("insurance");
+
+  return (
+    <Empty className="min-h-72 border border-dashed">
+      <EmptyHeader>
+        <EmptyMedia>
+          <div className="relative size-16">
+            <span className="flex size-16 items-center justify-center rounded-2xl bg-muted text-foreground">
+              <IdCard className="size-8" />
+            </span>
+            <span className="absolute -bottom-1 -inset-e-1 flex size-6.5 items-center justify-center rounded-full bg-background text-success ring-2 ring-background">
+              <CircleCheck className="size-5" />
+            </span>
+          </div>
+        </EmptyMedia>
+        <EmptyTitle>{t("categories.alreadyHasCard.title")}</EmptyTitle>
+        <EmptyDescription>
+          {t("categories.alreadyHasCard.description")}
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button asChild>
+          <Link href="/dashboard/insurance-card">
+            <CreditCard data-icon="inline-start" />
+            {t("categories.alreadyHasCard.viewCard")}
+          </Link>
+        </Button>
+      </EmptyContent>
+    </Empty>
+  );
+}
+
 export default function CategoriesLandingPage() {
   const t = useTranslations("insurance");
   const router = useRouter();
@@ -105,6 +148,14 @@ export default function CategoriesLandingPage() {
   } = useCategories();
   const { data: currentEnrollment, isLoading: isEnrollmentLoading } =
     useCurrentEnrollment();
+  const cardStateQuery = useCardState();
+  const cardState = cardStateQuery.data
+    ? deriveCardState(
+        cardStateQuery.data.status,
+        cardStateQuery.data.currentCard,
+      )
+    : null;
+  const hasReadyCard = cardState?.kind === "ready";
 
   // A patient who already started enrollment is redirected straight to the
   // wizard; the landing page is only for choosing a category.
@@ -113,14 +164,18 @@ export default function CategoriesLandingPage() {
     router.replace("/dashboard/insurance/apply");
   }, [currentEnrollment, router]);
 
-  // Wait for the enrollment query to settle so the redirect fires before the
-  // category grid flashes for a patient who is already enrolled.
-  if (isEnrollmentLoading || currentEnrollment) {
+  // Wait for enrollment and card queries so the category grid does not flash
+  // for a patient who is already enrolled or already has a ready card.
+  if (isEnrollmentLoading || currentEnrollment || cardStateQuery.isPending) {
     return (
       <div className="flex justify-center py-16">
         <Spinner />
       </div>
     );
+  }
+
+  if (hasReadyCard) {
+    return <AlreadyHasCardEmpty />;
   }
 
   if (isLoading) return <CategoriesLoading />;

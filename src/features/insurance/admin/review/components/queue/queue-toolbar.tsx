@@ -28,7 +28,7 @@ export function QueueToolbar({
   status: ApplicationStatus | undefined;
   numberQuery: string;
   onNumberQueryChange: (value: string) => void;
-  onStatusChange: (status: ApplicationStatus | undefined) => void;
+  onStatusChange: (status: ApplicationStatus | null) => void;
   isRefetching: boolean;
   onRefresh: () => void;
 }) {
@@ -40,9 +40,7 @@ export function QueueToolbar({
       <Select
         value={status ?? "all"}
         onValueChange={(value) =>
-          onStatusChange(
-            value === "all" ? undefined : (value as ApplicationStatus),
-          )
+          onStatusChange(value === "all" ? null : (value as ApplicationStatus))
         }
       >
         <SelectTrigger className="w-full sm:w-52">

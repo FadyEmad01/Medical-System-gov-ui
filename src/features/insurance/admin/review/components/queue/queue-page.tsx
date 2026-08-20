@@ -13,7 +13,10 @@ import {
 import { useRouter } from "@/i18n/navigation";
 import type { ApplicationStatus } from "../../../../types";
 import { useApplicationQueue } from "../../hooks/use-application-queue";
-import { parseQueueFilters, queueFiltersToParams } from "../../lib/queue-filters";
+import {
+  parseQueueFilters,
+  queueFiltersToParams,
+} from "../../lib/queue-filters";
 import { QueuePagination } from "./queue-pagination";
 import {
   QueueEmptyState,
@@ -40,10 +43,21 @@ export default function QueuePage() {
     page: filters.page,
   });
 
-  const navigate = (next: { status?: ApplicationStatus; page?: number }) => {
+  const navigate = (next: {
+    status?: ApplicationStatus | null;
+    page?: number;
+  }) => {
+    // null = caller explicitly wants to clear the status filter
+    // undefined = caller didn't pass status (keep current)
+    const nextStatus =
+      next.status === null
+        ? undefined
+        : next.status !== undefined
+          ? next.status
+          : filters.status;
     router.push(
       `/dashboard/admin/applications${queueFiltersToParams({
-        status: next.status ?? filters.status,
+        status: nextStatus,
         page: next.page ?? 1,
       })}`,
     );
