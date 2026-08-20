@@ -68,7 +68,7 @@
   },
   "history": {
     "title": "Verification history",
-    "hint": "GET /insurance/verification/{patientId}/history",
+    "hint": "GET /insurance/verification/'{patientId}'/history",
     "newestFirst": "Newest first",
     "when": "When",
     "status": "Status",
