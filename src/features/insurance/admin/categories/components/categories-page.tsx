@@ -20,7 +20,7 @@ export default function CategoriesPage() {
   const [createOpen, setCreateOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 md:gap-6">
       <Card>
         <CardHeader>
           <CardTitle>{t("categories.title")}</CardTitle>

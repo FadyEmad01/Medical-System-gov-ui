@@ -15,7 +15,7 @@ export default async function AuthLayout({ children }: Props) {
       <div className="flex flex-col gap-4 p-6 md:p-10 ">
         <div className="flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 font-medium">
-            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground"></div>
+            <div className="flex size-6 items-center justify-center rounded-md bg-linear-to-br from-primary to-primary/70 text-primary-foreground"></div>
             {t("brandName")}
           </Link>
           <LanguageSwitcher />
@@ -27,7 +27,7 @@ export default async function AuthLayout({ children }: Props) {
       <div className="relative hidden bg-muted lg:block">
         <div className="sticky top-0 h-svh">
           <Image
-            src="/placeholder.svg"
+            src="/images/p2.jpg"
             alt={t("brandName")}
             fill
             priority

@@ -36,7 +36,7 @@ export function PastApplicationsSection({
           {past.map((application) => (
             <li
               key={application.id}
-              className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
+              className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0 rounded-md transition-colors hover:bg-muted/50"
             >
               <div className="flex min-w-0 flex-col gap-0.5">
                 <p className="text-sm font-medium tabular-nums">

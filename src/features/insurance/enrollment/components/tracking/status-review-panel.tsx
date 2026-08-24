@@ -20,7 +20,10 @@ export function ReviewSummaryPanel({
 
   if (detailQuery.isPending) {
     return (
-      <Card aria-busy="true">
+      <Card
+        aria-busy="true"
+        className="bg-linear-to-t from-primary/5 to-card shadow-xs"
+      >
         <CardHeader>
           <Skeleton className="h-5 w-32" />
         </CardHeader>
@@ -42,7 +45,7 @@ export function ReviewSummaryPanel({
   const detail = detailQuery.data;
 
   return (
-    <Card>
+    <Card className="bg-linear-to-t from-primary/5 to-card shadow-xs">
       <CardHeader>
         <CardTitle>{t("tracking.details")}</CardTitle>
       </CardHeader>

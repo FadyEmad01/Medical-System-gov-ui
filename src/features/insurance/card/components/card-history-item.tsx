@@ -51,7 +51,7 @@ export function CardHistoryItem({
   return (
     <Collapsible onOpenChange={setOpen} open={open}>
       <div className="rounded-lg border">
-        <div className="flex items-start justify-between gap-3 p-4">
+        <div className="flex items-start justify-between gap-3 rounded-md p-4 transition-colors hover:bg-muted/50">
           <div className="flex min-w-0 flex-col gap-0.5">
             <p className="flex flex-wrap items-center gap-2 font-medium tabular-nums">
               {card.cardNumber ?? "—"}

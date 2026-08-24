@@ -1,9 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import {
-  Fragment,
   type Dispatch,
+  Fragment,
   type ReactNode,
   type SetStateAction,
 } from "react";
@@ -17,6 +18,7 @@ import {
   StepperTitle,
   StepperTrigger,
 } from "@/components/ui/stepper";
+import { cn } from "@/lib/utils";
 import type { WizardStep } from "../../lib/derive-wizard-step";
 
 export const STEP_ORDER: readonly WizardStep[] = [
@@ -47,6 +49,8 @@ export function EnrollmentWizardChrome({
   children: ReactNode;
 }) {
   const t = useTranslations("insurance");
+  const locale = useLocale();
+  const ForwardIcon = locale === "ar" ? ArrowLeft : ArrowRight;
 
   return (
     <Card className="mx-auto w-full max-w-3xl">
@@ -84,24 +88,31 @@ export function EnrollmentWizardChrome({
 
         {children}
 
-        {stepIndex < STEP_ORDER.length - 1 ? (
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={stepIndex === 0}
-              onClick={() => onStepIndexChange((index) => index - 1)}
-            >
-              {t("enrollment.back")}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => onStepIndexChange((index) => index + 1)}
-            >
-              {t("enrollment.next")}
-            </Button>
-          </div>
-        ) : null}
+        <div
+          className={cn(
+            "flex items-center justify-between gap-2",
+            stepIndex === STEP_ORDER.length - 1 &&
+              "invisible pointer-events-none",
+          )}
+        >
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            disabled={stepIndex === 0}
+            onClick={() => onStepIndexChange((index) => index - 1)}
+          >
+            {t("enrollment.back")}
+          </Button>
+          <Button
+            type="button"
+            className="w-full sm:w-auto"
+            onClick={() => onStepIndexChange((index) => index + 1)}
+          >
+            {t("enrollment.next")}
+            <ForwardIcon className="size-4" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

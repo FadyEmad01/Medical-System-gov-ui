@@ -97,7 +97,7 @@ export function AttentionState({ card }: { card: CardResponseDto }) {
       </Alert>
 
       {/* Muted card preview so the affected card stays in context. */}
-      <Card className="pointer-events-none opacity-70 select-none">
+      <Card className="bg-linear-to-t from-primary/5 to-card pointer-events-none opacity-70 select-none shadow-xs">
         <CardContent className="flex items-center justify-between gap-2">
           <div className="flex flex-col gap-0.5">
             <p className="text-sm font-medium">{card.holderFullName ?? "—"}</p>
@@ -141,20 +141,20 @@ export function ReadyState({
       />
 
       {/* Compact localized status/details row under the card. */}
-      <Card>
+      <Card className="bg-linear-to-t from-primary/5 to-card shadow-xs">
         <CardContent className="flex flex-wrap items-center gap-3 py-3">
           <Badge className={CARD_STATUS_TONE[card.status]}>
             {t(`card.status.${card.status}`)}
           </Badge>
           <span className="text-sm text-muted-foreground">
             {t("card.view.expires")}:{" "}
-            <span className="font-medium text-foreground">
+            <span className="text-sm font-medium tabular-nums text-foreground">
               {formatDate(card.expiresAt)}
             </span>
           </span>
           <span className="text-sm text-muted-foreground">
             {t("card.view.version")}:{" "}
-            <span className="font-medium text-foreground">
+            <span className="text-sm font-medium tabular-nums text-foreground">
               {t("card.view.versionPrefix", { version: card.version })}
             </span>
           </span>

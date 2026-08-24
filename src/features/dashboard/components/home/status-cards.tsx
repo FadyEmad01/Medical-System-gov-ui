@@ -49,7 +49,7 @@ export function StatusCards() {
     return (
       <div className="grid gap-4 lg:grid-cols-3">
         {(["card", "profile", "application"] as const).map((key) => (
-          <Card key={key}>
+          <Card key={key} className="bg-linear-to-t from-primary/5 to-card shadow-xs">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="size-8 rounded-lg" />
@@ -103,7 +103,7 @@ export function StatusCards() {
     return (
       <div className="grid gap-4 lg:grid-cols-3">
         {(["card", "profile", "application"] as const).map((key) => (
-          <Card key={key}>
+          <Card key={key} className="bg-linear-to-t from-primary/5 to-card shadow-xs">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="size-8 rounded-lg" />
@@ -148,34 +148,34 @@ export function StatusCards() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <Card>
+      <Card className="bg-linear-to-t from-primary/5 to-card shadow-xs">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             {t("status.cardStatus")}
           </CardTitle>
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
             <CreditCard className="size-4" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{cardStatusText}</div>
+          <div className="text-3xl font-medium leading-none tracking-tight tabular-nums">{cardStatusText}</div>
           <Badge variant="outline" className={`mt-1 text-xs ${cardStatusTone}`}>
             {card.step === 3 ? "✓" : `${card.step}/3`}
           </Badge>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-linear-to-t from-primary/5 to-card shadow-xs">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             {t("status.profileProgress")}
           </CardTitle>
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
             <UserCheck className="size-4" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{completeness.percent}%</div>
+          <div className="text-3xl font-medium leading-none tracking-tight tabular-nums">{completeness.percent}%</div>
           <Badge
             variant="outline"
             className={`mt-1 text-xs ${LEVEL_TONE[completeness.level]}`}
@@ -185,17 +185,17 @@ export function StatusCards() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-linear-to-t from-primary/5 to-card shadow-xs">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             {t("status.applicationStatus")}
           </CardTitle>
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
             <FileText className="size-4" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{appStatusText}</div>
+          <div className="text-3xl font-medium leading-none tracking-tight tabular-nums">{appStatusText}</div>
           <Badge variant="outline" className={`mt-1 text-xs ${appStatusTone}`}>
             {appStatusKey ?? "—"}
           </Badge>

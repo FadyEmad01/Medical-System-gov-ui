@@ -42,7 +42,7 @@ export default function CategoryDetailPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 md:gap-6">
       <Card>
         <CardContent className="flex items-start justify-between gap-2 py-4">
           <div className="flex min-w-0 flex-col gap-1">

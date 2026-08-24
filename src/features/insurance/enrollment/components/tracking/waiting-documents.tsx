@@ -40,7 +40,7 @@ export function WaitingDocumentsSection({
   } = useDocumentSlots({ patientId, requirements });
 
   return (
-    <Card>
+    <Card className="bg-linear-to-t from-primary/5 to-card shadow-xs">
       <CardHeader>
         <CardTitle>{t("tracking.documentsSection")}</CardTitle>
       </CardHeader>

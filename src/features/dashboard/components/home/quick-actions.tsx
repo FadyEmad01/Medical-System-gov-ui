@@ -31,14 +31,14 @@ export function QuickActions() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
           {actions.map(({ key, icon: Icon, href }) => (
             <Link
               key={key}
               href={href}
               className="flex flex-col items-center gap-2 group"
             >
-              <div className="flex size-12 items-center justify-center rounded-full border border-input bg-background transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
+              <div className="flex size-12 items-center justify-center rounded-full border border-input bg-background transition-colors group-hover:bg-accent group-hover:text-accent-foreground group-hover:border-primary/40">
                 <Icon className="size-5 text-muted-foreground transition-colors group-hover:text-foreground" />
               </div>
               <span className="text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">
