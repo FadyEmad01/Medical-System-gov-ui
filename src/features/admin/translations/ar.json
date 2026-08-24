@@ -77,20 +77,22 @@
       "email": "البريد الإلكتروني",
       "address": "العنوان",
       "occupation": "المهنة",
-      "maritalStatus": "الحالة الاجتماعية"
+      "maritalStatus": "الحالة الاجتماعية",
+      "unavailable": "تفاصيل مقدم الطلب غير متاحة."
     },
     "category": {
       "title": "{category} — المستندات المطلوبة",
       "optional": "اختياري",
       "notUploaded": "لم يُرفع بعد",
       "missing": "ناقص",
-      "viewFile": "عرض الملف"
+      "viewFile": "عرض الملف",
+      "unavailable": "هذه الفئة لم تعد متاحة."
     },
     "documents": {
       "title": "المستندات المرفوعة",
-      "noneCurrent": "لا توجد مستندات حالية.",
-      "superseded": "النسخ السابقة ({count})",
-      "supersededBadge": "مُستبدَل",
+      "caption": "ما كان على الملف عند تقديم هذا الطلب.",
+      "noneCurrent": "لم يتم تقديم أي مستندات.",
+      "forDependent": "خاص بـ {name}",
       "reviewStatus": {
         "Pending": "قيد المراجعة",
         "Approved": "مقبول",
@@ -99,9 +101,9 @@
     },
     "dependents": {
       "title": "التابعون",
+      "caption": "الأفراد المسجلون وقت التقديم.",
+      "addedAt": "أُضيف {date}",
       "none": "لا يوجد تابعون في هذا الطلب.",
-      "active": "نشط",
-      "inactive": "منتهي",
       "relationship": {
         "Spouse": "زوج/زوجة",
         "Child": "ابن/ابنة",

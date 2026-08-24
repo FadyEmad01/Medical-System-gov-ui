@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { arSA, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
-import type { CitizenDocumentResponseDto } from "../../../../enrollment/types";
+import type { DocumentReviewStatus } from "../../../../enrollment/types";
 
 export function useFormatDate() {
   const locale = useLocale();
@@ -30,10 +30,7 @@ export function Field({
   );
 }
 
-export const DOC_REVIEW_TONE: Record<
-  CitizenDocumentResponseDto["reviewStatus"],
-  string
-> = {
+export const DOC_REVIEW_TONE: Record<DocumentReviewStatus, string> = {
   Pending: "bg-warning/10 text-warning",
   Approved: "bg-success/10 text-success",
   Rejected: "bg-revoked/10 text-revoked",

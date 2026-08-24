@@ -15,8 +15,9 @@ export function HistorySection({
   const t = useTranslations("admin");
   const formatDate = useFormatDate();
 
-  if (detail.reviewHistory.length === 0) return null;
-  const history = [...detail.reviewHistory].reverse();
+  const history = [...(detail.reviewHistory ?? [])].reverse();
+
+  if (history.length === 0) return null;
 
   return (
     <Card>

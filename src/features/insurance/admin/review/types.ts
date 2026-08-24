@@ -8,9 +8,10 @@
 import type {
   ApplicationResponseDto,
   ApplicationReviewResponseDto,
-  CitizenDocumentResponseDto,
-  DependentResponseDto,
+  DocumentReviewStatus,
+  DocumentType,
   InsuranceCategoryResponseDto,
+  RelationshipType,
 } from "../../enrollment/types";
 import type {
   ApplicationStatus,
@@ -60,6 +61,34 @@ export interface ApplicantSummaryDto {
   emergencyContactPhone: string | null;
 }
 
+/** Submission-time snapshot per live Admin swagger. */
+export interface ApplicationDocumentDetailDto {
+  citizenDocumentId: string;
+  dependentPersonId: string | null;
+  dependentFullName: string | null;
+  documentType: DocumentType;
+  documentNumber: string | null;
+  fileName: string | null;
+  fileUrl: string | null;
+  fileType: string | null;
+  fileSize: number;
+  uploadedAt: string;
+  expiresAt: string | null;
+  reviewStatus: DocumentReviewStatus;
+  addedToApplicationAt: string;
+}
+
+/** Submission-time snapshot per live Admin swagger. */
+export interface ApplicationDependentDetailDto {
+  dependentPersonId: string;
+  fullName: string | null;
+  dateOfBirth: string;
+  gender: Gender;
+  nationalId: string | null;
+  relationshipType: RelationshipType;
+  addedToApplicationAt: string;
+}
+
 /**
  * GET /applications/{applicationId}/review — everything an Admin needs to
  * decide, in one call. NOTE: opening this endpoint auto-claims a freshly
@@ -80,13 +109,15 @@ export interface ApplicationReviewDetailResponseDto {
   verificationStatusSnapshot: InsuranceVerificationResponseDto["status"] | null;
   createdAt: string;
   correlationId: string;
-  applicant: ApplicantSummaryDto;
-  insuranceCategory: InsuranceCategoryResponseDto;
-  documents: CitizenDocumentResponseDto[];
-  dependents: DependentResponseDto[];
+  /** Live Admin swagger: arrays declare nullable:true and the schema has NO
+   * required array — every property below can legally be absent. */
+  applicant: ApplicantSummaryDto | null;
+  insuranceCategory: InsuranceCategoryResponseDto | null;
+  documents: ApplicationDocumentDetailDto[] | null;
+  dependents: ApplicationDependentDetailDto[] | null;
   eligibility: InsuranceEligibilityResponseDto | null;
   verification: InsuranceVerificationResponseDto | null;
-  reviewHistory: ApplicationReviewResponseDto[];
+  reviewHistory: ApplicationReviewResponseDto[] | null;
 }
 
 /** Boundary input for the three reason-carrying decision actions. */

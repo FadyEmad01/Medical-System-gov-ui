@@ -18,12 +18,26 @@ export function CategoryMatrixSection({
 }) {
   const t = useTranslations("admin");
   const formatDate = useFormatDate();
-  const requirements = detail.insuranceCategory.documentRequirements
+  const category = detail.insuranceCategory;
+
+  // Orphaned reference — the application's category was deleted server-side.
+  if (!category) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {t("review.category.unavailable")}
+      </p>
+    );
+  }
+
+  const requirements = category.documentRequirements
     .filter((requirement) => requirement.isActive)
     .sort((a, b) => a.displayOrder - b.displayOrder);
+  // Snapshot items arrive flattened; last upload of a type wins.
+  // Dependent-owned docs are excluded: a requirement on the applicant's row
+  // is only evidenced by an applicant-owned document (dependentPersonId null).
   const currentDocs = new Map(
-    detail.documents
-      .filter((document) => document.isCurrent)
+    (detail.documents ?? [])
+      .filter((document) => document.dependentPersonId === null)
       .map((document) => [document.documentType, document]),
   );
 
@@ -32,7 +46,7 @@ export function CategoryMatrixSection({
       <CardHeader>
         <CardTitle>
           {t("review.category.title", {
-            category: detail.insuranceCategory.name,
+            category: category.name,
           })}
         </CardTitle>
       </CardHeader>

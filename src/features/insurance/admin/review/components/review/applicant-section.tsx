@@ -13,7 +13,16 @@ export function ApplicantSection({
 }) {
   const t = useTranslations("admin");
   const formatDate = useFormatDate();
-  const a = detail.applicant;
+  const applicant = detail.applicant;
+
+  // Applicant record gone server-side — nothing to visually verify.
+  if (!applicant) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {t("review.applicant.unavailable")}
+      </p>
+    );
+  }
 
   return (
     <Card>
@@ -22,33 +31,42 @@ export function ApplicantSection({
       </CardHeader>
       <CardContent>
         <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <Field label={t("review.applicant.fullName")} value={a.fullName} />
+          <Field
+            label={t("review.applicant.fullName")}
+            value={applicant.fullName}
+          />
           <Field
             label={t("review.applicant.nationalId")}
-            value={a.nationalId}
+            value={applicant.nationalId}
           />
           <Field
             label={t("review.applicant.dateOfBirth")}
-            value={formatDate(a.dateOfBirth)}
+            value={formatDate(applicant.dateOfBirth)}
           />
-          <Field label={t("review.applicant.gender")} value={a.gender} />
-          <Field label={t("review.applicant.mobile")} value={a.mobileNumber} />
-          <Field label={t("review.applicant.email")} value={a.email} />
+          <Field
+            label={t("review.applicant.gender")}
+            value={applicant.gender}
+          />
+          <Field
+            label={t("review.applicant.mobile")}
+            value={applicant.mobileNumber}
+          />
+          <Field label={t("review.applicant.email")} value={applicant.email} />
           <Field
             label={t("review.applicant.address")}
             value={
-              a.address
-                ? `${a.address}${a.district ? `, ${a.district}` : ""}${a.governorate ? `, ${a.governorate}` : ""}`
+              applicant.address
+                ? `${applicant.address}${applicant.district ? `, ${applicant.district}` : ""}${applicant.governorate ? `, ${applicant.governorate}` : ""}`
                 : null
             }
           />
           <Field
             label={t("review.applicant.occupation")}
-            value={a.occupation}
+            value={applicant.occupation}
           />
           <Field
             label={t("review.applicant.maritalStatus")}
-            value={a.maritalStatus}
+            value={applicant.maritalStatus}
           />
         </dl>
       </CardContent>

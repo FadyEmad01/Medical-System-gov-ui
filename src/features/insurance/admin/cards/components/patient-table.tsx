@@ -19,8 +19,9 @@ import type { EnrichedApplicationDto } from "../types";
 
 /**
  * Patient table for the cards lookup page. Rows carry enriched patient
- * identity fields (patientName, nationalId, cardStatus) alongside the
- * standard application fields.
+ * identity fields (patientFullName, patientNationalId) alongside the
+ * standard application fields; cardStatus renders "—" until the backend
+ * ships it.
  */
 export function PatientTable({ items }: { items: EnrichedApplicationDto[] }) {
   const t = useTranslations("admin");
@@ -50,11 +51,11 @@ export function PatientTable({ items }: { items: EnrichedApplicationDto[] }) {
                 className="underline-offset-4 hover:underline truncate block"
                 href={`/dashboard/admin/cards/${item.patientId}`}
               >
-                {item.patientName ?? "—"}
+                {item.patientFullName ?? "—"}
               </Link>
             </TableCell>
             <TableCell className="tabular-nums">
-              {item.nationalId ?? "—"}
+              {item.patientNationalId ?? "—"}
             </TableCell>
             <TableCell>
               <Link

@@ -98,7 +98,9 @@ export default function ReviewPage() {
               <CardTitle className="text-base">
                 {detail.applicationNumber}
               </CardTitle>
-              <p className="text-sm font-medium">{detail.applicant.fullName}</p>
+              <p className="text-sm font-medium">
+                {detail.applicant?.fullName ?? "—"}
+              </p>
               <p className="text-xs text-muted-foreground">
                 {t("review.header.submittedAt", { date: submittedAt })}
               </p>

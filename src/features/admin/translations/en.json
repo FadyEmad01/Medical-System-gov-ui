@@ -77,20 +77,22 @@
       "email": "Email",
       "address": "Address",
       "occupation": "Occupation",
-      "maritalStatus": "Marital status"
+      "maritalStatus": "Marital status",
+      "unavailable": "Applicant details are unavailable."
     },
     "category": {
       "title": "{category} — required documents",
       "optional": "optional",
       "notUploaded": "Not uploaded yet",
       "missing": "Missing",
-      "viewFile": "View file"
+      "viewFile": "View file",
+      "unavailable": "This category is no longer available."
     },
     "documents": {
       "title": "Uploaded documents",
-      "noneCurrent": "No current documents on file.",
-      "superseded": "Previous versions ({count})",
-      "supersededBadge": "Superseded",
+      "caption": "What was on file when this application was submitted.",
+      "noneCurrent": "No documents were submitted.",
+      "forDependent": "For {name}",
       "reviewStatus": {
         "Pending": "Pending",
         "Approved": "Approved",
@@ -99,9 +101,9 @@
     },
     "dependents": {
       "title": "Dependents",
+      "caption": "Dependents recorded at submission time.",
+      "addedAt": "Added {date}",
       "none": "No dependents on this application.",
-      "active": "Active",
-      "inactive": "Ended",
       "relationship": {
         "Spouse": "Spouse",
         "Child": "Child",

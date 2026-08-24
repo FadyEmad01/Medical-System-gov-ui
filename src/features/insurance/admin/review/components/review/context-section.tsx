@@ -1,6 +1,5 @@
 "use client";
 
-import { BadgeCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,18 +20,21 @@ export function ContextSection({
       <Card>
         <CardHeader>
           <CardTitle>{t("review.dependents.title")}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {t("review.dependents.caption")}
+          </p>
         </CardHeader>
         <CardContent>
-          {detail.dependents.length === 0 ? (
+          {(detail.dependents ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t("review.dependents.none")}
             </p>
           ) : (
             <ul className="divide-y divide-border">
-              {detail.dependents.map((dependent) => (
+              {(detail.dependents ?? []).map((dependent) => (
                 <li
                   className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0"
-                  key={dependent.relationshipId}
+                  key={dependent.dependentPersonId}
                 >
                   <div className="flex min-w-0 flex-col">
                     <p className="text-sm font-medium">
@@ -46,16 +48,11 @@ export function ContextSection({
                       {formatDate(dependent.dateOfBirth)}
                     </p>
                   </div>
-                  {dependent.isActive ? (
-                    <Badge variant="outline">
-                      <BadgeCheck className="size-3" />
-                      {t("review.dependents.active")}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">
-                      {t("review.dependents.inactive")}
-                    </Badge>
-                  )}
+                  <p className="shrink-0 text-xs text-muted-foreground">
+                    {t("review.dependents.addedAt", {
+                      date: formatDate(dependent.addedToApplicationAt),
+                    })}
+                  </p>
                 </li>
               ))}
             </ul>

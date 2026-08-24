@@ -18,7 +18,7 @@ export interface PatientQueueFilters {
   /** Undefined = All statuses. */
   status: ApplicationStatus | undefined;
   page: number;
-  /** Free-text search for patientName / nationalId — client-side. */
+  /** Free-text search for patientFullName / patientNationalId — client-side. */
   search: string;
 }
 

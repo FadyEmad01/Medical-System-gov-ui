@@ -16,8 +16,9 @@ export interface QueueQuery {
 
 /**
  * GET /insurance/applications?Status=&Page=&PageSize= — the cross-patient
- * queue, server-paged. Rows are plain ApplicationResponseDto: no applicant
- * identity (that lives behind the review endpoint).
+ * queue, server-paged. Rows DO carry applicant identity via nullable
+ * patientFullName / patientNationalId (Admin API only — the citizen API's
+ * ApplicationResponseDto does not have them).
  */
 export function getApplicationQueue(
   token: string,
