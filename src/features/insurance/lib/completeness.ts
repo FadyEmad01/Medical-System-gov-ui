@@ -6,6 +6,13 @@ import {
 
 export type CompletenessLevel = "low" | "medium" | "high";
 
+/** Completeness level → gauge/badge color from the semantic status tokens. */
+export const LEVEL_COLORS: Record<CompletenessLevel, string> = {
+  low: "var(--revoked)",
+  medium: "var(--warning)",
+  high: "var(--success)",
+};
+
 export interface ProfileCompleteness {
   percent: number;
   filled: number;

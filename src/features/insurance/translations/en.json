@@ -51,6 +51,21 @@
       "emergencyContactName": "Emergency contact name",
       "emergencyContactPhone": "Emergency contact phone",
       "createdAt": "Member since"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "details": "Details"
+    },
+    "sections": {
+      "keyFacts": "Key facts",
+      "identity": "Identity",
+      "contact": "Contact & address",
+      "emergency": "Emergency contact"
+    },
+    "private": "Private",
+    "status": {
+      "title": "Profile status",
+      "updated": "Updated {date}"
     }
   },
   "card": {

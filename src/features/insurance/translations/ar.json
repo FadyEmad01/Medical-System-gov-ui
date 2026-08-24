@@ -51,6 +51,21 @@
       "emergencyContactName": "اسم جهة الاتصال للطوارئ",
       "emergencyContactPhone": "هاتف جهة الاتصال للطوارئ",
       "createdAt": "عضو منذ"
+    },
+    "tabs": {
+      "overview": "نظرة عامة",
+      "details": "التفاصيل"
+    },
+    "sections": {
+      "keyFacts": "بيانات أساسية",
+      "identity": "بيانات الهوية",
+      "contact": "التواصل والعنوان",
+      "emergency": "جهة اتصال الطوارئ"
+    },
+    "private": "خاص",
+    "status": {
+      "title": "حالة الملف",
+      "updated": "آخر تحديث {date}"
     }
   },
   "card": {

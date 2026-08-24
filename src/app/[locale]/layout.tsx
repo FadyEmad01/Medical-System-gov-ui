@@ -2,6 +2,7 @@ import { Almarai, Geist, Geist_Mono, Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { DirectionProvider } from "@/components/ui/direction";
 import { QueryProvider } from "@/features/auth/context/query-provider";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -55,9 +56,11 @@ export default async function LocaleLayout({ children, params }: Props) {
       )}
     >
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider messages={messages}>
-          <QueryProvider>{children}</QueryProvider>
-        </NextIntlClientProvider>
+        <DirectionProvider dir={dir}>
+          <NextIntlClientProvider messages={messages}>
+            <QueryProvider>{children}</QueryProvider>
+          </NextIntlClientProvider>
+        </DirectionProvider>
       </body>
     </html>
   );

@@ -9,55 +9,93 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { isAuthActionError } from "../../hooks/session-guard";
 
-const SKELETON_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
+/** One "key fact" slot: a muted label bar over a value bar. */
+function KeyFactSkeleton() {
+  return (
+    <div className="flex flex-col gap-1">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-5 w-40" />
+    </div>
+  );
+}
 
+/**
+ * Loading placeholder mirroring the loaded profile page 1:1 — hero row, tab
+ * strip, and the three-column overview grid — so the arrival of data causes
+ * zero layout shift.
+ */
 export function ProfileLoading() {
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="lg:col-span-1">
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-4 w-40" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center gap-4">
-          <Skeleton className="size-44 rounded-full" />
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-4 w-28" />
-          <div className="flex w-full flex-col gap-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
+    <div aria-hidden="true" className="flex flex-col">
+      {/* Hero: ring + identity stack, edit button at the row end on desktop. */}
+      <header className="flex flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between md:gap-6 md:px-6">
+        <div className="flex min-w-0 items-center gap-4">
+          <Skeleton className="size-18 shrink-0 rounded-full sm:size-23" />
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <Skeleton className="h-7 w-48 max-w-full sm:h-8" />
+            <Skeleton className="h-5 w-64 max-w-full" />
+            <div className="flex flex-wrap gap-1.5">
+              <Skeleton className="h-5 w-16 rounded-md" />
+              <Skeleton className="h-5 w-20 rounded-md" />
+              <Skeleton className="h-5 w-14 rounded-md" />
+            </div>
           </div>
-        </CardContent>
-      </Card>
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-4 w-44" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-            {SKELETON_ROWS.map((row) => (
-              <div key={row} className="flex flex-col gap-1">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-4 w-40" />
-              </div>
-            ))}
+        </div>
+        <Skeleton className="hidden h-7 w-24 shrink-0 self-start sm:block md:self-auto" />
+      </header>
+
+      {/* Tab strip: two trigger-sized slots inside the same scroll wrapper. */}
+      <div className="overflow-x-auto overscroll-x-contain border-y">
+        <div className="flex w-max min-w-min items-center gap-4 px-4">
+          <div className="shrink-0 rounded-md border border-transparent px-1.5 py-0.5">
+            <Skeleton className="h-5 w-20" />
           </div>
-        </CardContent>
-      </Card>
+          <div className="shrink-0 rounded-md border border-transparent px-1.5 py-0.5">
+            <Skeleton className="h-5 w-16" />
+          </div>
+        </div>
+      </div>
+
+      {/* Overview grid: about + key facts | separator | status rail. */}
+      <div className="grid gap-6 px-4 py-4 md:px-6 lg:grid-cols-[minmax(0,1fr)_auto_18rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-7 w-40" />
+            <Skeleton className="h-5 w-full max-w-lg" />
+          </div>
+          <section className="flex flex-col gap-3">
+            <Skeleton className="h-5 w-20" />
+            <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3 xl:gap-12">
+              <KeyFactSkeleton />
+              <KeyFactSkeleton />
+              <KeyFactSkeleton />
+              <KeyFactSkeleton />
+              <KeyFactSkeleton />
+              <KeyFactSkeleton />
+            </div>
+          </section>
+        </div>
+        <Separator orientation="vertical" className="hidden lg:block" />
+        <aside className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-16" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-2 shrink-0 rounded-full" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <Skeleton className="h-4 w-36" />
+          <Separator />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-5/6" />
+            <Skeleton className="h-5 w-2/3" />
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

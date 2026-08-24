@@ -1,22 +1,18 @@
 "use client";
 
-import { Pencil, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useProfile } from "../../hooks/use-profile";
-import { CompletenessCard } from "./profile-completeness-card";
-import { ProfileDetails } from "./profile-details";
+import { computeProfileCompleteness } from "../../lib/completeness";
+import { ProfileDetails, ProfileKeyFacts } from "./profile-details";
 import { ProfileEditForm } from "./profile-edit-form";
+import { ProfileHeader } from "./profile-header";
 import { ProfileError, ProfileLoading } from "./profile-page-states";
+import { ProfileStatusRail } from "./profile-status-rail";
 
 export default function ProfilePage() {
   const ti = useTranslations("insurance");
@@ -26,6 +22,26 @@ export default function ProfilePage() {
   const [pendingScrollToForm, setPendingScrollToForm] = useState(false);
   const editFormRef = useRef<HTMLFormElement | null>(null);
 
+  // Deep-linkable active tab: ?tab=details reopens the details tab on reload.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab = tabParam === "details" ? "details" : "overview";
+
+  const syncTabToUrl = useCallback(
+    (next: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      const current = searchParams.get("tab") ?? "overview";
+      if (current === next) return;
+      if (next === "overview") params.delete("tab");
+      else params.set("tab", next);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
+
   useEffect(() => {
     if (!pendingScrollToForm) return;
     const form = editFormRef.current;
@@ -33,9 +49,11 @@ export default function ProfilePage() {
     setPendingScrollToForm(false);
   }, [pendingScrollToForm]);
 
-  const startEditingFromCompleteness = () => {
-    setEditing(true);
-    setPendingScrollToForm(true);
+  // Entering edit mode swaps the tabs out for the full-width form below;
+  // flag a scroll so the form lands in view once it mounts.
+  const toggleEditing = () => {
+    if (!editing) setPendingScrollToForm(true);
+    setEditing((prev) => !prev);
   };
 
   if (isLoading) return <ProfileLoading />;
@@ -50,43 +68,68 @@ export default function ProfilePage() {
     );
   }
 
+  const completeness = computeProfileCompleteness(data);
+
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <CompletenessCard profile={data} onEdit={startEditingFromCompleteness} />
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>{ti("profile.title")}</CardTitle>
-          <CardDescription>{ti("profile.description")}</CardDescription>
-          <CardAction>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setEditing((prev) => !prev)}
-              aria-pressed={editing}
+    <div className="flex flex-col">
+      <ProfileHeader
+        profile={data}
+        percent={completeness.percent}
+        level={completeness.level}
+        editing={editing}
+        onToggleEditing={toggleEditing}
+      />
+      {editing ? (
+        <div className="px-4 pb-6 md:px-6">
+          <ProfileEditForm
+            profile={data}
+            formRef={editFormRef}
+            onCancel={() => setEditing(false)}
+            onSaved={() => setEditing(false)}
+          />
+        </div>
+      ) : (
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => syncTabToUrl(value)}
+          className="gap-0"
+        >
+          <div className="overflow-x-auto overscroll-x-contain border-y">
+            <TabsList
+              variant="line"
+              className="group-data-horizontal/tabs:h-auto w-max min-w-min justify-start gap-4 rounded-none bg-transparent p-1 px-4"
             >
-              {editing ? (
-                <X data-icon="inline-start" />
-              ) : (
-                <Pencil data-icon="inline-start" />
-              )}
-              {editing ? ti("profile.cancel") : ti("profile.edit")}
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          {editing ? (
-            <ProfileEditForm
-              profile={data}
-              formRef={editFormRef}
-              onCancel={() => setEditing(false)}
-              onSaved={() => setEditing(false)}
-            />
-          ) : (
+              <TabsTrigger value="overview" className="flex-none">
+                {ti("profile.tabs.overview")}
+              </TabsTrigger>
+              <TabsTrigger value="details" className="flex-none">
+                {ti("profile.tabs.details")}
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent
+            value="overview"
+            className="grid gap-6 px-4 py-4 md:px-6 lg:grid-cols-[minmax(0,1fr)_auto_18rem]"
+          >
+            <div className="flex min-w-0 flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <h2 className="text-lg font-semibold tracking-tight">
+                  {ti("profile.title")}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {ti("profile.description")}
+                </p>
+              </div>
+              <ProfileKeyFacts profile={data} />
+            </div>
+            <Separator orientation="vertical" className="hidden lg:block" />
+            <ProfileStatusRail profile={data} />
+          </TabsContent>
+          <TabsContent value="details" className="px-4 py-4 md:px-6">
             <ProfileDetails profile={data} />
-          )}
-        </CardContent>
-      </Card>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }
