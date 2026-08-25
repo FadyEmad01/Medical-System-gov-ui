@@ -80,13 +80,13 @@ export default function CardsLookupPage() {
    * Enrichment IS live: queue rows carry nullable patientFullName /
    * patientNationalId (Admin API only). The cast bridges
    * PagedResult<ApplicationResponseDto> to the enriched subtype because
-   * arrays are invariant in TypeScript.
+   * arrays are invariant in TypeScript; items are declared nullable:true
+   * in the Admin swagger, so coalesce to [] first.
    */
-  const enrichedItems = result?.items as EnrichedApplicationDto[] | undefined;
+  const enrichedItems = (result?.items ?? []) as EnrichedApplicationDto[];
 
   /** Client-side filter for patient name / national ID. */
   const filteredItems = useMemo(() => {
-    if (!enrichedItems) return [];
     const q = searchQuery.trim().toLowerCase();
     if (q === "") return enrichedItems;
     return enrichedItems.filter((item) => {

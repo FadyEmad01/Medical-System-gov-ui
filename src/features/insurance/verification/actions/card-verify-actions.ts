@@ -7,7 +7,7 @@ import {
   toSessionAwareError,
 } from "../../lib/session-aware-error";
 import { verifyCard } from "../api/verification-client";
-import { invalid } from "../lib/action-helpers";
+import { invalid, isValidVerificationToken } from "../lib/action-helpers";
 import type { CardVerificationResultDto } from "../types";
 
 /** POST /cards/verify — scans the QR/token payload. */
@@ -18,7 +18,7 @@ export async function verifyCardAction(
   if (!token) return { ok: false, error: SESSION_EXPIRED_ERROR };
 
   const scanned = verificationToken.trim();
-  if (scanned === "" || scanned.length > 500) {
+  if (!isValidVerificationToken(scanned)) {
     return invalid("verification.errors.invalidToken");
   }
 

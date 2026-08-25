@@ -64,6 +64,8 @@ export default function QueuePage() {
   };
 
   const result = queueQuery.data;
+  /** items declared nullable:true in admin swagger — coalesce before use. */
+  const items = result?.items ?? [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -86,8 +88,8 @@ export default function QueuePage() {
             <QueueLoadingState />
           ) : queueQuery.isError ? (
             <QueueErrorState onRetry={() => void queueQuery.refetch()} />
-          ) : result && result.items.length > 0 ? (
-            <QueueTable items={result.items} />
+          ) : items.length > 0 ? (
+            <QueueTable items={items} />
           ) : (
             <QueueEmptyState status={filters.status} />
           )}
