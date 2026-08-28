@@ -31,6 +31,9 @@
     "adminCategories": "الفئات",
     "adminCards": "دورة حياة البطاقة",
     "adminVerification": "التحقق",
-    "doctorPointOfCare": "نقطة الرعاية"
+    "doctorWorkspace": "مساحة عمل الطبيب"
+  },
+  "header": {
+    "searchPlaceholder": "بحث..."
   }
 }

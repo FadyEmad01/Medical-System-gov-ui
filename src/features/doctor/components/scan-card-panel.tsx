@@ -94,12 +94,11 @@ export function ScanCardPanel() {
                 </p>
               </div>
               <Badge className={CARD_STATUS_TONE[result.status]}>
-                {result.status}
+                {t(`cardStatuses.${result.status}`)}
               </Badge>
             </div>
-            <p className="mt-2 font-mono text-xs text-muted-foreground">
+            <p className="mt-2 text-xs text-muted-foreground">
               {t("scan.expires", {
-                valid: String(result.isCurrentlyValid),
                 date: result.expiresAt
                   ? format(new Date(result.expiresAt), "PPP", {
                       locale: locale === "ar" ? arSA : enUS,

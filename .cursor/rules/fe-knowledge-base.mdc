@@ -1,0 +1,15 @@
+---
+description: Use the Frontend Engineering Knowledge Base (fe-playbook) for React architecture, state, performance, a11y, forms, and pattern questions.
+alwaysApply: false
+globs: "**/*.{ts,tsx,jsx,js}"
+---
+
+# Frontend Knowledge Base
+
+When answering React / frontend architecture or pattern questions, read the relevant file from the installed KB before answering.
+
+- KB root: `D:\medical\react-knowledge-base`
+- Cursor skill: `fe-playbook` (`~/.cursor/skills/fe-playbook`)
+- Env: `REACT_KB_PATH` (User) → same path
+
+Start from `AGENTS.md` or `docs/file-map.md` in the KB if unsure which topic file to open.

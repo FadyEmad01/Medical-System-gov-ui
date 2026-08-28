@@ -31,6 +31,9 @@
     "adminCategories": "Categories",
     "adminCards": "Card lifecycle",
     "adminVerification": "Verification",
-    "doctorPointOfCare": "Point of care"
+    "doctorWorkspace": "Doctor workspace"
+  },
+  "header": {
+    "searchPlaceholder": "Search..."
   }
 }

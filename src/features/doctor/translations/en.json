@@ -1,33 +1,184 @@
 {
-  "title": "Point of care",
-  "description": "Scan a digital card, load the patient by ID, then record a coverage decision.",
+  "home": {
+    "title": "Doctor workspace",
+    "description": "Search a patient, review their chart, and manage visits — with point-of-care coverage checks.",
+    "search": {
+      "title": "Patient search",
+      "hint": "Exact 14-digit National ID — no partial match.",
+      "nationalId": "National ID",
+      "action": "Search",
+      "searching": "Searching…"
+    },
+    "openById": {
+      "title": "Open by patient ID",
+      "hint": "Jump straight to a chart if you know the internal patient ID.",
+      "action": "Open"
+    },
+    "invalidPatientId": "Enter a valid numeric patient ID.",
+    "roster": {
+      "title": "My patients",
+      "hint": "Assigned or previously visited by you.",
+      "patient": "Patient",
+      "relationship": "Relationship",
+      "unnamed": "Patient {id}",
+      "empty": "You have no patients yet. Search by National ID to look one up.",
+      "searchCta": "Search a patient",
+      "relationships": {
+        "assigned": "Assigned",
+        "visitDerived": "Visit history",
+        "both": "Assigned + visit history"
+      }
+    }
+  },
+  "pending": {
+    "title": "Coming soon",
+    "description": "This section isn't available yet — it will appear here as soon as it's ready."
+  },
+  "chart": {
+    "description": "Coverage, verification, and the clinical record for one patient.",
+    "backToWorkspace": "Doctor workspace",
+    "summary": {
+      "title": "Medical summary",
+      "hint": "Latest visit at a glance.",
+      "pendingBody": "The medical summary will show the latest visit's diagnosis, notes, tests, and medications.",
+      "noDiagnosis": "No diagnosis recorded.",
+      "noNotes": "No notes recorded.",
+      "requiredTests": "Required tests",
+      "medicationsCount": "{count, plural, =0 {No medications} one {# medication} other {# medications}}",
+      "none": "No visits yet for this patient.",
+      "lastVisit": "Last visit"
+    },
+    "history": {
+      "title": "Visit history",
+      "hint": "Every visit on record for this patient.",
+      "newVisit": "New visit",
+      "date": "Date",
+      "type": "Type",
+      "status": "Status",
+      "diagnosis": "Diagnosis",
+      "empty": "No visits recorded for this patient.",
+      "doctor": "Doctor"
+    }
+  },
+  "visits": {
+    "title": "Visit",
+    "pendingBody": "The visit detail — clinical note, medications, and attachments — will appear here.",
+    "backToChart": "Patient chart",
+    "doctorSeenBy": "Doctor: {doctor}",
+    "created": "Visit created.",
+    "statusUpdated": "Visit status updated.",
+    "noteSaved": "Clinical note saved.",
+    "fields": {
+      "visitDate": "Visit date",
+      "visitType": "Visit type",
+      "doctorId": "Doctor ID",
+      "doctorIdHint": "Set automatically from your account.",
+      "diagnosis": "Diagnosis",
+      "notes": "Notes",
+      "requiredTests": "Required tests"
+    },
+    "types": {
+      "Consultation": "Consultation",
+      "FollowUp": "Follow-up",
+      "Emergency": "Emergency"
+    },
+    "statuses": {
+      "Scheduled": "Scheduled",
+      "InProgress": "In progress",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "status": {
+      "change": "Update status",
+      "title": "Update visit status",
+      "hint": "Choose the next step for this visit.",
+      "next": "New status",
+      "placeholder": "Choose a status",
+      "confirm": "Update",
+      "saving": "Updating…"
+    },
+    "note": {
+      "title": "Clinical note",
+      "hint": "Diagnosis, notes, and required tests.",
+      "edit": "Edit note",
+      "editTitle": "Edit clinical note",
+      "fullReplace": "Saving replaces the whole note — cleared fields are deleted.",
+      "clearingWarning": "You cleared a previously filled field — saving will delete that content.",
+      "save": "Save note",
+      "saving": "Saving…"
+    },
+    "new": {
+      "title": "New visit",
+      "hint": "One page — clinical fields are optional and usually filled later.",
+      "create": "Create visit",
+      "saving": "Creating…",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "visitDate": "Enter a valid visit date.",
+      "visitType": "Choose a visit type.",
+      "diagnosis": "Diagnosis is too long.",
+      "notes": "Notes are too long.",
+      "requiredTests": "Required tests are too long.",
+      "medicineName": "Medication field is too long.",
+      "incompleteRow": "Medication rows are all-or-nothing: fill every field or leave the row empty."
+    }
+  },
+  "medications": {
+    "title": "Medications",
+    "allOrNothing": "Fill in every field in a row, or leave the row empty.",
+    "add": "Add medication",
+    "addRow": "Add row",
+    "removeRow": "Remove row",
+    "saveRow": "Add",
+    "saving": "Adding…",
+    "added": "Medication added.",
+    "count": "{count, plural, =0 {None prescribed} one {# medication} other {# medications}}",
+    "empty": "No medications prescribed in this visit.",
+    "closedBanner": "This visit is closed — medications can no longer be added.",
+    "fields": {
+      "medicineName": "Medicine name",
+      "dosage": "Dosage",
+      "frequency": "Frequency",
+      "duration": "Duration"
+    }
+  },
+  "attachments": {
+    "title": "Attachments",
+    "hint": "PDF, JPG or PNG up to 10 MB. Files can be added but not removed.",
+    "upload": "Upload",
+    "uploading": "Uploading…",
+    "uploaded": "Attachment uploaded.",
+    "empty": "No attachments on this visit.",
+    "closedBanner": "This visit is closed — attachments are read-only.",
+    "meta": "{size} KB",
+    "errors": {
+      "tooLarge": "File exceeds the 10 MB limit.",
+      "invalidType": "Only PDF, JPG, or PNG files are accepted.",
+      "invalidFile": "This file cannot be uploaded — check type and size.",
+      "storageUnavailable": "Attachment storage is temporarily unavailable. Try again in a moment."
+    }
+  },
   "strip": {
     "patientId": "Patient ID",
-    "load": "Load patient",
-    "loaded": "Loaded",
-    "eligibility": "Eligibility",
-    "coverageNow": "Coverage now",
     "noName": "Patient {id}",
-    "nidMasked": "NID - {masked}",
-    "none": "None",
-    "notLoaded": "Enter a patient ID to load coverage.",
-    "inaccessible": "Patient not found or not accessible."
+    "nidMasked": "NID ••{masked}"
   },
   "scan": {
-    "title": "1 - Scan card",
-    "hint": "POST /insurance/cards/verify",
-    "ready": "Ready for QR / NFC",
-    "pasteHint": "Paste token if the scanner is offline",
-    "placeholder": "verificationToken (uuid)",
-    "verify": "Verify token",
+    "title": "Check insurance card",
+    "hint": "Scan or enter the code from a patient's digital card",
+    "ready": "Ready to scan",
+    "pasteHint": "Paste the card's code if scanning isn't available",
+    "placeholder": "Card verification code",
+    "verify": "Check card",
     "checking": "Checking…",
-    "accept": "Accept",
-    "reject": "Not valid",
-    "expires": "isCurrentlyValid - {valid} - expires {date}"
+    "accept": "Valid card",
+    "reject": "Card not valid",
+    "expires": "Card expires {date}"
   },
   "snapshot": {
-    "title": "2 - Coverage snapshot",
-    "hint": "eligibility + current + latest",
+    "title": "Coverage snapshot",
+    "hint": "Coverage at a glance",
     "eligibility": "Eligibility",
     "current": "Current verification",
     "latest": "Latest (any)",
@@ -35,40 +186,40 @@
     "noEligibility": "No eligibility record yet.",
     "noCurrent": "No currently valid verification.",
     "noLatest": "No verification events yet.",
-    "expiresIn": "Expires {relative} - Source {source}",
+    "expiresIn": "Expires {relative}",
     "sameEvent": "Same event - still within window",
-    "accessNote": "Doctor can only read patients they already visited or are assigned to. Unknown / inaccessible → same 404.",
+    "accessNote": "You can view coverage for patients you've treated or who are assigned to you.",
     "needPatient": "Load a patient to see coverage."
   },
   "record": {
-    "title": "3 - Record verification",
-    "hint": "POST /insurance/verification/verify",
+    "title": "Record verification",
+    "hint": "Log a coverage decision for this patient.",
     "context": "Context",
-    "outcome": "Outcome",
+    "outcome": "Result",
     "reason": "Reason",
     "remarks": "Remarks (optional)",
     "remarksPlaceholder": "Internal note…",
-    "save": "Save verification event",
+    "save": "Save check",
     "saving": "Saving…",
-    "footnote": "Always inserts a new event. ExpiresAt set by server (~24h when Verified).",
+    "footnote": "Each save adds a new check. The expiry time is set automatically.",
     "needPatient": "Load a patient before recording.",
-    "recorded": "Verification recorded.",
+    "recorded": "Coverage check saved.",
     "contexts": {
       "Appointment": "Appointment",
-      "CheckIn": "CheckIn",
-      "ClinicVisit": "ClinicVisit",
+      "CheckIn": "Check-in",
+      "ClinicVisit": "Clinic visit",
       "EmergencyAdmission": "Emergency",
       "Billing": "Billing"
     },
     "statuses": {
       "Verified": "Verified",
-      "NotVerified": "NotVerified",
+      "NotVerified": "Not verified",
       "Pending": "Pending"
     }
   },
   "history": {
-    "title": "Verification history",
-    "hint": "GET /insurance/verification/'{patientId}'/history",
+    "title": "Coverage checks",
+    "hint": "Previous coverage checks for this patient.",
     "newestFirst": "Newest first",
     "when": "When",
     "status": "Status",
@@ -88,12 +239,23 @@
     "Expired": "Expired"
   },
   "errors": {
+    "pendingBackend": "This feature isn't available yet — please check back soon.",
+    "invalidNationalId": "Enter exactly 14 digits.",
+    "invalidInput": "Some values are invalid. Check the form and try again.",
+    "invalidMedicationRow": "Medication rows are all-or-nothing: fill every field or leave the row empty.",
+    "conflict": "The server rejected this change — the record changed in the meantime.",
     "forbidden": "You do not have permission for this action.",
     "sessionExpired": "Your session expired. Sign in again.",
-    "notFound": "Patient not found or not accessible.",
+    "notFound": "Not found, or you do not have access to this record.",
     "generic": "Something went wrong. Try again.",
     "retry": "Retry",
-    "invalidToken": "Enter a valid verification token.",
+    "invalidToken": "Paste the card's verification code.",
     "reason": "A reason of 1–1000 characters is required."
+  },
+  "cardStatuses": {
+    "Active": "Active",
+    "Suspended": "Suspended",
+    "Revoked": "Revoked",
+    "Superseded": "Replaced"
   }
 }

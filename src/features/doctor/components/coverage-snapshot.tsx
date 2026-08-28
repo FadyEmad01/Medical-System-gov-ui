@@ -13,11 +13,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { eligibilityTone } from "@/features/insurance/verification/lib/status-tones";
 import type {
   InsuranceEligibilityResponseDto,
   InsuranceVerificationResponseDto,
 } from "@/features/insurance/verification/types";
-import { eligibilityTone } from "@/features/insurance/verification/lib/status-tones";
 
 type CoverageSnapshotProps = {
   patientId: number | null;
@@ -61,7 +61,12 @@ export function CoverageSnapshot({
           <div className="flex flex-1 flex-col items-start justify-center gap-3 py-6">
             <p className="text-sm text-destructive">{t("errors.generic")}</p>
             {onRetry ? (
-              <Button onClick={onRetry} size="sm" type="button" variant="outline">
+              <Button
+                onClick={onRetry}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
                 {t("errors.retry")}
               </Button>
             ) : null}
@@ -85,7 +90,7 @@ export function CoverageSnapshot({
                   <Badge className="bg-muted text-muted-foreground">—</Badge>
                 )}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground" dir="auto">
                 {eligibility?.reason ?? t("snapshot.noEligibility")}
               </p>
             </div>
@@ -112,8 +117,10 @@ export function CoverageSnapshot({
               {current ? (
                 <>
                   <p className="mt-2 text-sm font-medium">
-                    {current.status}
-                    {current.context ? ` · ${current.context}` : ""}
+                    {t(`record.statuses.${current.status}`)}
+                    {current.context
+                      ? ` · ${t(`record.contexts.${current.context}`)}`
+                      : ""}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {t("snapshot.expiresIn", {
@@ -123,7 +130,6 @@ export function CoverageSnapshot({
                             locale: dateLocale,
                           })
                         : "—",
-                      source: current.source ?? "—",
                     })}
                   </p>
                 </>
@@ -141,8 +147,10 @@ export function CoverageSnapshot({
               {latest ? (
                 <>
                   <p className="mt-1 text-sm">
-                    {latest.status}
-                    {latest.context ? ` · ${latest.context}` : ""}
+                    {t(`record.statuses.${latest.status}`)}
+                    {latest.context
+                      ? ` · ${t(`record.contexts.${latest.context}`)}`
+                      : ""}
                   </p>
                   {current &&
                   latest.id === current.id &&
