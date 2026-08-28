@@ -9,6 +9,7 @@ import {
   House,
   IdCard,
   ScanLine,
+  Stethoscope,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
@@ -83,9 +84,9 @@ export function AppSidebar({
       label: t("nav.groups.doctor"),
       items: [
         {
-          title: t("nav.doctorPointOfCare"),
+          title: t("nav.doctorWorkspace"),
           url: "/dashboard/doctor",
-          icon: ScanLine,
+          icon: Stethoscope,
         },
       ],
     });

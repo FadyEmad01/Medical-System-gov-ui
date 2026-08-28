@@ -58,6 +58,7 @@
 // }
 
 import { Bell, SearchIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import LanguageSwitcher from "@/components/language-switcher";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -65,7 +66,8 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import UserAvatar from "./user-avatar";
 
-export default function AppHeader() {
+export default async function AppHeader() {
+  const t = await getTranslations("common");
 
   return (
     <header className="relative flex justify-between border-b h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-14 px-4">
@@ -80,7 +82,7 @@ export default function AppHeader() {
         <div className="relative flex-1 lg:absolute lg:left-1/2 lg:-translate-x-1/2  max-w-[230px]">
           <Input
             className="peer ps-8 pe-2 w-full"
-            placeholder="Search..."
+            placeholder={t("header.searchPlaceholder")}
             type="search"
           />
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-2 text-muted-foreground/80 peer-disabled:opacity-50">

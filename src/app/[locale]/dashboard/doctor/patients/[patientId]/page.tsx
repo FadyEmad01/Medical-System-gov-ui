@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { DoctorGuard } from "@/components/role-guard";
-import { WorkspaceHome } from "@/features/doctor/components/workspace-home";
+import { PatientChart } from "@/features/doctor/components/patient-chart";
 
 export const metadata: Metadata = {
-  title: "Doctor workspace",
+  title: "Patient chart",
 };
 
 export default function Page() {
   return (
     <DoctorGuard>
-      <WorkspaceHome />
+      <PatientChart />
     </DoctorGuard>
   );
 }

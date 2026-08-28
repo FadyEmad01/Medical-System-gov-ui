@@ -21,8 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { InsuranceVerificationResponseDto } from "@/features/insurance/verification/types";
 import { verificationStatusTone } from "@/features/insurance/verification/lib/status-tones";
+import type { InsuranceVerificationResponseDto } from "@/features/insurance/verification/types";
 
 type VerificationHistoryProps = {
   patientId: number | null;
@@ -67,7 +67,12 @@ export function VerificationHistory({
           <div className="flex flex-col items-start gap-3 px-4 py-6">
             <p className="text-sm text-destructive">{t("errors.generic")}</p>
             {onRetry ? (
-              <Button onClick={onRetry} size="sm" type="button" variant="outline">
+              <Button
+                onClick={onRetry}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
                 {t("errors.retry")}
               </Button>
             ) : null}
@@ -111,10 +116,12 @@ export function VerificationHistory({
                   </TableCell>
                   <TableCell className="px-4">
                     <Badge className={verificationStatusTone(row.status)}>
-                      {row.status}
+                      {t(`record.statuses.${row.status}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-4">{row.context ?? "—"}</TableCell>
+                  <TableCell className="px-4">
+                    {row.context ? t(`record.contexts.${row.context}`) : "—"}
+                  </TableCell>
                   <TableCell
                     className={
                       row.isCurrentlyValid
@@ -124,7 +131,10 @@ export function VerificationHistory({
                   >
                     {row.isCurrentlyValid ? t("history.yes") : t("history.no")}
                   </TableCell>
-                  <TableCell className="max-w-[20rem] truncate px-4 text-muted-foreground">
+                  <TableCell
+                    className="max-w-[20rem] truncate px-4 text-muted-foreground"
+                    dir="auto"
+                  >
                     {row.reason ?? "—"}
                   </TableCell>
                 </TableRow>
